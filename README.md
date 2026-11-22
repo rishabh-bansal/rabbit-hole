@@ -18,7 +18,12 @@ Kimi K3.1 Pro on Cerebras: 29.4 s.   Same model on GPUs: still thinking at 5 min
 ## What it does
 
 - **Two lanes, one model.** Both lanes run **Kimi K3.1 Pro**. Only the inference hardware differs:
-  Cerebras on one side, NVIDIA GPUs (NVIDIA API catalog) on the other. Clocks are real elapsed time.
+  Cerebras on one side, NVIDIA GPUs on the other. Clocks are real elapsed time.
+- **Where the GPU number comes from.** The GPU lane uses the **free tier of NVIDIA's API catalog**
+  (build.nvidia.com), and the site labels it that way. On the free tier, a request often waits
+  3-4 minutes in NVIDIA's queue before the first token, so the GPU time is real but includes that
+  queue; it is not a measurement of what a paid GPU host would do. Swapping in a paid GPU host
+  (for example through Vercel AI Gateway) is one line in `server.py`'s `lanes()`.
 - **Every click is a real link.** On each page the agent sees the article's body links and picks
   one with a one-line reason (and an optional "thinking note"). The rules are enforced in code,
   not by the model: only links on the current page, no page twice, and if the target is linked

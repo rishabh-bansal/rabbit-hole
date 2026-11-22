@@ -144,6 +144,7 @@ def render(summary: dict | None, kicker: str = "Latest race") -> bytes:
     d.text((54, by + 26), hero, font=hf, fill=EMBER)
     gx = 60 + d.textlength(hero, font=hf) + 36
     paste(img, logo("nvidia-color", 22), gx, by + 62); d.text((gx + 30, by + 61), "NVIDIA GPU", font=font("ins", 20, 600), fill=PEARL)
+    d.text((gx + 30 + d.textlength("NVIDIA GPU  ", font=font("ins", 20, 600)), by + 62), "free tier", font=font("ins", 18, 500), fill=HAZE)
     gpu, outcome = lanes.get("gpu"), (summary.get("outcome") or {}).get("gpu")
     gtxt = fmt(gpu["seconds"]) if gpu else "5:00 still thinking" if outcome == "lane_timeout" else "did not finish" if outcome == "lane_error" else "resting today"
     d.text((gx, by + 92), gtxt, font=font("ins", 34, 400), fill=HAZE)
