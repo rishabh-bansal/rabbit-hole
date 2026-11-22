@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rabbit Hole · Home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Hubot+Sans:wdth,wght@100..125,500..700&amp;family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#111110}
+a{color:#F5F4F0}a:hover{color:#D6B28A}
+@keyframes rh-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes rh-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}@keyframes rh-glow{0%{box-shadow:0 0 0 0 rgba(214,178,138,.45)}100%{box-shadow:0 0 0 18px rgba(214,178,138,0)}}.rh-in{animation:rh-in .6s cubic-bezier(.19,1,.22,1) both}.rh-rise{animation:rh-rise .9s cubic-bezier(.19,1,.22,1) both}.rh-d1{animation-delay:.08s}.rh-d2{animation-delay:.16s}.rh-d3{animation-delay:.24s}.rh-d4{animation-delay:.32s}.rh-win{animation:rh-in .7s cubic-bezier(.19,1,.22,1) both}.rh-win .rh-glow{animation:rh-glow 1.6s ease-out 2}a,button{transition:transform .35s cubic-bezier(.19,1,.22,1),background-color .35s,color .35s}a:active,button:active{transform:scale(.98)}:focus-visible{outline:2px solid #D6B28A;outline-offset:3px}input:focus{outline:none}label:focus-within{box-shadow:inset 0 0 0 1px #D6B28A}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+<div style="background: #111110; color: #F5F4F0; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 16px; line-height: 1.55">
+<div style="max-width: 1160px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px)">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 18px 0">
+<span style="display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 16px; font-weight: 600"><svg width="20" height="20" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="#D6B28A" stroke-width="2"></circle><circle cx="15" cy="18" r="8.5" fill="none" stroke="#D6B28A" stroke-opacity="0.55" stroke-width="2"></circle><circle cx="15" cy="21" r="3" fill="#D6B28A"></circle></svg>Rabbit Hole</span>
+<span style="font-size: 14px; color: #A6A9A3">Waiting saved by Cerebras: <span style="color: #D6B28A">13 min 9 s</span> over 3 races</span>
+</header>
+
+<section class="rh-rise rh-d1" style="display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 96px 0 64px; text-align: center">
+<h1 class="rh-rise rh-d2" style="margin: 0; max-width: 16em; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: clamp(36px, 4.4vw, 56px); font-weight: 500; line-height: 1.05; letter-spacing: -0.025em; text-wrap: balance">How are two things connected?</h1>
+<p style="margin: 0; max-width: 34em; font-size: 18px; color: #A6A9A3">An AI clicks through real Wikipedia articles until it gets there. The same model races itself on Cerebras and on NVIDIA GPUs.</p>
+
+<form aria-label="Start a race" style="width: 100%; max-width: 760px; margin-top: 28px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 10px">
+<label style="display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border-radius: 12px; background: #191816; text-align: left"><span style="font-size: 12px; color: #A6A9A3">From</span><input type="text" value="{{ start }}" onChange="{{ onStart }}" style="width: 100%; min-height: 30px; padding: 0; border: 0; background: transparent; color: #F5F4F0; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 18px; font-weight: 500"></label>
+<label style="display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border-radius: 12px; background: #191816; text-align: left"><span style="font-size: 12px; color: #A6A9A3">To</span><input type="text" value="{{ target }}" onChange="{{ onTarget }}" style="width: 100%; min-height: 30px; padding: 0; border: 0; background: transparent; color: #F5F4F0; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 18px; font-weight: 500"></label>
+<a href="Main.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 64px; border-radius: 12px; background: #F5F4F0; color: #111110; text-decoration: none; font-size: 16px; font-weight: 600">Start the race</a>
+</form>
+
+<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px">
+<sc-for list="{{ examples }}" as="ex" hint-placeholder-count="5"><button type="button" onClick="{{ ex.pick }}" style="min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: {{ ex.bg }}; color: #C8CAC4; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 14px; cursor: pointer">{{ ex.label }}</button></sc-for>
+</div>
+</section>
+
+<section aria-label="Replay playing now" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 0; margin-bottom: 80px; border-top: 1px solid rgba(245,244,240,0.1); border-bottom: 1px solid rgba(245,244,240,0.1)">
+<div style="display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 28px 28px 28px 0">
+<span style="align-self: flex-start; display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(245,244,240,0.35); font-size: 13px">Replay</span>
+<p style="margin: 6px 0 0; font-size: 20px; font-weight: 500">Cat → Moon</p>
+<p style="margin: 0; font-size: 14px; color: #A6A9A3">Recorded 1 h ago · both lanes run Kimi K3.1 Pro</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 28px; border-left: 1px solid rgba(245,244,240,0.1)">
+<span style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #A6A9A3"><img src="/_blob/6a083dba817a3ba983061109cfb27531" alt="" style="flex: none; width: 16px; height: 16px; display: block">Cerebras</span>
+<span style="font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 40px; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums; color: {{ rcColor }}">{{ rcClock }}</span>
+<span style="font-size: 14px; color: #C8CAC4">{{ rcStatus }}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 28px; border-left: 1px solid rgba(245,244,240,0.1)">
+<span style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #A6A9A3"><img src="/_blob/578edb2ae16e7b58a80d1c14f20d6cef" alt="" style="flex: none; width: 16px; height: 16px; display: block">NVIDIA GPU</span>
+<span style="font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 40px; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums">{{ rgClock }}</span>
+<span style="font-size: 14px; color: #C8CAC4">{{ rgStatus }}</span>
+</div>
+</section>
+
+<section id="runs" aria-labelledby="runs-title" style="display: flex; flex-direction: column; margin-bottom: 96px">
+<h2 id="runs-title" style="margin: 0 0 12px; font-size: 16px; font-weight: 600">Recent races</h2>
+<sc-for list="{{ runs }}" as="r" hint-placeholder-count="3">
+<a href="Main.dc.html" style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) auto auto; align-items: baseline; gap: 4px 28px; padding: 18px 0; border-top: 1px solid rgba(245,244,240,0.1); text-decoration: none; color: #F5F4F0">
+<span style="font-size: 17px; font-weight: 500">{{ r.title }}</span>
+<span style="font-size: 14px; color: #A6A9A3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ r.chain }}</span>
+<span style="font-size: 14px; color: #A6A9A3; white-space: nowrap"><span style="font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 16px; color: #D6B28A">{{ r.time }}</span> vs GPU stopped at 5:00</span>
+<span style="font-size: 14px; color: #A6A9A3; white-space: nowrap">{{ r.when }}</span>
+</a>
+</sc-for>
+</section>
+
+<footer style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 32px; padding: 24px 0 40px; border-top: 1px solid rgba(245,244,240,0.1); font-size: 13px; color: #A6A9A3">
+<span>Same model in both lanes, Kimi K3.1 Pro. Only the chip differs. Clocks are real elapsed time. Text from Wikipedia, CC BY-SA 4.0.</span>
+<span style="display: inline-flex; align-items: center; gap: 18px; flex-wrap: wrap"><span style="display: inline-flex; align-items: center; gap: 14px; flex-wrap: wrap; color: #A6A9A3"><span style="display: inline-flex; align-items: center; gap: 6px"><img src="/_blob/90769b34a964e73087dec077661f4455" alt="" style="flex: none; width: 16px; height: 16px; display: block">Kimi K3.1 Pro</span><span style="display: inline-flex; align-items: center; gap: 6px"><img src="/_blob/6a083dba817a3ba983061109cfb27531" alt="" style="flex: none; width: 16px; height: 16px; display: block">Cerebras</span><span style="display: inline-flex; align-items: center; gap: 6px"><img src="/_blob/000083f16174ebafc9487fba12e236a4" alt="" style="flex: none; width: 16px; height: 16px; display: block">OpenClaw</span></span><span>airabbithole.pages.dev</span></span>
+</footer>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1300}}'>
+var EX = [['Pizza', 'Black hole'], ['Cat', 'Moon'], ['Coffee', 'French Revolution'], ['Taylor Swift', 'Quantum mechanics'], ['Minecraft', 'Ancient Egypt']];
+var RUNS = [
+  { title: 'Pizza → Black hole', chain: 'Pizza theorem · Geometry · General relativity', time: '29.5 s', when: '12 min ago' },
+  { title: 'Cat → Moon', chain: 'Ancient Egypt · Solar deity', time: '40.5 s', when: '1 h ago' },
+  { title: 'Coffee → French Revolution', chain: 'Haitian Revolution', time: '40.8 s', when: '3 h ago' }
+];
+var CAT = { titles: ['Cat', 'Ancient Egypt', 'Solar deity', 'Moon'], links: [612, 905, 214], open: [0, 9.8, 24.1, 39.9], done: 40.5, loop: 48 };
+function fmt(x) {
+  var tenths = Math.max(0, Math.floor(x * 10 + 0.0001));
+  var m = Math.floor(tenths / 600);
+  var rem = tenths - m * 600;
+  var s = Math.floor(rem / 10);
+  return m + ':' + (s < 10 ? '0' : '') + s + '.' + (rem - s * 10);
+}
+class Component extends DCLogic {
+  componentDidMount() {
+    var self = this;
+    this.last = Date.now();
+    this.timer = setInterval(function () {
+      var now = Date.now();
+      var dt = Math.min(0.25, (now - self.last) / 1000);
+      self.last = now;
+      var cur = (self.state && typeof self.state.t === 'number') ? self.state.t : 0;
+      var nt = cur + dt;
+      if (nt > CAT.loop) { nt = 0; }
+      self.setState({ t: nt });
+    }, 100);
+  }
+  componentWillUnmount() { if (this.timer) { clearInterval(this.timer); } }
+  renderVals() {
+    var self = this;
+    var st = this.state || {};
+    var t = typeof st.t === 'number' ? st.t : 12;
+    var start = typeof st.start === 'string' ? st.start : 'Pizza';
+    var target = typeof st.target === 'string' ? st.target : 'Black hole';
+    var page = 0;
+    for (var i = 0; i < 4; i++) { if (t >= CAT.open[i]) { page = i; } }
+    var done = t >= CAT.done;
+    var rc = done ? 'Found it in 3 clicks' : (t - CAT.open[page] < 2.2 ? 'Reading ' + CAT.titles[page] + '…' : 'Thinking about ' + CAT.links[page] + ' links on ' + CAT.titles[page] + '…');
+    return {
+      start: start, target: target,
+      onStart: function (e) { self.setState({ start: e.target.value }); },
+      onTarget: function (e) { self.setState({ target: e.target.value }); },
+      examples: EX.map(function (x) { var on = x[0] === start && x[1] === target; return { label: x[0] + ' → ' + x[1], bg: on ? '#2A2926' : '#191816', pick: function () { self.setState({ start: x[0], target: x[1] }); } }; }),
+      rcClock: fmt(Math.min(t, CAT.done)), rcColor: done ? '#D6B28A' : '#F5F4F0', rcStatus: rc,
+      rgClock: fmt(t), rgStatus: t < 2.4 ? 'Reading Cat…' : (done ? 'Still on page 1, thinking about 612 links…' : 'Thinking about 612 links on Cat…'),
+      runs: RUNS
+    };
+  }
+}
+</script>
+</body>
+</html>

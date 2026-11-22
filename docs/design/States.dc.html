@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rabbit Hole · Desktop states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Hubot+Sans:wdth,wght@100..125,500..700&amp;family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#111110}
+a{color:#F5F4F0}a:hover{color:#D6B28A}
+@keyframes rh-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes rh-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}@keyframes rh-glow{0%{box-shadow:0 0 0 0 rgba(214,178,138,.45)}100%{box-shadow:0 0 0 18px rgba(214,178,138,0)}}.rh-in{animation:rh-in .6s cubic-bezier(.19,1,.22,1) both}.rh-rise{animation:rh-rise .9s cubic-bezier(.19,1,.22,1) both}.rh-d1{animation-delay:.08s}.rh-d2{animation-delay:.16s}.rh-d3{animation-delay:.24s}.rh-d4{animation-delay:.32s}.rh-win{animation:rh-in .7s cubic-bezier(.19,1,.22,1) both}.rh-win .rh-glow{animation:rh-glow 1.6s ease-out 2}a,button{transition:transform .35s cubic-bezier(.19,1,.22,1),background-color .35s,color .35s}a:active,button:active{transform:scale(.98)}:focus-visible{outline:2px solid #D6B28A;outline-offset:3px}input:focus{outline:none}label:focus-within{box-shadow:inset 0 0 0 1px #D6B28A}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+<div style="background: #111110; color: #F5F4F0; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+<div style="max-width: 1240px; margin: 0 auto; padding: 56px clamp(20px, 4vw, 48px)">
+<h1 class="rh-rise rh-d1" style="margin: 0 0 8px; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 32px; font-weight: 500; letter-spacing: -0.02em">When live races are busy</h1>
+<p style="margin: 0 0 40px; max-width: 40em; color: #A6A9A3">Every state offers something to watch. None of them ends in a dead end.</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); gap: 16px">
+
+<article class="rh-rise rh-d2" style="display: flex; flex-direction: column; gap: 10px; padding: 26px; border-radius: 14px; background: #191816">
+<span style="font-size: 13px; color: #A6A9A3">A race is already running</span>
+<h2 style="margin: 0; font-size: 21px; font-weight: 600; letter-spacing: -0.01em">Someone is racing right now</h2>
+<p style="margin: 0; color: #A6A9A3">One live race at a time. Watch theirs live, and your turn opens when it finishes.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 10px"><a href="Main.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 10px; background: #F5F4F0; color: #111110; text-decoration: none; font-weight: 600">Watch it live</a><a href="Ask.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; color: #C8CAC4; text-decoration: none">Play a replay</a></div>
+</article>
+
+<article class="rh-rise rh-d3" style="display: flex; flex-direction: column; gap: 10px; padding: 26px; border-radius: 14px; background: #191816">
+<span style="font-size: 13px; color: #A6A9A3">Personal limit · 4 live races per hour</span>
+<h2 style="margin: 0; font-size: 21px; font-weight: 600; letter-spacing: -0.01em">Enjoy the replays, come back soon</h2>
+<p style="margin: 0; color: #A6A9A3">You’ve used all 4 live races this hour. The next one opens in <span style="color: #D6B28A">23 min</span>.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 10px"><a href="Main.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 10px; background: #F5F4F0; color: #111110; text-decoration: none; font-weight: 600">Play the latest replay</a></div>
+</article>
+
+<article class="rh-rise rh-d4" style="display: flex; flex-direction: column; gap: 10px; padding: 26px; border-radius: 14px; background: #191816">
+<span style="font-size: 13px; color: #A6A9A3">Daily limit · replay-only mode</span>
+<h2 style="margin: 0; font-size: 21px; font-weight: 600; letter-spacing: -0.01em">Live races are paused for today</h2>
+<p style="margin: 0; color: #A6A9A3">The home page swaps the race form for this banner and plays the latest replay automatically, labelled Replay.</p>
+<div style="display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 14px; border-top: 1px solid rgba(245,244,240,0.1); font-size: 14px; color: #C8CAC4"><span style="display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(245,244,240,0.35); color: #F5F4F0">Replay</span>Cat → Moon, playing now</div>
+</article>
+
+<article class="rh-rise rh-d4" style="display: flex; flex-direction: column; gap: 10px; padding: 26px; border-radius: 14px; background: #191816">
+<span style="font-size: 13px; color: #A6A9A3">GPU budget used · one lane</span>
+<h2 style="margin: 0; display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: 600; letter-spacing: -0.01em"><img src="/_blob/578edb2ae16e7b58a80d1c14f20d6cef" alt="" style="width: 20px; height: 20px; display: block; opacity: 0.6">The GPU side is resting</h2>
+<p style="margin: 0; color: #A6A9A3">Races run with the Cerebras lane only. On the race page the GPU column becomes this note; turn on “gpu: paused” in the race board’s tweaks to see it.</p>
+<a href="Main.dc.html" style="margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; color: #D6B28A; text-decoration: none; font-weight: 600">See the one-lane race</a>
+</article>
+
+<article class="rh-rise rh-d4" style="display: flex; flex-direction: column; gap: 10px; padding: 26px; border-radius: 14px; background: #191816">
+<span style="font-size: 13px; color: #A6A9A3">Bad input</span>
+<label style="display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border-radius: 12px; background: #111110; box-shadow: inset 0 0 0 1px #D6B28A"><span style="font-size: 12px; color: #A6A9A3">From</span><input type="text" value="Pizzza" style="min-height: 28px; padding: 0; border: 0; background: transparent; color: #F5F4F0; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 17px"></label>
+<p style="margin: 0; font-size: 14px; color: #C8CAC4">No Wikipedia article called “Pizzza”. Did you mean <a href="#" style="color: #D6B28A">Pizza</a>?</p>
+<p style="margin: 0; font-size: 14px; color: #C8CAC4">“Mercury” is ambiguous. Try <a href="#" style="color: #D6B28A">Mercury (planet)</a> or <a href="#" style="color: #D6B28A">Mercury (element)</a>.</p>
+</article>
+
+<article class="rh-rise rh-d4" style="display: flex; flex-direction: column; gap: 10px; padding: 26px; border-radius: 14px; background: #191816">
+<span style="font-size: 13px; color: #A6A9A3">Something broke mid-race</span>
+<h2 style="margin: 0; display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: 600; letter-spacing: -0.01em"><img src="/_blob/578edb2ae16e7b58a80d1c14f20d6cef" alt="" style="width: 20px; height: 20px; display: block">Lane ended with an error</h2>
+<p style="margin: 0; color: #A6A9A3">The GPU lane lost its connection on page 1 at 1:12.0. The Cerebras result still counts, and the race is saved as a replay.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 10px"><a href="Answer.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 10px; background: #F5F4F0; color: #111110; text-decoration: none; font-weight: 600">See the answer</a></div>
+</article>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

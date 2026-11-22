@@ -1,0 +1,313 @@
+{
+  "gateway": {
+    "mode": "local",
+    "bind": "lan",
+    "port": 18789,
+    "auth": {
+      "mode": "token",
+      "token": "${OPENCLAW_GATEWAY_TOKEN}"
+    },
+    "http": {
+      "endpoints": {
+        "chatCompletions": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "cerebras/moonshotai-kimi-k3.1-pro-trial"
+      },
+      "thinkingDefault": "low",
+      "sandbox": {
+        "mode": "off"
+      },
+      "systemAgent": {
+        "agentId": "main"
+      }
+    },
+    "ownership": "explicit",
+    "entries": {
+      "main": {
+        "workspace": "/home/node/.openclaw/workspace"
+      },
+      "racer-cerebras": {
+        "name": "racer-cerebras",
+        "workspace": "/home/node/.openclaw/ws/racer-cerebras",
+        "agentDir": "/home/node/.openclaw/agents/racer-cerebras/agent",
+        "identity": {
+          "name": "racer-cerebras"
+        },
+        "model": "cerebras/moonshotai-kimi-k3.1-pro-trial"
+      },
+      "racer-nvidia": {
+        "name": "racer-nvidia",
+        "workspace": "/home/node/.openclaw/ws/racer-nvidia",
+        "agentDir": "/home/node/.openclaw/agents/racer-nvidia/agent",
+        "identity": {
+          "name": "racer-nvidia"
+        },
+        "model": "nvidia/moonshotai/kimi-k3.1-pro"
+      },
+      "racer-qwen": {
+        "name": "racer-qwen",
+        "workspace": "/home/node/.openclaw/ws/racer-qwen",
+        "agentDir": "/home/node/.openclaw/agents/racer-qwen/agent",
+        "identity": {
+          "name": "racer-qwen"
+        },
+        "model": "cerebras/qwen-3.8-27b"
+      },
+      "storyteller": {
+        "name": "storyteller",
+        "workspace": "/home/node/.openclaw/ws/storyteller",
+        "agentDir": "/home/node/.openclaw/agents/storyteller/agent",
+        "identity": {
+          "name": "storyteller"
+        },
+        "model": "cerebras/moonshotai-kimi-k3.1-pro-trial"
+      }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "cerebras": {
+        "baseUrl": "https://api.cerebras.ai/v1",
+        "api": "openai-completions",
+        "apiKey": "${CEREBRAS_API_KEY}",
+        "models": [
+          {
+            "id": "moonshotai-kimi-k3.1-pro-trial",
+            "name": "Kimi K3.1 Pro (Cerebras)",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsTools": true,
+              "supportsStrictMode": false,
+              "supportsReasoningEffort": true,
+              "supportedReasoningEfforts": [
+                "low",
+                "high",
+                "max"
+              ]
+            }
+          },
+          {
+            "id": "qwen-3.8-27b",
+            "name": "Qwen 3.8 27B (Cerebras, testing)",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsTools": true,
+              "supportsStrictMode": false
+            }
+          }
+        ]
+      },
+      "nvidia": {
+        "baseUrl": "https://integrate.api.nvidia.com/v1",
+        "api": "openai-completions",
+        "apiKey": "${NVIDIA_API_KEY}",
+        "models": [
+          {
+            "id": "moonshotai/kimi-k3.1-pro",
+            "name": "Kimi K3.1 Pro (NVIDIA GPU)",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsTools": true,
+              "supportsStrictMode": false,
+              "supportsReasoningEffort": true,
+              "supportedReasoningEfforts": [
+                "low",
+                "high",
+                "max"
+              ]
+            }
+          }
+        ],
+        "timeoutSeconds": 295
+      }
+    }
+  },
+  "tools": {
+    "profile": "minimal",
+    "deny": [
+      "group:runtime",
+      "group:fs",
+      "group:web",
+      "group:automation",
+      "group:ui",
+      "group:nodes",
+      "sessions_spawn",
+      "sessions_send"
+    ],
+    "exec": {
+      "security": "deny",
+      "ask": "always"
+    },
+    "elevated": {
+      "enabled": false
+    }
+  },
+  "plugins": {
+    "entries": {
+      "alibaba": {
+        "enabled": false
+      },
+      "anthropic": {
+        "enabled": false
+      },
+      "azure-speech": {
+        "enabled": false
+      },
+      "bifrost": {
+        "enabled": false
+      },
+      "browser": {
+        "enabled": false
+      },
+      "canvas": {
+        "enabled": false
+      },
+      "clawrouter": {
+        "enabled": false
+      },
+      "copilot-proxy": {
+        "enabled": false
+      },
+      "cua-computer": {
+        "enabled": false
+      },
+      "deepgram": {
+        "enabled": false
+      },
+      "device-pair": {
+        "enabled": false
+      },
+      "document-extract": {
+        "enabled": false
+      },
+      "elevenlabs": {
+        "enabled": false
+      },
+      "fal": {
+        "enabled": false
+      },
+      "file-transfer": {
+        "enabled": false
+      },
+      "geolocation": {
+        "enabled": false
+      },
+      "github": {
+        "enabled": false
+      },
+      "github-copilot": {
+        "enabled": false
+      },
+      "google": {
+        "enabled": false
+      },
+      "huggingface": {
+        "enabled": false
+      },
+      "kie": {
+        "enabled": false
+      },
+      "linux-node": {
+        "enabled": false
+      },
+      "litellm": {
+        "enabled": false
+      },
+      "lmstudio": {
+        "enabled": false
+      },
+      "memory-core": {
+        "enabled": false
+      },
+      "microsoft": {
+        "enabled": false
+      },
+      "microsoft-foundry": {
+        "enabled": false
+      },
+      "minimax": {
+        "enabled": false
+      },
+      "ollama": {
+        "enabled": false
+      },
+      "omlx": {
+        "enabled": false
+      },
+      "openai": {
+        "enabled": false
+      },
+      "opencode-go": {
+        "enabled": false
+      },
+      "openrouter": {
+        "enabled": false
+      },
+      "requesty": {
+        "enabled": false
+      },
+      "runway": {
+        "enabled": false
+      },
+      "senseaudio": {
+        "enabled": false
+      },
+      "sglang": {
+        "enabled": false
+      },
+      "talk-voice": {
+        "enabled": false
+      },
+      "together": {
+        "enabled": false
+      },
+      "tts-local-cli": {
+        "enabled": false
+      },
+      "vllm": {
+        "enabled": false
+      },
+      "web-readability": {
+        "enabled": false
+      },
+      "xai": {
+        "enabled": false
+      }
+    }
+  }
+}

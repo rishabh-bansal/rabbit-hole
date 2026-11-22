@@ -1,0 +1,6 @@
+# HTTPS in front of the race server. flush_interval -1 keeps the live race stream (SSE) flowing.
+rabbithole.example.com {
+	reverse_proxy 127.0.0.1:8031 {
+		flush_interval -1
+	}
+}

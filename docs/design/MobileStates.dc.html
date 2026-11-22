@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rabbit Hole · Mobile states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Hubot+Sans:wdth,wght@100..125,500..700&amp;family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0A09}
+a{color:#F5F4F0}
+@keyframes rh-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes rh-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}@keyframes rh-glow{0%{box-shadow:0 0 0 0 rgba(214,178,138,.45)}100%{box-shadow:0 0 0 18px rgba(214,178,138,0)}}.rh-in{animation:rh-in .6s cubic-bezier(.19,1,.22,1) both}.rh-rise{animation:rh-rise .9s cubic-bezier(.19,1,.22,1) both}.rh-d1{animation-delay:.08s}.rh-d2{animation-delay:.16s}.rh-d3{animation-delay:.24s}.rh-d4{animation-delay:.32s}.rh-win{animation:rh-in .7s cubic-bezier(.19,1,.22,1) both}.rh-win .rh-glow{animation:rh-glow 1.6s ease-out 2}a,button{transition:transform .35s cubic-bezier(.19,1,.22,1),background-color .35s,color .35s}a:active,button:active{transform:scale(.98)}:focus-visible{outline:2px solid #D6B28A;outline-offset:3px}input:focus{outline:none}label:focus-within{box-shadow:inset 0 0 0 1px #D6B28A}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+<div style="width: 2540px; height: 844px; display: flex; gap: 40px; background: #0B0A09; color: #F5F4F0; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+
+<section aria-label="A race is already running" style="flex: none; width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; padding: 8px 20px 26px; background: #111110">
+<p style="margin: 0; display: flex; align-items: center; gap: 8px; min-height: 44px; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 15px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="#D6B28A" stroke-width="2"></circle><circle cx="15" cy="18" r="8.5" fill="none" stroke="#D6B28A" stroke-opacity="0.55" stroke-width="2"></circle><circle cx="15" cy="21" r="3" fill="#D6B28A"></circle></svg>Rabbit Hole</p>
+<div style="flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: 10px">
+<span style="font-size: 13px; color: #A6A9A3">One live race at a time</span>
+<h2 style="margin: 0; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 28px; font-weight: 500; line-height: 1.15; letter-spacing: -0.02em">Someone is racing right now</h2>
+<p style="margin: 0; color: #A6A9A3">Watch theirs live. Your turn opens as soon as it finishes.</p>
+<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 18px; padding: 16px; border-radius: 14px; background: #191816">
+<span style="display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: #C8CAC4"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #F5F4F0"></span>Live · Coffee → French Revolution</span>
+<span style="display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline"><span style="display: inline-flex; align-items: center; gap: 7px; font-size: 14px"><img src="/_blob/6a083dba817a3ba983061109cfb27531" alt="" style="width: 14px; height: 14px; display: block">Cerebras</span><span style="font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 20px; font-weight: 500">0:18.2</span><span style="display: inline-flex; align-items: center; gap: 7px; font-size: 14px; color: #C8CAC4"><img src="/_blob/578edb2ae16e7b58a80d1c14f20d6cef" alt="" style="width: 14px; height: 14px; display: block">NVIDIA GPU</span><span style="font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 20px; font-weight: 500">0:18.2</span></span>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<a href="Mobile.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 12px; background: #F5F4F0; color: #111110; text-decoration: none; font-size: 16px; font-weight: 600">Watch it live</a>
+<a href="MobileReplay.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 48px; color: #C8CAC4; text-decoration: none; font-size: 15px">Play a replay instead</a>
+</div>
+</section>
+
+<section aria-label="Personal limit reached" style="flex: none; width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; padding: 8px 20px 26px; background: #111110">
+<p style="margin: 0; display: flex; align-items: center; gap: 8px; min-height: 44px; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 15px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="#D6B28A" stroke-width="2"></circle><circle cx="15" cy="18" r="8.5" fill="none" stroke="#D6B28A" stroke-opacity="0.55" stroke-width="2"></circle><circle cx="15" cy="21" r="3" fill="#D6B28A"></circle></svg>Rabbit Hole</p>
+<div style="flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: 10px">
+<span style="font-size: 13px; color: #A6A9A3">4 of 4 live races used this hour</span>
+<h2 style="margin: 0; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 28px; font-weight: 500; line-height: 1.15; letter-spacing: -0.02em">Enjoy the replays, come back soon</h2>
+<p style="margin: 0; color: #A6A9A3">Each visitor gets 4 live races an hour, so the free credits last. Your next one opens in <span style="color: #D6B28A">23 min</span>.</p>
+<div style="display: flex; gap: 6px; margin-top: 10px" aria-hidden="true"><span style="flex: 1 1 0; height: 3px; background: #C8CAC4"></span><span style="flex: 1 1 0; height: 3px; background: #C8CAC4"></span><span style="flex: 1 1 0; height: 3px; background: #C8CAC4"></span><span style="flex: 1 1 0; height: 3px; background: #C8CAC4"></span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<a href="MobileReplay.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 12px; background: #F5F4F0; color: #111110; text-decoration: none; font-size: 16px; font-weight: 600">Play the latest replay</a>
+<a href="MobileHome.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 48px; color: #C8CAC4; text-decoration: none; font-size: 15px">Browse past races</a>
+</div>
+</section>
+
+<section aria-label="Replay-only mode" style="flex: none; width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: #111110">
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 14px 20px; background: #191816; border-bottom: 1px solid rgba(245,244,240,0.1)">
+<span style="font-size: 14px; font-weight: 600">Live races are paused for today</span>
+<span style="font-size: 13px; color: #A6A9A3">We hit today’s limit. Replays keep playing, and live races are back tomorrow.</span>
+</div>
+<div style="flex: 1 1 auto; display: flex; flex-direction: column; padding: 18px 20px 26px">
+<span style="align-self: flex-start; display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(245,244,240,0.35); font-size: 13px">Replay · playing automatically</span>
+<h2 style="margin: 14px 0 18px; font-size: 22px; font-weight: 500; line-height: 1.25; color: #A6A9A3">How is <span style="color: #F5F4F0">Cat</span> connected to <span style="color: #F5F4F0">Moon</span>?</h2>
+<div style="border-top: 1px solid rgba(245,244,240,0.1); border-bottom: 1px solid rgba(245,244,240,0.1)">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid rgba(245,244,240,0.1)"><span style="display: flex; flex-direction: column"><span style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600"><img src="/_blob/6a083dba817a3ba983061109cfb27531" alt="" style="width: 16px; height: 16px; display: block">Cerebras</span><span style="font-size: 13px; color: #A6A9A3">on Solar deity</span></span><span style="font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 36px; font-weight: 500; letter-spacing: -0.03em">0:31.2</span></div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px 0"><span style="display: flex; flex-direction: column"><span style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600"><img src="/_blob/578edb2ae16e7b58a80d1c14f20d6cef" alt="" style="width: 16px; height: 16px; display: block">NVIDIA GPU</span><span style="font-size: 13px; color: #A6A9A3">still on Cat</span></span><span style="font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 36px; font-weight: 500; letter-spacing: -0.03em">0:31.2</span></div>
+</div>
+<a href="MobileHome.dc.html" style="margin-top: auto; display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 12px; background: #191816; text-decoration: none; font-size: 16px; font-weight: 600">Pick another replay</a>
+</div>
+</section>
+
+<section aria-label="GPU side resting, one lane" style="flex: none; width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; padding: 8px 20px 26px; background: #111110">
+<p style="margin: 0; display: flex; align-items: center; justify-content: space-between; min-height: 44px; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 15px; font-weight: 600"><span style="display: inline-flex; align-items: center; gap: 8px"><svg width="18" height="18" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="#D6B28A" stroke-width="2"></circle><circle cx="15" cy="18" r="8.5" fill="none" stroke="#D6B28A" stroke-opacity="0.55" stroke-width="2"></circle><circle cx="15" cy="21" r="3" fill="#D6B28A"></circle></svg>Rabbit Hole</span><span style="font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 13px; font-weight: 400; color: #C8CAC4">Live</span></p>
+<h2 style="margin: 4px 0 18px; font-size: 22px; font-weight: 500; line-height: 1.25; color: #A6A9A3">How is <span style="color: #F5F4F0">Pizza</span> connected to <span style="color: #F5F4F0">Black hole</span>?</h2>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 16px 0; border-top: 1px solid rgba(245,244,240,0.1); border-bottom: 1px solid rgba(245,244,240,0.1)"><span style="display: flex; flex-direction: column"><span style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600"><img src="/_blob/6a083dba817a3ba983061109cfb27531" alt="" style="width: 16px; height: 16px; display: block">Cerebras</span><span style="display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #A6A9A3">running <img src="/_blob/90769b34a964e73087dec077661f4455" alt="" style="width: 12px; height: 12px; display: block">Kimi K3.1 Pro</span></span><span style="font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 48px; font-weight: 500; letter-spacing: -0.03em">0:14<span style="color: #55574F">.9</span></span></div>
+<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 22px">
+<span style="font-size: 13px; color: #A6A9A3">Now reading · page 3</span>
+<span style="font-size: 26px; font-weight: 600; line-height: 1.15; letter-spacing: -0.015em">Geometry</span>
+<span style="display: flex; align-items: center; gap: 9px; color: #C8CAC4"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #F15A29"></span>Reading the page…</span>
+</div>
+<div style="margin-top: auto; display: flex; gap: 12px; padding: 14px 16px; border-radius: 14px; background: #191816">
+<img src="/_blob/578edb2ae16e7b58a80d1c14f20d6cef" alt="" style="flex: none; width: 18px; height: 18px; margin-top: 2px; display: block; opacity: 0.6">
+<span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">The GPU side is resting today</span><span style="font-size: 13px; color: #A6A9A3">Its daily budget ran out. Replays still show both lanes.</span></span>
+</div>
+</section>
+
+<section aria-label="Bad input" style="flex: none; width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; padding: 8px 20px 26px; background: #111110">
+<p style="margin: 0; display: flex; align-items: center; gap: 8px; min-height: 44px; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 15px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="#D6B28A" stroke-width="2"></circle><circle cx="15" cy="18" r="8.5" fill="none" stroke="#D6B28A" stroke-opacity="0.55" stroke-width="2"></circle><circle cx="15" cy="21" r="3" fill="#D6B28A"></circle></svg>Rabbit Hole</p>
+<h2 style="margin: 18px 0 22px; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 30px; font-weight: 500; line-height: 1.1; letter-spacing: -0.02em">How are two things connected?</h2>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label style="display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border-radius: 12px; background: #191816; box-shadow: inset 0 0 0 1px #D6B28A"><span style="font-size: 12px; color: #A6A9A3">From</span><input type="text" value="Pizzza" aria-describedby="err-from" style="width: 100%; min-height: 30px; padding: 0; border: 0; background: transparent; color: #F5F4F0; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 18px; font-weight: 500"></label>
+<p id="err-from" style="margin: 0 0 8px; font-size: 13px; color: #C8CAC4">No Wikipedia article called “Pizzza”. Did you mean <a href="#" style="color: #D6B28A">Pizza</a>?</p>
+<label style="display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border-radius: 12px; background: #191816; box-shadow: inset 0 0 0 1px #D6B28A"><span style="font-size: 12px; color: #A6A9A3">To</span><input type="text" value="Mercury" aria-describedby="err-to" style="width: 100%; min-height: 30px; padding: 0; border: 0; background: transparent; color: #F5F4F0; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 18px; font-weight: 500"></label>
+<p id="err-to" style="margin: 0; font-size: 13px; color: #C8CAC4">“Mercury” is ambiguous. Be more specific:</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px">
+<button type="button" style="min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: #191816; color: #C8CAC4; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 14px">Mercury (planet)</button>
+<button type="button" style="min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: #191816; color: #C8CAC4; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 14px">Mercury (element)</button>
+<button type="button" style="min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: #191816; color: #C8CAC4; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 14px">Mercury (mythology)</button>
+</div>
+</div>
+<span style="margin-top: auto; display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 12px; background: #2A2926; color: #A6A9A3; font-size: 16px; font-weight: 600">Start the race</span>
+</section>
+
+<section aria-label="Error mid-race" style="flex: none; width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; padding: 8px 20px 26px; background: #111110">
+<p style="margin: 0; display: flex; align-items: center; gap: 8px; min-height: 44px; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 15px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="#D6B28A" stroke-width="2"></circle><circle cx="15" cy="18" r="8.5" fill="none" stroke="#D6B28A" stroke-opacity="0.55" stroke-width="2"></circle><circle cx="15" cy="21" r="3" fill="#D6B28A"></circle></svg>Rabbit Hole</p>
+<h2 style="margin: 4px 0 18px; font-size: 22px; font-weight: 500; line-height: 1.25; color: #A6A9A3">How is <span style="color: #F5F4F0">Coffee</span> connected to <span style="color: #F5F4F0">French Revolution</span>?</h2>
+<div style="border-top: 1px solid rgba(245,244,240,0.1); border-bottom: 1px solid rgba(245,244,240,0.1)">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid rgba(245,244,240,0.1)"><span style="display: flex; flex-direction: column"><span style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600"><img src="/_blob/6a083dba817a3ba983061109cfb27531" alt="" style="width: 16px; height: 16px; display: block">Cerebras</span><span style="font-size: 13px; color: #D6B28A">Found it in 2 clicks</span></span><span style="font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 36px; font-weight: 500; letter-spacing: -0.03em; color: #D6B28A">0:40.8</span></div>
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px 0"><span style="display: flex; flex-direction: column"><span style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600"><img src="/_blob/578edb2ae16e7b58a80d1c14f20d6cef" alt="" style="width: 16px; height: 16px; display: block">NVIDIA GPU</span><span style="font-size: 13px; color: #A6A9A3">Ended with an error</span></span><span style="font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 36px; font-weight: 500; letter-spacing: -0.03em; color: #A6A9A3">1:12.0</span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px; margin-top: 22px; padding-left: 14px; border-left: 1px solid rgba(245,244,240,0.3)">
+<span style="font-size: 15px; font-weight: 600">The GPU lane lost its connection on page 1</span>
+<span style="font-size: 14px; color: #A6A9A3">The model service stopped answering. The Cerebras result still counts.</span>
+</div>
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px">
+<a href="MobileAnswer.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 12px; background: #F5F4F0; color: #111110; text-decoration: none; font-size: 16px; font-weight: 600">See the answer</a>
+<a href="MobileReplay.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 48px; color: #C8CAC4; text-decoration: none; font-size: 15px">Watch a replay</a>
+</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2540,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

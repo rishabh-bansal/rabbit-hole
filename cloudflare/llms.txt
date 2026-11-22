@@ -1,0 +1,9 @@
+# Rabbit Hole
+
+> An AI plays the Wikipedia game. Ask how any two things are connected, and Kimi K3.1 Pro clicks through real Wikipedia links until it gets there, racing itself on Cerebras and on NVIDIA GPUs at the same time.
+
+- Site: https://airabbithole.pages.dev/
+- Every step is a link that exists on the previous Wikipedia page; the AI gives a one-line reason for each click and writes a short story of the chain at the end.
+- Both lanes run the same model (Kimi K3.1 Pro). Only the inference hardware differs. Clocks are real elapsed time.
+- The agent runs on OpenClaw. Past races can be replayed at /?replay=<id>.
+- Built for the Cerebras x Kimi hackathon (#KimiOnCerebras).

@@ -1,0 +1,8 @@
+.env
+*.env
+.git
+backend/.venv
+backend/runs/*.json
+backend/wiki_cache.json
+cloudflare
+docs

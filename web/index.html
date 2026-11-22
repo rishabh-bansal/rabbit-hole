@@ -1,0 +1,1336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Rabbit Hole: an AI plays the Wikipedia game, Cerebras vs GPU</title>
+<meta name="description" content="Ask how any two things are connected. Kimi K3.1 Pro clicks through real Wikipedia links to find out, racing itself on Cerebras and on NVIDIA GPUs." />
+<link rel="canonical" href="https://airabbithole.pages.dev/" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Rabbit Hole" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:url" content="https://airabbithole.pages.dev/" />
+<meta property="og:title" content="Rabbit Hole: an AI plays the Wikipedia game, Cerebras vs GPU" />
+<meta property="og:description" content="Ask how any two things are connected. Kimi K3.1 Pro clicks through real Wikipedia links to find out, racing itself on Cerebras and on NVIDIA GPUs." />
+<meta property="og:image" content="https://airabbithole.pages.dev/api/og.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="The latest Rabbit Hole race: the chain of Wikipedia articles and the Cerebras and NVIDIA GPU times." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Rabbit Hole: an AI plays the Wikipedia game, Cerebras vs GPU" />
+<meta name="twitter:description" content="Ask how any two things are connected. Kimi K3.1 Pro clicks through real Wikipedia links to find out, racing itself on Cerebras and on NVIDIA GPUs." />
+<meta name="twitter:image" content="https://airabbithole.pages.dev/api/og.png" />
+<meta name="twitter:image:alt" content="The latest Rabbit Hole race: the chain of Wikipedia articles and the Cerebras and NVIDIA GPU times." />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Rabbit Hole","url":"https://airabbithole.pages.dev/",
+ "description":"An AI plays the Wikipedia game: ask how any two things are connected and watch Kimi K3.1 Pro click through real Wikipedia articles, racing itself on Cerebras and on NVIDIA GPUs.",
+ "applicationCategory":"EducationalApplication","applicationSubCategory":"Game","operatingSystem":"Any","browserRequirements":"Requires JavaScript",
+ "isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
+ "keywords":"Wikipedia game, WikiRace, AI agent, Kimi K3.1 Pro, Cerebras, OpenClaw, AI inference speed"}
+</script>
+<meta name="theme-color" content="#111110" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Crect width='30' height='30' rx='7' fill='%23111110'/%3E%3Ccircle cx='15' cy='15' r='11' fill='none' stroke='%23D6B28A' stroke-width='2'/%3E%3Ccircle cx='15' cy='17.5' r='6.5' fill='none' stroke='%23D6B28A' stroke-opacity='.55' stroke-width='2'/%3E%3Ccircle cx='15' cy='20' r='2.5' fill='%23D6B28A'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hubot+Sans:wdth,wght@100..125,500..700&family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --ink: #111110; --night: #191816; --smoke: #2A2926;
+  --pearl: #F5F4F0; --haze: #A6A9A3; --fog: #C8CAC4; --mute: #55574F;
+  --line: rgba(245,244,240,.10); --line2: rgba(245,244,240,.15); --rule: rgba(245,244,240,.07);
+  --ember: #D6B28A; --ease: cubic-bezier(.19,1,.22,1);
+  --hub: 'Hubot Sans', system-ui, sans-serif; --ins: 'Instrument Sans', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; background: var(--ink); color: var(--pearl); font: 400 15px/1.5 var(--ins); -webkit-font-smoothing: antialiased; }
+body { min-height: 100vh; overflow-wrap: anywhere; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+a, button { transition: transform .35s var(--ease), background-color .35s, color .35s; -webkit-tap-highlight-color: transparent; }
+a:active, button:active { transform: scale(.98); }
+:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
+input:focus { outline: none; }
+.lg { display: block; flex: none; }
+.small { font-size: 13px; color: var(--haze); }
+.ember { color: var(--ember); } .haze { color: var(--haze); } .fog { color: var(--fog); } .pearl { color: var(--pearl); }
+.tab { font-variant-numeric: tabular-nums; }
+.run { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 400; color: var(--haze); }
+@media (max-width: 899px) { .desk-only { display: none !important; } }
+@media (min-width: 900px) { .mob-only { display: none !important; } }
+
+/* motion */
+@keyframes rh-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes rh-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes rh-drop { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+@keyframes breathe { from { opacity: .3; } to { opacity: 1; } }
+.rh-in { animation: rh-in .6s var(--ease) both; }
+.rise { animation: rh-rise .9s var(--ease) both; }
+.d1 { animation-delay: .08s; } .d2 { animation-delay: .16s; } .d3 { animation-delay: .24s; } .d4 { animation-delay: .32s; }
+.rh-win { animation: rh-in .7s var(--ease) both; }
+.breathe { animation: breathe 1s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* shared bits */
+.brand { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font: 600 15px var(--hub); }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
+.link-quiet { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; color: var(--haze); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 0; border-radius: 10px;
+  background: var(--night); color: var(--pearl); font: 600 14px var(--ins); }
+.btn.primary { background: var(--pearl); color: var(--ink); min-height: 52px; border-radius: 12px; font-size: 16px; }
+.btn.primary:disabled { background: var(--smoke); color: var(--haze); cursor: default; }
+.btn.ghost { background: transparent; box-shadow: inset 0 0 0 1px rgba(245,244,240,.38); }
+.btn.quiet { background: transparent; color: var(--fog); font-weight: 400; font-size: 15px; min-height: 48px; }
+.btn.big { min-height: 52px; border-radius: 12px; font-size: 16px; }
+.tag { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(245,244,240,.35); font-size: 13px; color: var(--pearl); white-space: nowrap; }
+.live { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--fog); }
+.live i { width: 6px; height: 6px; border-radius: 50%; background: var(--pearl); }
+.banner { display: flex; flex-direction: column; gap: 2px; padding: 14px 20px; background: var(--night); border-bottom: 1px solid var(--line); }
+.banner b { font-size: 14px; font-weight: 600; } .banner span { font-size: 13px; color: var(--haze); }
+.band { display: flex; align-items: center; justify-content: center; height: 32px; background: var(--night); border-bottom: 1px solid var(--line); font-size: 13px; color: var(--fog); }
+.clock { margin: 0; font-family: var(--hub); font-weight: 500; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.clock .dec { color: var(--mute); }
+.clock.win { color: var(--ember); } .clock.win .dec { color: #6B5640; }
+.clock.grey, .clock.grey .dec { color: var(--haze); }
+.odo b { color: var(--ember); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+/* ---------------- HOME ---------------- */
+.wrap { padding: 0 20px; }
+.hero { display: flex; flex-direction: column; gap: 8px; padding: 18px 0 22px; }
+.hero h1 { margin: 0; font: 500 30px/1.1 var(--hub); letter-spacing: -.02em; }
+.hero .lead { margin: 0; font-size: 15px; color: var(--haze); }
+.ask { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.fwrap { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border-radius: 12px; background: var(--night); text-align: left; cursor: text; }
+.field > span { font-size: 12px; color: var(--haze); }
+.field input { width: 100%; min-height: 30px; padding: 0; border: 0; background: transparent; color: var(--pearl); font: 500 18px var(--ins); }
+.field:focus-within, .field.bad { box-shadow: inset 0 0 0 1px var(--ember); }
+.ferr { margin: 0; font-size: 13px; color: var(--fog); text-align: left; }
+.ferr .ok { color: var(--ember); margin-right: 4px; }
+.fwrap { position: relative; }
+.sugg { position: absolute; left: 0; right: 0; z-index: 20; margin: 0; padding: 6px; list-style: none; background: var(--night); border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.55), inset 0 0 0 1px var(--line2); max-height: 336px; overflow-y: auto; text-align: left; animation: rh-in .35s var(--ease) both; }
+.sugg li { display: flex; flex-direction: column; justify-content: center; gap: 1px; min-height: 44px; padding: 8px 12px; border-radius: 9px; cursor: pointer; }
+.sugg li b { font-size: 15px; font-weight: 500; color: var(--pearl); }
+.sugg li span { font-size: 13px; color: var(--haze); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sugg li[aria-selected="true"], .sugg li:hover { background: var(--smoke); }
+.ferr a { color: var(--ember); }
+.opts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.chip { flex: none; min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--night); color: var(--fog); font-size: 14px; white-space: nowrap; }
+.chip.on { background: var(--smoke); }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 14px 20px 2px; margin: 0 -20px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.formmsg { margin: 10px 0 0; font-size: 13px; color: var(--fog); }
+
+.preview { display: flex; flex-direction: column; gap: 10px; margin: 26px 0 0; padding: 14px 16px; border-radius: 14px; background: var(--night); }
+.pv-info { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12px; color: var(--haze); }
+.pv-q { margin: 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+.pv-q img { display: inline-block; vertical-align: -2px; }
+.pv-sub { display: none; }
+.pv-lane { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: baseline; }
+.pv-name { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; min-width: 0; }
+.pv-st { grid-column: 1; font-size: 12px; color: var(--haze); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pv-clock { grid-column: 2; grid-row: 1 / span 2; align-self: center; font: 500 20px var(--hub); font-variant-numeric: tabular-nums; }
+.pv-clock.win { color: var(--ember); }
+
+.recent { display: flex; flex-direction: column; margin: 26px 0 0; padding-bottom: 40px; }
+.recent-h { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 8px; gap: 10px; }
+.recent-h h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.runrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "t time" "sub when"; gap: 2px 12px; padding: 12px 0; border-top: 1px solid rgba(245,244,240,.08); }
+.r-t { grid-area: t; font-size: 15px; font-weight: 500; }
+.r-c { grid-area: c; display: none; }
+.r-time { grid-area: time; font: 400 15px var(--hub); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.r-sub { grid-area: sub; font-size: 13px; color: var(--haze); }
+.r-when { grid-area: when; font-size: 13px; color: var(--haze); text-align: right; white-space: nowrap; }
+.empty { padding: 12px 0; border-top: 1px solid rgba(245,244,240,.08); color: var(--haze); font-size: 14px; }
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 32px; padding: 24px 0 40px; border-top: 1px solid var(--line); font-size: 13px; color: var(--haze); }
+.logos { display: inline-flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.logos span { display: inline-flex; align-items: center; gap: 6px; }
+.credits { gap: 18px; }
+
+@media (min-width: 900px) {
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
+  #v-home .top { padding: 18px 0; }
+  #v-home .brand { font-size: 16px; gap: 10px; }
+  .odo { font-size: 14px; color: var(--haze); }
+  .hero { align-items: center; text-align: center; gap: 18px; padding: 96px 0 64px; }
+  .hero h1 { max-width: 16em; font-size: clamp(36px, 4.4vw, 56px); line-height: 1.05; letter-spacing: -.025em; text-wrap: balance; }
+  .hero .lead { max-width: 34em; font-size: 18px; }
+  .ask { width: 100%; max-width: 760px; margin-top: 28px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  .field { padding: 12px 16px; }
+  .ask .btn.primary { min-height: 64px; }
+  .chips { flex-wrap: wrap; justify-content: center; overflow: visible; margin: 0; padding: 0; }
+  .preview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: 0 0 80px; padding: 0; border-radius: 0; background: none;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .pv-info { flex-direction: column; align-items: flex-start; justify-content: center; gap: 6px; padding: 28px 28px 28px 0; font-size: 14px; }
+  .pv-q { margin-top: 6px; font-size: 20px; font-weight: 500; color: var(--pearl); text-align: left; }
+  .pv-sub { display: block; margin: 0; }
+  .pv-lane { display: flex; flex-direction: column; gap: 4px; padding: 28px; border-left: 1px solid var(--line); }
+  .pv-name { font-size: 14px; color: var(--haze); }
+  .pv-clock { font-size: 40px; line-height: 1.1; order: 2; }
+  .pv-st { order: 3; font-size: 14px; color: var(--fog); white-space: normal; }
+  .recent { margin: 0 0 96px; padding: 0; }
+  .recent-h h2 { font-size: 16px; margin-bottom: 4px; }
+  .runrow { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) auto auto; grid-template-areas: "t c time when"; align-items: baseline; gap: 4px 28px; padding: 18px 0; border-top: 1px solid var(--line); }
+  .r-t { font-size: 17px; }
+  .r-c { display: block; font-size: 14px; color: var(--haze); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .r-time { font: 400 14px var(--ins); color: var(--haze); }
+  .r-time b { font: 400 16px var(--hub); color: var(--ember); }
+  .r-sub { display: none; }
+  .r-when { font-size: 14px; }
+}
+
+/* countdown */
+.cd { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(17,17,16,.92); backdrop-filter: blur(6px); }
+.cd span { font: 500 clamp(120px, 28vw, 260px)/1 var(--hub); letter-spacing: -.04em; color: var(--pearl); font-variant-numeric: tabular-nums; animation: cd-pop .26s var(--ease) both; }
+.cd span.go { color: var(--ember); }
+@keyframes cd-pop { from { opacity: 0; transform: scale(1.5); } 60% { opacity: 1; } to { opacity: 1; transform: scale(1); } }
+
+/* surprise me: its own button, not a preset */
+.chip.surprise { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--ember); box-shadow: inset 0 0 0 1px rgba(214,178,138,.55); font-weight: 600; }
+.chip.surprise svg { transition: transform .5s var(--ease); }
+.chip.surprise:hover svg, .chip.surprise.rolling svg { transform: rotate(180deg); }
+
+/* hall of fame: the standout races */
+.fame { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(230px, 1fr); gap: 10px; overflow-x: auto; margin: 4px -20px 18px; padding: 2px 20px 4px; scrollbar-width: none; }
+.fame::-webkit-scrollbar { display: none; }
+.fcard { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 14px; background: var(--night); overflow: hidden; isolation: isolate; }
+.fcard::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; z-index: -1;
+  background: conic-gradient(from var(--a, 0deg), rgba(214,178,138,.0), rgba(214,178,138,.7), rgba(214,178,138,.0) 40%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: spin 6s linear infinite; }
+@property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes spin { to { --a: 360deg; } }
+.fcard .fi { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ember); }
+.fcard .fi i { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(214,178,138,.12); }
+.fcard .ft { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fcard .fv { font: 500 24px/1.1 var(--hub); color: var(--pearl); font-variant-numeric: tabular-nums; }
+.fcard .fv small { font: 400 13px var(--ins); color: var(--haze); }
+.fcard:hover { background: #1E1D1A; }
+
+/* hackathon stripe */
+.stripe { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 2px 8px; min-height: 36px; padding: 6px 16px; background: var(--night); border-bottom: 1px solid var(--line);
+  font-size: 13px; color: var(--fog); text-align: center; }
+.stripe b { font-weight: 600; color: var(--pearl); }
+.stripe .go { color: var(--ember); font-weight: 600; white-space: nowrap; }
+.stripe:hover .go { text-decoration: underline; }
+body.film .stripe, body.carding .stripe { display: none; }
+
+/* built with */
+.built { display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 20px 0 36px; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.6; color: var(--haze); }
+.built p { margin: 0; } .built b { color: var(--fog); font-weight: 500; }
+.built .blogos { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.built .blogos > span { display: inline-flex; align-items: center; gap: 7px; color: var(--fog); }
+.built .contrib { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; min-height: 44px; padding: 0 14px; border-radius: 10px; background: var(--night); color: var(--pearl); font-weight: 600; }
+.built .contrib:hover { background: var(--smoke); }
+@media (min-width: 900px) { .fame { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; margin: 8px 0 22px; padding: 0; } .built { padding: 0 0 40px; border: 0; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; } .built p { flex: 1 1 100%; } }
+
+/* ---------------- RACE ---------------- */
+.rtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 20px; }
+.rtop-r { display: flex; align-items: center; gap: 10px; }
+.q { margin: 4px 20px 18px; font-size: 22px; font-weight: 500; line-height: 1.25; letter-spacing: -.01em; color: var(--haze); }
+.q span { color: var(--pearl); }
+.board { margin: 0 20px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.brow { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px 0; }
+.brow + .brow { border-top: 1px solid var(--line); }
+.bname { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; }
+.brow .run { margin-top: 2px; }
+.bsub { margin: 2px 0 0; font-size: 13px; color: var(--haze); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brow .clock { font-size: 40px; }
+.same { margin: 10px 20px 0; display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--haze); flex-wrap: wrap; }
+.saved { display: flex; flex-direction: column; gap: 4px; margin: 22px 20px 0; }
+.saved b { font: 500 30px var(--hub); letter-spacing: -.02em; color: var(--ember); }
+.storycard { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 22px 20px 0; padding: 16px; border-radius: 14px; background: var(--night); }
+.storycard b { display: block; font-size: 15px; font-weight: 600; } .storycard span span { font-size: 13px; color: var(--haze); }
+.seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; margin: 18px 20px 0; padding: 4px; border-radius: 12px; background: var(--night); }
+.seg button { min-height: 44px; border: 0; border-radius: 9px; background: transparent; color: var(--haze); font-size: 14px; font-weight: 600; }
+.seg button[aria-pressed="true"] { background: var(--smoke); color: var(--pearl); }
+.lanes { padding: 0 20px 150px; }
+.lane { display: flex; flex-direction: column; margin-top: 22px; }
+.lane:not(.sel) { display: none; }
+.lhead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.lhead h2 { margin: 0; font-size: 16px; font-weight: 600; }
+.lhead .run { font-size: 14px; }
+.lstate { margin-left: auto; font-size: 14px; color: var(--haze); }
+.lstate.first { color: var(--ember); }
+.lclock { display: flex; flex-direction: column; gap: 6px; }
+.meta { margin: 0; font-size: 14px; color: var(--haze); }
+.now { display: flex; flex-direction: column; gap: 4px; }
+.plabel { font-size: 13px; color: var(--haze); }
+.plabel.stuck { color: var(--pearl); }
+.ptitle { font-size: 26px; font-weight: 600; line-height: 1.15; letter-spacing: -.015em; }
+.pstatus { margin: 4px 0 0; display: flex; align-items: center; gap: 9px; font-size: 15px; color: var(--fog); }
+.pstatus.direct { color: var(--ember); }
+.sdot { flex: none; width: 6px; height: 6px; border-radius: 50%; }
+.endb { display: flex; flex-direction: column; gap: 8px; }
+.endb .et { margin: 0; font-size: 22px; font-weight: 600; line-height: 1.15; letter-spacing: -.015em; }
+.endb .es { margin: 0; font-size: 15px; color: var(--haze); }
+.endb.err { padding-left: 14px; border-left: 1px solid rgba(245,244,240,.3); }
+.endb.err .et { font-size: 15px; }
+.wlink { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 15px; font-weight: 600; color: var(--ember); }
+.trail { margin: 22px 0 0; padding: 0; list-style: none; }
+.trail li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; column-gap: 10px; padding: 11px 0; border-top: 1px solid var(--rule); }
+.trail .n, .trail .tm { font-size: 13px; color: var(--mute); font-variant-numeric: tabular-nums; }
+.trail .st { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.trail .tt { font-size: 15px; font-weight: 500; color: var(--fog); }
+.trail li.cur .tt { color: var(--pearl); }
+.trail .dl { margin-left: 8px; font-size: 13px; color: var(--ember); }
+.trail .rs { font-size: 13px; color: var(--haze); }
+.trail .note { display: none; margin-top: 4px; font-size: 13px; font-style: italic; line-height: 1.45; color: var(--fog); }
+body.notes .trail .note { display: block; }
+.rest { display: flex; gap: 12px; margin: 22px 20px 0; padding: 14px 16px; border-radius: 14px; background: var(--night); }
+.rest img { opacity: .6; margin-top: 2px; }
+.rest b { display: block; font-size: 14px; font-weight: 600; } .rest span span { font-size: 13px; color: var(--haze); }
+.rest a { color: var(--ember); font-weight: 600; font-size: 14px; }
+.rfoot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: flex; flex-direction: column; gap: 4px; padding: 10px 20px calc(22px + env(safe-area-inset-bottom));
+  background: var(--ink); border-top: 1px solid var(--line); font-size: 12px; color: var(--haze); }
+.toggle { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--fog); font-size: 14px; }
+.sw { position: relative; width: 28px; height: 16px; border-radius: 999px; background: var(--smoke); transition: background .35s; }
+.sw i { position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--haze); transition: left .35s var(--ease), background .35s; }
+body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; background: var(--ink); }
+.rbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "scrub scrub scrub" "pp speeds time";
+  align-items: center; gap: 12px; padding: 16px 20px calc(26px + env(safe-area-inset-bottom)); background: var(--ink); border-top: 1px solid var(--line); }
+#v-race.replay .rfoot { display: none; }
+.pp { grid-area: pp; width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 50%; background: var(--pearl); color: var(--ink); }
+.speeds { grid-area: speeds; justify-self: center; display: inline-flex; gap: 2px; padding: 3px; border-radius: 12px; background: var(--night); }
+.speeds button { min-width: 48px; min-height: 44px; border: 0; border-radius: 9px; background: transparent; color: var(--haze); font-size: 14px; font-weight: 600; }
+.speeds button[aria-pressed="true"] { background: var(--smoke); color: var(--pearl); }
+.scrub { grid-area: scrub; position: relative; height: 24px; padding: 0; border: 0; background: transparent; touch-action: none; }
+.scrub > span { position: absolute; pointer-events: none; }
+.scrub .tr { left: 0; right: 0; top: 11px; height: 2px; background: rgba(245,244,240,.12); }
+.scrub .fi { left: 0; top: 11px; height: 2px; background: var(--fog); }
+.scrub .tk { top: 6px; width: 2px; height: 12px; background: var(--ember); }
+.scrub .kn { top: 6px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--pearl); }
+.rtime { grid-area: time; font-size: 13px; color: var(--haze); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+@media (min-width: 900px) {
+  #v-race { min-height: 100vh; display: flex; flex-direction: column; }
+  .rtop { flex-wrap: wrap; gap: 12px 32px; padding: 20px 40px; border-bottom: 1px solid var(--line); }
+  .rtop .brand { flex: 0 1 260px; font-size: 16px; gap: 10px; }
+  .rtop .q { flex: 1 1 420px; margin: 0; text-align: center; font-size: 20px; }
+  .rtop-r { flex: 0 1 260px; justify-content: flex-end; }
+  .rtop .live { font-size: 14px; } .rtop .live i { width: 7px; height: 7px; }
+  .rtop .tag { height: 30px; padding: 0 12px; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(245,244,240,.4); font-size: 14px; font-weight: 600; }
+  .lanes { flex: 1 1 auto; display: flex; flex-wrap: wrap; padding: 0; }
+  .lane, .lane:not(.sel) { display: flex; }
+  .lane { flex: 1 1 520px; min-width: 0; gap: 28px; margin: 0; padding: 36px 40px 28px; }
+  .lane + .lane, .lane + .rest { border-left: 1px solid var(--line); }
+  .lclock .clock { font-size: clamp(56px, 6vw, 88px); font-stretch: 105%; }
+  .now { gap: 6px; padding-top: 20px; border-top: 1px solid var(--line); }
+  .ptitle { font-size: 28px; }
+  .pstatus { gap: 10px; }
+  .endb { padding-top: 20px; border-top: 1px solid var(--line); }
+  .endb.won { border-top-color: rgba(214,178,138,.5); }
+  .endb .et { font-size: 28px; }
+  .endb.err { padding-left: 0; border-left: 0; }
+  .endb.err .et { font-size: 28px; }
+  .trail { margin: 0; }
+  .trail li { grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 12px; padding: 10px 0; }
+  .trail .st { gap: 2px; }
+  .rest { flex: 0 1 420px; flex-direction: column; justify-content: center; gap: 10px; margin: 0; padding: 40px; border-radius: 0; background: none; }
+  .rest img { display: none; }
+  .rest b { font-size: 24px; letter-spacing: -.01em; }
+  .rest span span { font-size: 15px; max-width: 30em; }
+  .rbar { position: static; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 12px 40px; }
+  .pp { width: 44px; height: 44px; }
+  .speeds { padding: 0; background: none; }
+  .speeds button { min-width: 44px; border-radius: 10px; }
+  .scrub { flex: 1 1 300px; height: 44px; }
+  .scrub .tr, .scrub .fi { top: 21px; } .scrub .tk { top: 16px; } .scrub .kn { top: 17px; width: 10px; height: 10px; margin-left: -5px; }
+  .rtime { font-size: 14px; }
+  .rfoot, #v-race.replay .rfoot { position: static; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding: 12px 40px 16px; font-size: 13px; }
+}
+
+/* ---------------- ANSWER ---------------- */
+.ahead { padding: 14px 0 0; }
+.ahead .k { margin: 0; font-size: 14px; color: var(--haze); }
+.ahead h1 { margin: 4px 0 0; font: 500 30px/1.1 var(--hub); letter-spacing: -.02em; }
+.times { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 20px 0 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.times > div { padding: 12px 0 12px 14px; }
+.times > div:first-child { padding: 12px 12px 12px 0; border-right: 1px solid var(--line); }
+.times dt { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--haze); }
+.times dd { margin: 2px 0 0; }
+.times .tv { font: 500 30px var(--hub); white-space: nowrap; }
+.times .tv small { font: 400 13px var(--ins); }
+.times .ts { font-size: 14px; color: var(--haze); }
+.story-m { display: flex; flex-direction: column; gap: 8px; margin: 22px 0 0; }
+.story-m p { margin: 0; font-size: 17px; line-height: 1.5; }
+.achain { margin: 22px 0 0; padding: 0 0 130px; list-style: none; }
+.achain li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; column-gap: 10px; padding: 9px 0; border-top: 1px solid var(--rule); }
+.achain .n, .achain .tm { font-size: 13px; color: var(--mute); font-variant-numeric: tabular-nums; }
+.achain .st { min-width: 0; display: flex; flex-direction: column; }
+.achain .tt { font-size: 15px; font-weight: 500; }
+.achain .dl { margin-left: 8px; font-size: 13px; font-weight: 400; color: var(--ember); }
+.achain .rs { display: none; }
+.abar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 12px 20px calc(24px + env(safe-area-inset-bottom)); background: var(--ink); border-top: 1px solid var(--line); }
+.abar .btn { min-height: 52px; border-radius: 12px; font-size: 16px; }
+.abar .btn:not(.primary) { padding: 0 18px; }
+@media (min-width: 900px) {
+  .wrap.wide { max-width: 1400px; padding: 0 clamp(16px, 4.2vw, 64px); }
+  #v-answer .top { min-height: 76px; border-bottom: 1px solid var(--line2); }
+  .agrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(520px, 100%), 1fr)); gap: 56px clamp(32px, 5vw, 96px); padding: 72px 0 96px; font-size: 17px; line-height: 1.6; }
+  .acol { display: flex; flex-direction: column; gap: 40px; min-width: 0; }
+  .acol.r { gap: 32px; }
+  .ahead { display: flex; flex-direction: column; gap: 18px; padding: 0; }
+  .ahead .k { font: 500 14px var(--hub); }
+  .ahead h1 { margin: 0; font-size: clamp(40px, 4.4vw, 68px); line-height: .96; letter-spacing: -.012em; text-wrap: balance; }
+  .times { margin: 0; border-bottom: 0; border-top-color: var(--line2); }
+  .times > div, .times > div:first-child { display: flex; flex-direction: column; gap: 6px; padding: 22px 0 0 24px; }
+  .times > div:first-child { padding: 22px 24px 0 0; border-right-color: var(--line2); }
+  .times dt { gap: 10px; font: 700 14px var(--hub); color: var(--pearl); }
+  .times dd { margin: 0; }
+  .times .run { font-size: 14px; }
+  .times .tv { font-size: clamp(48px, 5.2vw, 80px); line-height: 1; letter-spacing: -.02em; }
+  .achain { margin: 0; padding: 0; border-top: 1px solid var(--line2); }
+  .achain li { grid-template-columns: 44px minmax(0, 1fr) auto; column-gap: 16px; padding: 20px 0; border-top: 0; border-bottom: 1px solid var(--line2); }
+  .achain .n { font: 700 15px var(--hub); letter-spacing: .08em; color: var(--ember); }
+  .achain .st { gap: 4px; }
+  .achain .tt { font: 500 24px/1.05 var(--hub); }
+  .achain .rs { display: block; font-size: 15px; color: var(--haze); }
+  .achain .tm { font: 600 14px var(--hub); color: var(--haze); }
+  .storybox { position: relative; display: flex; flex-direction: column; gap: 18px; padding: clamp(26px, 3vw, 44px); border-radius: 24px; background: var(--night); }
+  .storybox .c1, .storybox .c2 { position: absolute; width: 22px; height: 22px; }
+  .storybox .c1 { top: -12px; right: -12px; border-top: 2px solid var(--ember); border-right: 2px solid var(--ember); }
+  .storybox .c2 { bottom: -12px; left: -12px; border-bottom: 2px solid var(--ember); border-left: 2px solid var(--ember); }
+  .storybox .lb { font: 500 14px var(--hub); color: var(--haze); }
+  .storybox .s1 { margin: 0; font: 500 clamp(22px, 2vw, 30px)/1.2 var(--hub); letter-spacing: -.015em; text-wrap: pretty; }
+  .storybox .s2 { margin: 0; color: var(--fog); }
+  .storybox .wr { margin: 0; font-size: 20px; color: var(--fog); }
+  .abtns { display: flex; flex-wrap: wrap; gap: 12px; }
+  .abtns .btn { min-height: 48px; padding: 0 22px; border-radius: 12px; font: 700 14px var(--hub); }
+  .post { display: flex; flex-direction: column; gap: 10px; padding-top: 22px; border-top: 1px solid var(--line2); }
+  .post span { font: 500 14px var(--hub); color: var(--haze); }
+  .post p { margin: 0; font-size: 15px; line-height: 1.6; color: var(--fog); white-space: pre-line; }
+}
+
+/* ---------------- STATES ---------------- */
+.state { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; padding: 8px 20px calc(26px + env(safe-area-inset-bottom)); }
+.sbody { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 24px 0; }
+.sbody h2 { margin: 0; font: 500 28px/1.15 var(--hub); letter-spacing: -.02em; }
+.sbody p { margin: 0; color: var(--haze); }
+.livecard { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; padding: 16px; border-radius: 14px; background: var(--night); }
+.livecard .g { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; }
+.livecard .g span:nth-child(odd) { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; }
+.livecard .g span:nth-child(even) { font: 500 20px var(--hub); font-variant-numeric: tabular-nums; }
+.bars { display: flex; gap: 6px; margin-top: 10px; } .bars span { flex: 1 1 0; height: 3px; background: var(--fog); }
+.sacts { display: flex; flex-direction: column; gap: 8px; }
+@media (min-width: 900px) {
+  .state { max-width: 640px; margin: 0 auto; padding: 18px 40px 48px; }
+  .sbody h2 { font-size: 44px; line-height: 1.05; }
+  .sbody p { font-size: 17px; }
+  .sacts { flex-direction: row; flex-wrap: wrap; }
+  .sacts .btn { padding: 0 22px; }
+}
+
+/* ---------------- VIDEO CARDS ---------------- */
+.vstage { position: fixed; inset: 0; background: var(--ink); overflow: hidden; }
+.vcard { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; box-sizing: border-box; padding: 96px 128px; background: var(--ink); }
+.vi { display: flex; flex-direction: column; justify-content: space-between; }
+.vi .vb, .ve .vb { margin: 0; display: flex; align-items: center; gap: 14px; font: 600 30px var(--hub); }
+.vi h1 { margin: 0; max-width: 13em; font: 500 124px/1.02 var(--hub); letter-spacing: -.035em; color: var(--haze); }
+.vi h1 span { color: var(--pearl); }
+.vi .vs { margin: 40px 0 0; font-size: 44px; line-height: 1.3; color: var(--fog); }
+.vlanes { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line2); }
+.vlanes > div { display: flex; flex-direction: column; gap: 10px; padding: 32px 40px 0 0; }
+.vlanes > div + div { padding: 32px 0 0 40px; border-left: 1px solid var(--line2); }
+.vlanes b { display: inline-flex; align-items: center; gap: 16px; font-size: 44px; font-weight: 600; }
+.vlanes .run { font-size: 28px; gap: 10px; }
+.ve { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 120px; }
+.ve .vl { display: flex; flex-direction: column; justify-content: center; gap: 28px; }
+.ve .vk { margin: 0; font-size: 30px; color: var(--haze); }
+.ve ol { margin: 0; padding: 0; list-style: none; }
+.ve li { display: flex; align-items: center; gap: 28px; padding: 18px 0; animation: rh-drop .7s var(--ease) both; }
+.ve li i { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--mute); }
+.ve li span { font: 500 64px/1 var(--hub); letter-spacing: -.03em; white-space: nowrap; }
+.ve li.last i { border: 0; background: var(--ember); } .ve li.last span { color: var(--ember); }
+.ve .vr { display: flex; flex-direction: column; justify-content: space-between; }
+.ve .vb { justify-content: flex-end; }
+.ve dl { margin: 0; }
+.ve dl > div:first-child { padding: 0 0 36px; border-bottom: 1px solid var(--line2); }
+.ve dl > div + div { padding: 36px 0 0; }
+.ve dt { display: flex; align-items: center; gap: 14px; font-size: 34px; font-weight: 600; }
+.ve dd { margin: 8px 0 0; font: 500 150px/1 var(--hub); letter-spacing: -.04em; color: var(--ember); }
+.ve dd.g { font-size: 72px; letter-spacing: -.03em; color: var(--haze); }
+.ve .vf { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.ve .vf p { margin: 0; }
+</style>
+</head>
+<body>
+<a class="stripe" href="https://luma.com/cerebras-kimi-hackathon?tk=F5e3mX" target="_blank" rel="noopener">
+  <span>Built for the <b>Cerebras × Kimi hackathon</b>.</span><span class="go">Sign up now →</span>
+</a>
+
+<!-- ============ HOME ============ -->
+<section id="v-home" class="view" hidden>
+  <div class="banner" id="pausedBanner" hidden><b>Live races are paused for today</b><span>We hit today’s limit. Replays keep playing, and live races are back tomorrow.</span></div>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="./" data-home><span data-mark="18"></span>Rabbit Hole</a>
+      <span class="odo desk-only" data-odo></span>
+      <a class="link-quiet mob-only" href="#recent">Past races</a>
+    </header>
+    <div class="hero">
+      <h1 class="rise d1">How are two things connected?</h1>
+      <p class="lead">An AI clicks through real Wikipedia articles until it gets there. The same model races itself on Cerebras and on NVIDIA GPUs.</p>
+      <form class="ask" id="ask" autocomplete="off" aria-label="Start a race">
+        <div class="fwrap"><label class="field" id="f-start"><span>From</span><input id="start" aria-label="From" value="Pizza" maxlength="120" enterkeyhint="next" /></label><div class="ferr" id="e-start" hidden></div></div>
+        <div class="fwrap"><label class="field" id="f-target"><span>To</span><input id="target" aria-label="To" value="Black hole" maxlength="120" enterkeyhint="go" /></label><div class="ferr" id="e-target" hidden></div></div>
+        <button class="btn primary" id="go" type="submit">Start the race</button>
+      </form>
+      <div class="chips" id="chips"></div>
+      <p class="formmsg" id="formMsg" hidden></p>
+    </div>
+    <a class="preview" id="preview" href="#" hidden>
+      <div class="pv-info"><span class="tag">Replay</span><p class="pv-q" id="pvQ"></p><p class="pv-sub small" id="pvSub"></p></div>
+      <div class="pv-lane" id="pvC"><span class="pv-name"><span data-logo="cerebras" data-s="16"></span>Cerebras</span><span class="pv-clock" id="pvCc"></span><span class="pv-st" id="pvCs"></span></div>
+      <div class="pv-lane" id="pvG"><span class="pv-name"><span data-logo="gpu" data-s="16"></span>NVIDIA GPU</span><span class="pv-clock" id="pvGc"></span><span class="pv-st" id="pvGs"></span></div>
+    </a>
+    <section class="recent" id="recent" aria-labelledby="recentTitle">
+      <div class="recent-h"><h2 id="recentTitle">Recent races</h2><span class="small mob-only" id="savedShort"></span></div>
+      <div class="fame" id="fame" hidden></div>
+      <div id="runs"><div class="empty">Loading races…</div></div>
+    </section>
+    <footer class="foot desk-only">
+      <span>Same model in both lanes, Kimi K3.1 Pro. Only the chip differs. Clocks are real elapsed time. Text from Wikipedia, CC BY-SA 4.0.</span>
+      <span>airabbithole.pages.dev</span>
+    </footer>
+    <div class="built">
+      <p>Built with <b>Claude</b>. Powered by <b>Kimi K3.1 Pro</b> on <b>Cerebras</b>, raced against the same model on <b>NVIDIA GPUs</b>, run by an <b>OpenClaw</b> agent. Every step is a real link on <b>Wikipedia</b>.</p>
+      <span class="blogos"><span><span data-logo="claude" data-s="18"></span><span data-wm="claudeText" data-h="13"></span></span><span><span data-logo="kimi" data-s="18"></span>Kimi K3.1 Pro</span><span><span data-logo="cerebras" data-s="18"></span><span data-wm="cbText" data-h="15"></span></span><span><span data-logo="gpu" data-s="18"></span><span data-wm="nvText" data-h="13"></span></span><span><span data-logo="claw" data-s="18"></span><span data-wm="clawText" data-h="13"></span></span></span>
+      <a class="contrib" href="https://github.com/rishabh-bansal/rabbit-hole" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.29-1.69-1.29-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>Looking to contribute? GitHub →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RACE (live + replay) ============ -->
+<section id="v-race" class="view" hidden>
+  <div class="band mob-only" id="rBand" hidden></div>
+  <div class="banner" id="rPaused" hidden><b>Live races are paused for today</b><span>We hit today’s limit. Replays keep playing, and live races are back tomorrow.</span></div>
+  <header class="rtop">
+    <a class="brand" href="./" data-home aria-label="Back to home"><span data-mark="18"></span>Rabbit Hole</a>
+    <h1 class="q desk-only" id="rQd"></h1>
+    <div class="rtop-r">
+      <span class="live" id="rLive"><i class="breathe"></i>Live</span>
+      <span class="tag desk-only" id="rTag" hidden>Replay · not live</span>
+      <button class="btn mob-only" id="copyM" type="button" hidden>Copy link</button>
+    </div>
+  </header>
+  <h1 class="q mob-only rise d1" id="rQm"></h1>
+  <div class="board mob-only" id="board"></div>
+  <p class="same mob-only" id="rSame" hidden>Both lanes run <span data-logo="kimi" data-s="12"></span> Kimi K3.1 Pro. Only the chip differs.</p>
+  <div class="saved mob-only" id="rSaved" hidden><span class="small">Waiting saved so far in this race</span><b id="rSavedV"></b></div>
+  <a class="storycard mob-only" id="rStory" href="#" hidden><span><b>Read the story</b><span id="rStorySub"></span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A6A9A3" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  <div class="seg mob-only" id="seg"><button type="button" data-sel="cerebras" aria-pressed="true">Cerebras</button><button type="button" data-sel="gpu" aria-pressed="false">NVIDIA GPU</button></div>
+  <main class="lanes" id="lanes"></main>
+  <div class="rest mob-only" id="restM" hidden><span data-logo="gpu" data-s="18"></span><span><b>The GPU side is resting today</b><span>Its daily budget ran out. Replays still show both lanes.</span></span></div>
+  <div class="rbar" id="rbar" hidden>
+    <button class="pp" id="pp" type="button" aria-label="Pause replay"></button>
+    <div class="speeds" id="speeds"><button type="button" data-sp="1">1×</button><button type="button" data-sp="2">2×</button><button type="button" data-sp="5">5×</button></div>
+    <button class="scrub" id="scrub" type="button" aria-label="Seek in the replay"><span class="tr"></span><span class="fi" id="scFi"></span><span class="tk" id="scTk"></span><span class="kn" id="scKn"></span></button>
+    <span class="rtime" id="rtime"></span>
+    <button class="btn desk-only" id="copyD" type="button">Copy link</button>
+  </div>
+  <footer class="rfoot" id="rfoot">
+    <button class="toggle" type="button" data-notes aria-pressed="false"><span class="sw" aria-hidden="true"><i></i></span>Show thinking notes</button>
+    <span><span class="desk-only">Same model in both lanes. Only the chip differs. Clocks are real elapsed time.</span><span class="mob-only">Same model in both lanes. Clocks are real elapsed time.</span></span>
+    <span class="odo desk-only" data-odo-race></span>
+  </footer>
+</section>
+
+<!-- ============ ANSWER ============ -->
+<section id="v-answer" class="view" hidden>
+  <div class="wrap wide">
+    <header class="top">
+      <a class="brand" href="./" data-home><span data-mark="18"></span>Rabbit Hole</a>
+      <span class="odo desk-only" data-odo></span>
+      <a class="link-quiet mob-only" href="#" id="aReplayM">Watch replay</a>
+    </header>
+    <div class="agrid">
+      <div class="acol">
+        <div class="ahead"><p class="k" id="aK"></p><h1 class="rise d1" id="aH"></h1></div>
+        <dl class="times rise d2" id="aTimes"></dl>
+        <section class="story-m mob-only" aria-label="The story"><span class="small">The story, written by Kimi</span><p id="aStoryM"></p></section>
+        <ol class="achain rise d3" id="aChain"></ol>
+      </div>
+      <div class="acol r desk-only">
+        <div class="storybox"><span class="c1" aria-hidden="true"></span><span class="c2" aria-hidden="true"></span><span class="lb">The story · by Kimi</span><div id="aStoryD"></div></div>
+        <div class="abtns"><a class="btn primary" id="aX" target="_blank" rel="noopener">Post on X</a><button class="btn ghost" type="button" data-img>Share image</button><a class="btn ghost" href="#" id="aReplayD">Watch the replay</a></div>
+        <div class="post"><span>The post</span><p id="aPost"></p></div>
+        <p class="small" style="font-size:14px">Same model in both lanes, Kimi K3.1 Pro. Only the hardware differs. Clocks show real elapsed time. Article text from Wikipedia, CC BY-SA 4.0.</p>
+      </div>
+    </div>
+  </div>
+  <div class="abar mob-only"><a class="btn primary" id="aXm" target="_blank" rel="noopener">Post on X</a><button class="btn" type="button" data-img>Image</button></div>
+</section>
+
+<!-- ============ STATES ============ -->
+<section id="v-state" class="view" hidden>
+  <div class="state">
+    <header class="top"><a class="brand" href="./" data-home><span data-mark="18"></span>Rabbit Hole</a></header>
+    <div class="sbody rise d1" id="sBody"></div>
+    <div class="sacts" id="sActs"></div>
+  </div>
+</section>
+
+<!-- ============ VIDEO CARDS ============ -->
+<div class="vstage" id="vstage" hidden></div>
+<div class="cd" id="cd" hidden aria-hidden="true"></div>
+
+<script>
+"use strict";
+const API = window.RH_API || "";
+const SITE = "airabbithole.pages.dev";
+// Logos from @lobehub/icons (static SVG, recoloured for dark backgrounds)
+const LOGO = { cerebras: "logos/cerebras-color.svg", gpu: "logos/nvidia-color.svg", kimi: "logos/kimi-color.svg", claw: "logos/openclaw-color.svg", claude: "logos/claude-color.svg" };
+const MARK_W = { cbText: ["logos/cerebras-text.svg", 95 / 24], nvText: ["logos/nvidia-text.svg", 111 / 24], clawText: ["logos/openclaw-text.svg", 140 / 24], claudeText: ["logos/claude-text.svg", 97 / 24] };
+const NAME = { cerebras: "Cerebras", gpu: "NVIDIA GPU" };
+const DOT = { cerebras: "#F15A29", gpu: "#76B900" };
+const EXAMPLES = [["Pizza", "Black hole"], ["Cat", "Moon"], ["Coffee", "French Revolution"], ["Taylor Swift", "Quantum mechanics"], ["Minecraft", "Ancient Egypt"]];
+
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const img = (k, s) => `<img class="lg" src="${LOGO[k]}" alt="" width="${s}" height="${s}">`;
+const mark = s => `<svg width="${s}" height="${s}" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="#D6B28A" stroke-width="2"/><circle cx="15" cy="18" r="8.5" fill="none" stroke="#D6B28A" stroke-opacity="0.55" stroke-width="2"/><circle cx="15" cy="21" r="3" fill="#D6B28A"/></svg>`;
+const wm = (k, h) => { const [src, r] = MARK_W[k]; return `<img class="lg" src="${src}" alt="" height="${h}" width="${Math.round(h * r)}">`; };
+const credits = h => `<span class="logos credits"><span title="Built with Claude">${img("claude", h)}${wm("claudeText", h - 3)}</span><span>${img("kimi", h)}Kimi K3.1 Pro</span><span title="Cerebras">${img("cerebras", h)}${wm("cbText", h)}</span><span title="OpenClaw">${img("claw", h)}${wm("clawText", h - 4)}</span></span>`;
+const kimiRun = s => `<span class="run">running ${img("kimi", s)}Kimi K3.1 Pro</span>`;
+const wurl = t => "https://en.wikipedia.org/wiki/" + encodeURIComponent(String(t).replace(/ /g, "_"));
+function hydrate(root = document) {
+  root.querySelectorAll("[data-mark]").forEach(el => { el.outerHTML = mark(+el.dataset.mark); });
+  root.querySelectorAll("[data-credits]").forEach(el => { el.outerHTML = credits(16); });
+  root.querySelectorAll("[data-wm]").forEach(el => { el.outerHTML = wm(el.dataset.wm, +el.dataset.h); });
+  root.querySelectorAll("[data-logo]").forEach(el => { el.outerHTML = img(el.dataset.logo, +el.dataset.s || 16); });
+}
+
+// ---------- formatting ----------
+function fmt(x) {
+  const tenths = Math.max(0, Math.floor(x * 10 + 1e-4)), m = Math.floor(tenths / 600), rem = tenths - m * 600, s = Math.floor(rem / 10), d = rem - s * 10;
+  const main = m + ":" + (s < 10 ? "0" : "") + s; return { main, dec: "." + d, full: main + "." + d };
+}
+const clockHTML = x => { const f = fmt(x); return `${f.main}<span class="dec">${f.dec}</span>`; };
+const fmtS = x => x < 60 ? (Math.floor(x * 10) / 10).toFixed(1) + " s" : fmt(x).full;
+function fmtMS(x) { x = Math.max(0, x || 0); if (x >= 3600) { const h = Math.floor(x / 3600); return `${h} h ${Math.floor((x - h * 3600) / 60)} min`; } const m = Math.floor(x / 60); return m ? `${m} min ${Math.floor(x - m * 60)} s` : `${Math.floor(x)} s`; }
+function ago(ts) { const s = Date.now() / 1000 - (ts || 0); if (s < 90) return "just now"; if (s < 3600) return Math.round(s / 60) + " min ago"; if (s < 86400) return Math.round(s / 3600) + " h ago"; return Math.round(s / 86400) + " d ago"; }
+const clicks = n => n + (n === 1 ? " click" : " clicks");
+const question = S => `How is <span>${esc(S.start)}</span> connected to <span>${esc(S.target)}</span>?`;
+
+// ---------- race state, rebuilt from the event stream ----------
+let kc = 0;
+function laneObj(id, page) { return { id, page: page || "", url: page ? wurl(page) : "", pageNo: 1, links: 0, status: "reading", trail: [], hops: 0, ai: 0, thinkSince: null, end: null, endWall: null, result: null, error: "", startPage: page || "" }; }
+function fresh(start, target) { return { _k: ++kc, start: start || "", target: target || "", targetTitle: target || "", ids: ["cerebras", "gpu"], lanes: { cerebras: laneObj("cerebras", start), gpu: laneObj("gpu", start) },
+  gpuPaused: false, storyWriting: false, story: "", done: false, first: null, firstWall: null, endWall: null }; }
+function apply(S, e) {
+  const w = e.wall || 0;
+  switch (e.type) {
+    case "race_started":
+      S.start = e.start; S.target = e.target; S.targetTitle = S.targetTitle || e.target; S.gpuPaused = !!e.gpu_paused;
+      S.ids = (e.lanes || []).map(l => l.id); S.lanes = {}; S.ids.forEach(id => S.lanes[id] = laneObj(id, e.start)); return;
+    case "story_started": S.storyWriting = true; return;
+    case "story": S.story = (e.text || "").replace(/[*_`#]+/g, "").trim(); S.storyWriting = false; return;
+    case "race_done": S.done = true; S.storyWriting = false; S.endWall = w; return;
+  }
+  const L = S.lanes[e.lane]; if (!L) return;
+  switch (e.type) {
+    case "lane_started": L.page = L.startPage = e.page; L.url = e.url || wurl(e.page); L.pageNo = 1; L.status = "reading"; if (e.target) S.targetTitle = e.target; break;
+    case "thinking": L.links = e.options || 0; L.status = "thinking"; L.ai = e.ai || 0; L.thinkSince = w; break;
+    case "hop":
+      L.trail.push({ title: e.page, reason: e.reason || "", note: e.thinking || "", t: e.t || 0, auto: !!e.auto, url: e.url || wurl(e.page) });
+      L.page = e.page; L.url = e.url || wurl(e.page); L.pageNo = L.trail.length + 1; L.hops = e.hop || L.trail.length; L.ai = e.ai ?? L.ai; L.thinkSince = null;
+      L.status = e.auto ? "direct" : "reading"; break;
+    case "lane_done": L.result = "done"; L.end = e.seconds; L.endWall = w; L.ai = e.model_seconds ?? L.ai; L.hops = e.hops ?? L.hops; L.thinkSince = null;
+      if (!S.first) { S.first = L.id; S.firstWall = w; } break;
+    case "lane_timeout": L.result = "stopped"; L.end = e.after || 300; L.endWall = w; L.thinkSince = null; break;
+    case "lane_error": L.result = "error"; L.error = e.error || ""; L.end = e.t || w; L.endWall = w; L.thinkSince = null; break;
+    case "lane_stopped": L.result = "stopped"; L.end = e.t || w; L.endWall = w; L.thinkSince = null; break;
+  }
+}
+function applyAll(events, start, target) { const S = fresh(start, target); events.forEach(e => apply(S, e)); return S; }
+const aiNow = (L, T) => L.ai + (L.thinkSince != null && L.result == null ? Math.max(0, T - L.thinkSince) : 0);
+const laneT = (L, T) => L.end != null ? L.end : T;
+
+class Player {
+  constructor(events, start, target) { this.ev = events || []; this.start = start; this.target = target; this.T = 0; this.i = 0; this.S = fresh(start, target);
+    this.speed = 1; this.playing = true; this.dur = this.ev.length ? (this.ev[this.ev.length - 1].wall || 0) : 0; }
+  seek(t) { t = Math.max(0, Math.min(this.dur, t)); if (t < this.T) { this.S = fresh(this.start, this.target); this.i = 0; } this.T = t;
+    while (this.i < this.ev.length && (this.ev[this.i].wall || 0) <= t) apply(this.S, this.ev[this.i++]); }
+  step(dt) { if (!this.playing) return; const t = this.T + dt * this.speed; if (t >= this.dur) { this.seek(this.dur); this.playing = false; } else this.seek(t); }
+}
+
+// ---------- API ----------
+async function api(path, opts) {
+  const r = await fetch(API + path, opts); let d = null; try { d = await r.json(); } catch {}
+  return { ok: r.ok, status: r.status, d: d || {} };
+}
+let STATS = { seconds_saved: 0, races: 0 };
+async function loadStats() { const r = await api("/api/stats").catch(() => null); if (r && r.ok) STATS = r.d; paintOdo(); }
+function paintOdo(extra = 0, extraRace = 0) {
+  const txt = `Waiting saved by Cerebras: <b>${fmtMS(STATS.seconds_saved + extra)}</b> over ${STATS.races + extraRace} races`;
+  $$("[data-odo]").forEach(el => el.innerHTML = txt);
+  $("#savedShort").innerHTML = `saved <span class="ember">${fmtMS(STATS.seconds_saved)}</span> of waiting`;
+}
+let RUNS = [];
+async function loadRuns() { const r = await api("/api/runs").catch(() => null); RUNS = (r && r.ok && r.d.runs) || []; paintRuns(); pickPreview(); }
+function gpuText(r, short) {
+  const g = r.lanes.gpu, o = (r.outcome || {}).gpu;
+  if (g) return `GPU ${fmtS(g.seconds)}`;
+  if (o === "lane_timeout") return short ? "GPU stopped at 5 min" : "GPU stopped at 5:00";
+  if (o === "lane_error") return "GPU ended with an error";
+  return "Cerebras only";
+}
+const ICON = {
+  bolt: `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>`,
+  target: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>`,
+  hole: `<svg width="15" height="15" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="15" cy="15" r="12.5"/><circle cx="15" cy="18" r="7.5" stroke-opacity=".6"/><circle cx="15" cy="21" r="2.6" fill="currentColor"/></svg>`,
+  hourglass: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h12M6 22h12M7 2c0 6 10 6 10 10S7 16 7 22M17 2c0 6-10 6-10 10s10 4 10 10"/></svg>`,
+};
+const gpuSecs = r => r.lanes.gpu ? r.lanes.gpu.seconds : (r.outcome || {}).gpu === "lane_timeout" ? 300 : null;
+function paintFame() {
+  const done = RUNS.filter(r => r.lanes.cerebras), el = $("#fame");
+  if (done.length < 2) { el.hidden = true; return; }
+  const by = (f, dir = 1) => [...done].sort((a, b) => dir * (f(a) - f(b)) || a.lanes.cerebras.seconds - b.lanes.cerebras.seconds)[0];
+  const fastest = by(r => r.lanes.cerebras.seconds);
+  const deepest = by(r => r.lanes.cerebras.hops, -1);
+  const saved = by(r => (gpuSecs(r) ?? 0) - r.lanes.cerebras.seconds, -1);
+  const cards = [
+    { r: fastest, icon: "bolt", label: "Fastest find", value: fmtS(fastest.lanes.cerebras.seconds), sub: clicks(fastest.lanes.cerebras.hops) },
+    { r: deepest, icon: "hole", label: "Deepest rabbit hole", value: clicks(deepest.lanes.cerebras.hops), sub: fmtS(deepest.lanes.cerebras.seconds) },
+    { r: saved, icon: "hourglass", label: "Most waiting saved", value: fmtMS((gpuSecs(saved) ?? 0) - saved.lanes.cerebras.seconds), sub: "vs the GPU" },
+  ];
+  el.innerHTML = cards.map(c => `<a class="fcard" href="?replay=${encodeURIComponent(c.r.id)}" data-replay="${esc(c.r.id)}">
+    <span class="fi"><i>${ICON[c.icon]}</i>${c.label}</span><span class="ft">${esc(c.r.start)} → ${esc(c.r.target)}</span>
+    <span class="fv">${c.value} <small>${c.sub}</small></span></a>`).join("");
+  el.hidden = false;
+}
+function paintRuns() {
+  paintFame();
+  const el = $("#runs");
+  if (!RUNS.length) { el.innerHTML = `<div class="empty">No races yet. Start the first one.</div>`; return; }
+  el.innerHTML = RUNS.slice(0, 12).map(r => {
+    const c = r.lanes.cerebras, mid = c ? c.path.slice(1, -1).join(" · ") : "";
+    const time = c ? fmtS(c.seconds) : "—";
+    return `<a class="runrow" href="?replay=${encodeURIComponent(r.id)}" data-replay="${esc(r.id)}">
+      <span class="r-t">${esc(r.start)} → ${esc(r.target)}</span><span class="r-c">${esc(mid || "Direct link")}</span>
+      <span class="r-time"><b>${time}</b><span class="desk-only"> vs ${esc(gpuText(r))}</span></span>
+      <span class="r-sub">${c ? clicks(c.hops) + " · " : ""}${esc(gpuText(r, true))}</span><span class="r-when">${ago(r.created)}</span></a>`;
+  }).join("");
+}
+
+// ---------- home: auto-playing replay ----------
+let PV = null;
+async function pickPreview() {
+  const good = RUNS.filter(r => r.lanes.cerebras && r.lanes.cerebras.hops > 1);
+  const pool = good.filter(r => (r.outcome || {}).gpu === "lane_timeout");
+  const r = (pool.length ? pool : good).sort((a, b) => a.lanes.cerebras.seconds - b.lanes.cerebras.seconds)[0];
+  if (!r) return;
+  const run = await api(`/api/runs/${r.id}`).catch(() => null); if (!run || !run.ok) return;
+  const p = new Player(run.d.events, r.start, r.target);
+  const done = run.d.events.find(e => e.type === "lane_done" && e.lane === "cerebras");
+  PV = { id: r.id, player: p, loopAt: Math.min(p.dur, (done ? done.wall : 40) + 8) };
+  $("#pvQ").innerHTML = `${esc(r.start)} → ${esc(r.target)}<span class="mob-only"> · both on ${img("kimi", 12)} Kimi K3.1 Pro</span>`;
+  $("#pvSub").innerHTML = `Recorded ${ago(r.created)} · both lanes run Kimi K3.1 Pro`;
+  $("#pvG").hidden = !run.d.events.some(e => e.type === "race_started" && (e.lanes || []).some(l => l.id === "gpu"));
+  $("#preview").href = `?replay=${encodeURIComponent(r.id)}`; $("#preview").dataset.replay = r.id; $("#preview").hidden = false;
+}
+function pvStatus(L, S, other) {
+  if (L.result === "done") return `Found it in ${clicks(L.hops)}`;
+  if (L.result === "stopped") return "Stopped at 5 minutes";
+  if (L.result === "error") return "Ended with an error";
+  if (other && other.result === "done" && L.hops === 0) return `Still on page 1, thinking about ${L.links || "its"} links…`;
+  if (L.status === "thinking") return `Thinking about ${L.links} links on ${L.page}…`;
+  return `Reading ${L.page || S.start}…`;
+}
+function renderPreview() {
+  if (!PV) return; const S = PV.player.S, T = PV.player.T, c = S.lanes.cerebras, g = S.lanes.gpu;
+  if (c) { const el = $("#pvCc"); el.textContent = fmt(laneT(c, T)).full; el.classList.toggle("win", c.result === "done"); $("#pvCs").textContent = pvStatus(c, S, g); }
+  if (g) { $("#pvGc").textContent = fmt(laneT(g, T)).full; $("#pvGs").textContent = pvStatus(g, S, c); }
+}
+
+// ---------- views & routing ----------
+let VIEW = "home";
+function show(v) { VIEW = v; $$(".view").forEach(s => s.hidden = s.id !== "v-" + v); $("#vstage").hidden = true; }
+function nav(url, replace) { history[replace ? "replaceState" : "pushState"]({}, "", url || location.pathname); route(); }
+window.addEventListener("popstate", route);
+document.addEventListener("click", e => {
+  const a = e.target.closest("a"); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+  if (a.hasAttribute("data-home")) { e.preventDefault(); nav(location.pathname); window.scrollTo(0, 0); }
+  else if (a.dataset.replay) { e.preventDefault(); nav(`?replay=${encodeURIComponent(a.dataset.replay)}`); window.scrollTo(0, 0); }
+});
+const Q = () => new URLSearchParams(location.search);
+async function route() {
+  stopLive();
+  const q = Q();
+  if (q.get("card")) return showCard(q);
+  if (q.get("replay")) return openReplay(q.get("replay"), { speed: +q.get("speed") || 1 });
+  if (q.get("answer")) return openAnswer(q.get("answer"));
+  if (q.get("watch")) return watch(q.get("watch"));
+  show("home"); document.title = "Rabbit Hole: an AI plays the Wikipedia game, Cerebras vs GPU";
+  if (q.get("from")) $("#start").value = q.get("from");
+  if (q.get("to")) $("#target").value = q.get("to");
+  paintChips();
+  if (q.get("autostart")) startRace();
+}
+
+// ---------- home form ----------
+function paintChips() {
+  const s = $("#start").value.trim(), t = $("#target").value.trim();
+  $("#chips").innerHTML = `<button type="button" class="chip surprise" data-surprise><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="8" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="8" cy="16" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/></svg>Surprise me</button>` +
+    EXAMPLES.map(([a, b]) => `<button type="button" class="chip${a === s && b === t ? " on" : ""}" data-a="${esc(a)}" data-b="${esc(b)}">${esc(a)} → ${esc(b)}</button>`).join("");
+}
+$("#chips").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.hasAttribute("data-surprise")) {
+    b.classList.add("rolling"); const r = await api("/api/surprise").catch(() => null);
+    if (r && r.ok) { $("#start").value = r.d.start; $("#target").value = r.d.target; TOPIC.start = { state: "unknown" }; TOPIC.target = { state: "unknown" }; clearErrors(); paintChips(); startRace(); }
+    return;
+  }
+  $("#start").value = b.dataset.a; $("#target").value = b.dataset.b; clearErrors(); paintChips(); TOPIC.start = { state: "unknown" }; TOPIC.target = { state: "unknown" };
+});
+["start", "target"].forEach(id => $("#" + id).addEventListener("input", () => paintChips()));
+$("#ask").addEventListener("submit", e => { e.preventDefault(); startRace(); });
+function clearErrors() { ["start", "target"].forEach(id => { $("#f-" + id).classList.remove("bad"); $("#e-" + id).hidden = true; }); $("#formMsg").hidden = true; }
+function fieldError(d) {
+  const id = d.field === "target" ? "target" : "start", box = $("#e-" + id);
+  $("#f-" + id).classList.add("bad");
+  const opts = (d.options || []).filter(Boolean);
+  if (d.kind === "missing" && opts.length) box.innerHTML = `No Wikipedia article called “${esc(d.value)}”. Did you mean <a href="#" data-fill="${id}" data-v="${esc(opts[0])}">${esc(opts[0])}</a>?`;
+  else if (d.kind === "ambiguous" && opts.length) box.innerHTML = `${esc(d.message)}<div class="opts">${opts.map(o => `<button type="button" class="chip" data-fill="${id}" data-v="${esc(o)}">${esc(o)}</button>`).join("")}</div>`;
+  else box.textContent = d.message || "Check this topic.";
+  box.hidden = false;
+}
+document.addEventListener("click", e => {
+  const f = e.target.closest("[data-fill]"); if (!f) return; e.preventDefault();
+  $("#" + f.dataset.fill).value = f.dataset.v; $("#f-" + f.dataset.fill).classList.remove("bad"); $("#e-" + f.dataset.fill).hidden = true; paintChips(); checkTopic(f.dataset.fill, true);
+});
+// ---------- live topic check ----------
+// Uses Wikipedia's own search, straight from the visitor's browser: instant, free, no AI tokens, no load on our server.
+const WAPI = "https://en.wikipedia.org/w/api.php";
+async function wq(params) {
+  const u = new URL(WAPI); Object.entries({ format: "json", formatversion: 2, origin: "*", ...params }).forEach(([k, v]) => u.searchParams.set(k, v));
+  const r = await fetch(u, { headers: { "Api-User-Agent": "RabbitHole/1.0 (https://airabbithole.pages.dev)" } }); if (!r.ok) throw new Error("wiki " + r.status); return r.json();
+}
+const isDis = p => !!(p && p.pageprops && "disambiguation" in p.pageprops);
+const TOPIC = { start: { state: "unknown" }, target: { state: "unknown" } };   // unknown | checking | ok | missing | ambiguous
+const memo = new Map();
+function lookup(text) {
+  const key = text.toLowerCase(); if (memo.has(key)) return memo.get(key);
+  const job = (async () => {
+    const [ex, pre] = await Promise.all([
+      wq({ action: "query", titles: text, redirects: 1, prop: "pageprops|description", ppprop: "disambiguation" }),
+      wq({ action: "query", generator: "prefixsearch", gpssearch: text, gpslimit: 8, redirects: 1, prop: "pageprops|description", ppprop: "disambiguation" }),
+    ]);
+    const page = ((ex.query || {}).pages || [])[0] || {};
+    const sugg = ((pre.query || {}).pages || []).sort((a, b) => a.index - b.index).filter(p => !isDis(p)).slice(0, 6).map(p => ({ title: p.title, desc: p.description || "" }));
+    let state = "ok", title = page.title || text, desc = page.description || "", senses = [];
+    if (page.missing || page.invalid || !page.title) state = "missing";
+    else if (isDis(page)) {
+      state = "ambiguous";
+      const base = page.title.toLowerCase();
+      const d = await wq({ action: "query", generator: "links", titles: page.title, gpllimit: 200, gplnamespace: 0, prop: "description" }).catch(() => ({}));
+      senses = ((d.query || {}).pages || []).filter(p => p.title.toLowerCase().startsWith(base + " (")).slice(0, 4).map(p => ({ title: p.title, desc: p.description || "" }));
+      if (!senses.length) senses = sugg.slice(0, 4);
+    }
+    return { state, title, desc, sugg, senses };
+  })();
+  memo.set(key, job); job.catch(() => memo.delete(key)); return job;
+}
+function paintTopic(id, force) {
+  let T = TOPIC[id]; const box = $("#e-" + id), field = $("#f-" + id);
+  if (!force && document.activeElement === $("#" + id) && (T.state === "missing" || T.state === "ambiguous")) T = { state: "typing" };  // don't nag mid-word
+  field.classList.toggle("bad", T.state === "missing" || T.state === "ambiguous");
+  if (T.state === "ok" && T.dirty) { box.innerHTML = `<span class="ok">✓</span>${esc(T.desc || "Wikipedia article")}`; box.hidden = false; }
+  else if (T.state === "missing") {
+    const top = T.sugg && T.sugg[0];
+    box.innerHTML = `No Wikipedia article called “${esc(T.text)}”.` + (top ? ` Did you mean <a href="#" data-fill="${id}" data-v="${esc(top.title)}">${esc(top.title)}</a>?` : " Try another spelling.");
+    box.hidden = false;
+  } else if (T.state === "ambiguous") {
+    box.innerHTML = `“${esc(T.text)}” has several meanings. Pick one:<div class="opts">${T.senses.map(o => `<button type="button" class="chip" data-fill="${id}" data-v="${esc(o.title)}">${esc(o.title)}</button>`).join("")}</div>`;
+    box.hidden = false;
+  } else box.hidden = true;
+}
+async function checkTopic(id, dirty) {
+  const v = $("#" + id).value.trim(); if (!v) { TOPIC[id] = { state: "unknown" }; paintTopic(id); return TOPIC[id]; }
+  const seq = (TOPIC[id].seq || 0) + 1; TOPIC[id] = { state: "checking", seq, dirty };
+  try { const r = await lookup(v); if (TOPIC[id].seq !== seq || $("#" + id).value.trim() !== v) return TOPIC[id]; TOPIC[id] = { ...r, text: v, seq, dirty }; }
+  catch { if (TOPIC[id].seq === seq) TOPIC[id] = { state: "unknown", seq }; }   // Wikipedia unreachable: the server still checks on submit
+  paintTopic(id); return TOPIC[id];
+}
+function setupTopic(id, nextId) {
+  const input = $("#" + id), label = $("#f-" + id), list = document.createElement("ul");
+  list.className = "sugg"; list.id = id + "-sugg"; list.setAttribute("role", "listbox"); list.hidden = true; label.after(list);
+  input.setAttribute("role", "combobox"); input.setAttribute("aria-autocomplete", "list"); input.setAttribute("aria-controls", list.id); input.setAttribute("aria-expanded", "false");
+  input.setAttribute("autocapitalize", "words"); input.setAttribute("spellcheck", "false");
+  let timer, items = [], active = -1;
+  const close = () => { list.hidden = true; input.setAttribute("aria-expanded", "false"); active = -1; };
+  const draw = () => {
+    const v = input.value.trim().toLowerCase();
+    if (document.activeElement !== input || !items.length || (items.length === 1 && items[0].title.toLowerCase() === v)) return close();
+    list.style.top = label.offsetHeight + 6 + "px";
+    list.innerHTML = items.map((it, i) => `<li role="option" id="${id}-o${i}" aria-selected="${i === active}" data-i="${i}"><b>${esc(it.title)}</b>${it.desc ? `<span>${esc(it.desc)}</span>` : ""}</li>`).join("");
+    list.hidden = false; input.setAttribute("aria-expanded", "true");
+    if (active >= 0) input.setAttribute("aria-activedescendant", `${id}-o${active}`); else input.removeAttribute("aria-activedescendant");
+  };
+  const pick = i => { const it = items[i]; if (!it) return; input.value = it.title; close(); paintChips(); checkTopic(id, true); if (nextId && !$("#" + nextId).value.trim()) $("#" + nextId).focus(); };
+  input.addEventListener("input", () => {
+    clearTimeout(timer); const v = input.value.trim();
+    if (!v) { items = []; close(); TOPIC[id] = { state: "unknown" }; paintTopic(id); return; }
+    timer = setTimeout(async () => { const r = await checkTopic(id, true); if (r.sugg) { items = r.sugg; active = -1; draw(); } }, 180);
+  });
+  input.addEventListener("focus", () => { if (items.length) draw(); });
+  input.addEventListener("blur", () => setTimeout(() => { close(); paintTopic(id); }, 120));
+  input.addEventListener("keydown", e => {
+    if (list.hidden) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); active = (active + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length; draw(); }
+    else if (e.key === "Enter" && active >= 0) { e.preventDefault(); pick(active); }
+    else if (e.key === "Escape") close();
+  });
+  document.addEventListener("pointerdown", e => { if (!label.parentElement.contains(e.target) && (!list.hidden || TOPIC[id].state !== "unknown")) { close(); paintTopic(id, true); } });
+  list.addEventListener("pointerdown", e => { const li = e.target.closest("li"); if (!li) return; e.preventDefault(); pick(+li.dataset.i); });
+}
+setupTopic("start", "target"); setupTopic("target");
+
+// fast 3-2-1 (about a second), played while the race request is already on its way
+function countdown() {
+  const el = $("#cd");  // under reduced motion the numbers still show, just without the zoom
+  let stopped = false, t = []; el.hidden = false;
+  const done = new Promise(res => ["3", "2", "1", "Go"].forEach((n, i) => t.push(setTimeout(() => {
+    if (stopped) return; el.innerHTML = `<span class="${n === "Go" ? "go" : ""}">${n}</span>`; if (n === "Go") t.push(setTimeout(res, 230));
+  }, i * 260))));
+  return { done, stop() { stopped = true; t.forEach(clearTimeout); el.hidden = true; el.innerHTML = ""; } };
+}
+let starting = false;
+async function startRace() {
+  if (starting) return;
+  const start = $("#start").value.trim(), target = $("#target").value.trim();
+  clearErrors();
+  if (!start || !target) { $("#formMsg").textContent = "Type two topics first."; $("#formMsg").hidden = false; return; }
+  const bad = ["start", "target"].filter(id => ["missing", "ambiguous"].includes(TOPIC[id].state) && TOPIC[id].text === $("#" + id).value.trim());
+  if (bad.length) { bad.forEach(id => paintTopic(id, true)); return; }
+  starting = true; const go = $("#go"); go.disabled = true; go.textContent = "Starting…";
+  const cd = countdown();
+  try {
+    const r = await api("/api/race", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ start, target }) });
+    if (r.ok && r.d.race_id) { await cd.done; cd.stop(); history.pushState({}, "", `?watch=${r.d.race_id}`); return watch(r.d.race_id, { start, target }); }
+    cd.stop();
+    const d = typeof r.d.detail === "object" && r.d.detail ? r.d.detail : { message: r.d.detail || "Something went wrong. Try again." };
+    if (d.code === "bad_input") { show("home"); fieldError(d); }
+    else if (d.code === "busy") showBusy(d);
+    else if (d.code === "ip_limit") showLimit(d);
+    else if (d.code === "paused") { const best = latestRun(); if (best) openReplay(best, { auto: true }); else { $("#formMsg").textContent = d.message; $("#formMsg").hidden = false; } }
+    else { $("#formMsg").textContent = d.message; $("#formMsg").hidden = false; }
+  } catch (x) { cd.stop(); $("#formMsg").textContent = "Couldn’t reach the race server. Try again in a moment."; $("#formMsg").hidden = false; }
+  finally { starting = false; go.disabled = false; go.textContent = "Start the race"; }
+}
+const latestRun = () => (RUNS.find(r => r.lanes.cerebras && (r.outcome || {}).gpu) || RUNS.find(r => r.lanes.cerebras) || RUNS[0] || {}).id;
+
+// ---------- race view ----------
+let R = null;            // { mode: "live"|"replay", S?, origin?, es?, rid, run?, player?, sel, key, tn, cache }
+function raceS() { return R.mode === "live" ? R.S : R.player.S; }
+function raceT() { if (R.mode === "replay") return R.player.T; const S = R.S; return S.done ? S.endWall : Math.max(0, (performance.now() - R.origin) / 1000); }
+function stopLive() { if (R && R.es) { R.es.close(); R.es = null; } if (R && R.retry) clearTimeout(R.retry); }
+
+function boardRow(id) {
+  return `<div class="brow" data-lane="${id}"><div style="min-width:0"><p class="bname">${img(id, 16)}${NAME[id]}</p><p style="margin:0">${kimiRun(12)}</p><p class="bsub" data-f="bsub"></p></div><p class="clock" data-f="clock"></p></div>`;
+}
+function laneCol(id) {
+  return `<section class="lane" data-lane="${id}" aria-label="${NAME[id]} lane">
+    <div class="lhead desk-only">${img(id, 18)}<h2>${NAME[id]}</h2>${kimiRun(14)}<span class="lstate" data-f="state">Racing</span></div>
+    <div class="lclock desk-only"><p class="clock" data-f="clock"></p><p class="meta" data-f="meta"></p></div>
+    <div class="now" data-f="now"><span class="plabel" data-f="plabel"></span><a class="ptitle" data-f="ptitle" target="_blank" rel="noopener"></a>
+      <p class="pstatus" data-f="pstatus"><span class="sdot breathe" style="background:${DOT[id]}"></span><span data-f="stxt"></span></p></div>
+    <div class="endb" data-f="endb" hidden><p class="et" data-f="et"></p><p class="es" data-f="es"></p><a class="wlink" href="#" data-f="wstory" data-story hidden>Read the story <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <ol class="trail" data-f="trail"></ol></section>`;
+}
+const restCol = `<section class="rest desk-only" aria-label="NVIDIA GPU lane, resting today"><span><b>The GPU side is resting today</b><span>Its daily budget ran out, so live races run on Cerebras only. Replays still show both lanes.</span></span><a href="#" data-latest>Watch a replay</a></section>`;
+function buildRace(S) {
+  const ids = S.ids.length ? S.ids : ["cerebras"];
+  $("#board").innerHTML = ids.map(boardRow).join("");
+  $("#lanes").innerHTML = ids.map(laneCol).join("") + (S.gpuPaused ? restCol : "");
+  $("#restM").hidden = !S.gpuPaused; $("#seg").hidden = ids.length < 2;
+  if (!ids.includes(R.sel)) R.sel = ids[0];
+  R.key = S._k + "|" + ids.join() + "|" + S.gpuPaused; R.tn = {}; R.cache = {};
+  paintSel();
+}
+function paintSel() {
+  $$("#lanes .lane").forEach(el => el.classList.toggle("sel", el.dataset.lane === R.sel));
+  $$("#seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.sel === R.sel)));
+}
+$("#seg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b || !R) return; R.sel = b.dataset.sel; paintSel(); });
+function put(id, f, val, how = "html") {
+  const k = id + "|" + f + "|" + how; if (R.cache[k] === val) return; R.cache[k] = val;
+  $$(`#v-race [data-lane="${id}"] [data-f="${f}"]`).forEach(el => {
+    if (how === "html") el.innerHTML = val; else if (how === "text") el.textContent = val; else if (how === "hide") el.hidden = val;
+    else if (how === "href") el.href = val; else if (how === "class") el.className = val;
+  });
+}
+function stepHTML(s, i, anim) {
+  return `<li class="${anim ? "rh-in" : ""}"><span class="n">${i + 1}</span><div class="st"><span><a class="tt" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>${s.auto ? `<span class="dl">Direct link</span>` : ""}</span>
+    <span class="rs">${esc(s.reason)}</span>${s.note ? `<span class="note">“${esc(s.note)}”</span>` : ""}</div><span class="tm">${fmt(s.t).full}</span></li>`;
+}
+function paintTrail(id, L, S) {
+  const el = $(`#lanes [data-lane="${id}"] [data-f="trail"]`); if (!el) return;
+  const n = L.trail.length, prev = R.tn[id] ?? -1; if (prev === n) return;
+  if (n === 0) el.innerHTML = `<li><span class="n">1</span><div class="st"><span class="tt" style="color:var(--pearl)">${esc(L.startPage || S.start)}</span><span class="rs">Start page · no clicks yet</span></div><span class="tm">0:00.0</span></li>`;
+  else {
+    if (prev <= 0 || prev > n) { el.innerHTML = ""; L.trail.forEach((s, i) => el.insertAdjacentHTML("beforeend", stepHTML(s, i, false))); }
+    else for (let i = prev; i < n; i++) el.insertAdjacentHTML("beforeend", stepHTML(L.trail[i], i, true));
+    [...el.children].forEach((li, i) => li.classList.toggle("cur", i === n - 1));
+  }
+  R.tn[id] = n;
+}
+function renderRace() {
+  const S = raceS(), T = raceT();
+  const key = S._k + "|" + (S.ids.length ? S.ids : ["cerebras"]).join() + "|" + S.gpuPaused;
+  if (R.key !== key) buildRace(S);
+  const qh = question(S); if (R.cache.q !== qh) { R.cache.q = qh; $("#rQd").innerHTML = qh; $("#rQm").innerHTML = qh; }
+  for (const id of S.ids) {
+    const L = S.lanes[id]; if (!L) continue;
+    const other = S.ids.find(x => x !== id), O = other && S.lanes[other];
+    const running = L.result == null, won = L.result === "done";
+    put(id, "clock", clockHTML(laneT(L, T)));
+    put(id, "clock", "clock" + (won && S.first === id ? " win" : L.result === "stopped" || L.result === "error" ? " grey" : ""), "class");
+    put(id, "state", running ? "Racing" : won ? (S.first === id ? "Finished first" : "Finished") : L.result === "error" ? "Error" : "Stopped", "text");
+    put(id, "state", "lstate" + (won && S.first === id ? " first" : ""), "class");
+    put(id, "meta", won ? `${clicks(L.hops)} · ${fmtS(L.ai)} AI thinking · ${fmtS(L.end)} total` : `${clicks(L.hops)} · ${fmtS(aiNow(L, T))} thinking`, "text");
+    let bsub;
+    if (won) bsub = `<span class="ember">Found it in ${clicks(L.hops)}</span>`;
+    else if (L.result === "stopped") bsub = L.end >= 299 ? "Stopped at 5 minutes" : "Stopped";
+    else if (L.result === "error") bsub = "Ended with an error";
+    else if (L.hops === 0) bsub = (O && O.result === "done") ? `Still on ${esc(L.page || S.start)}, thinking…` : `0 clicks · still on ${esc(L.page || S.start)}`;
+    else bsub = `${clicks(L.hops)} · on ${esc(L.page)}`;
+    put(id, "bsub", bsub);
+    // now reading / end blocks
+    put(id, "now", !running, "hide");
+    if (running) {
+      const stuck = O && O.result === "done" && L.pageNo <= 1;
+      put(id, "plabel", stuck ? "Still on page 1" : `Now reading · page ${L.pageNo}`, "text");
+      put(id, "plabel", "plabel" + (stuck ? " stuck" : ""), "class");
+      put(id, "ptitle", L.page || S.start, "text"); put(id, "ptitle", L.url || wurl(L.page || S.start), "href");
+      const direct = L.status === "direct";
+      put(id, "stxt", direct ? `Direct link to ${S.targetTitle || S.target}. Clicking.` : L.status === "thinking" ? `Thinking about ${L.links} links…` : "Reading the page…", "text");
+      put(id, "pstatus", "pstatus" + (direct ? " direct" : ""), "class");
+    }
+    put(id, "endb", running, "hide");
+    if (!running) {
+      let cls = "endb", et = "", es = "";
+      if (won) { cls += " won rh-win"; et = `Found it in ${clicks(L.hops)}`; es = S.first === id && S.storyWriting ? "Kimi is writing the story…" : ""; }
+      else if (L.result === "stopped") { et = L.end >= 299 ? "Stopped at 5 minutes" : "Stopped"; es = `Still not there. It was still deciding where to go from ${L.page || S.start}.`; }
+      else { cls += " err"; et = `The ${NAME[id]} lane stopped on page ${L.pageNo}`; es = "The model service stopped answering." + (O && O.result === "done" ? ` The ${NAME[other]} result still counts.` : ""); }
+      put(id, "endb", cls, "class"); put(id, "et", et, "text"); put(id, "es", es, "text"); put(id, "es", !es, "hide");
+      put(id, "wstory", !(won && S.first === id && S.story), "hide");
+    }
+    paintTrail(id, L, S);
+  }
+  // waiting saved, story card, odometer
+  const c = S.lanes.cerebras, g = S.lanes.gpu;
+  const savedOn = c && g && c.result === "done";
+  const saved = savedOn ? Math.max(0, (g.endWall ?? T) - c.endWall) : 0;
+  $("#rSaved").hidden = !(savedOn && (g.result == null || g.result === "stopped"));
+  if (savedOn) $("#rSavedV").textContent = fmtMS(saved);
+  $("#rStory").hidden = !S.story;
+  if (S.story) $("#rStorySub").textContent = `Kimi wrote how ${S.start} leads to ${S.target}`;
+  const live = R.mode === "live" && !S.done;
+  $("#v-race [data-odo-race]").innerHTML = `Waiting saved by Cerebras: <b>${fmtMS(STATS.seconds_saved + (live ? saved : 0))}</b> over ${STATS.races + (live && savedOn && g.result ? 1 : 0)} races`;
+  if (R.mode === "replay") paintBar();
+}
+function startRaceView(mode) {
+  show("race");
+  $("#v-race").classList.toggle("replay", mode === "replay");
+  $("#rLive").hidden = mode !== "live"; $("#rTag").hidden = mode !== "replay"; $("#copyM").hidden = mode !== "replay";
+  $("#rbar").hidden = mode !== "replay"; $("#rBand").hidden = mode !== "replay"; $("#rSame").hidden = mode !== "replay";
+  $("#rPaused").hidden = true;
+  R.key = null; R.cache = {}; R.tn = {};
+  window.scrollTo(0, 0);
+}
+async function openReplay(id, opts = {}) {
+  stopLive();
+  const r = await api(`/api/runs/${encodeURIComponent(id)}`).catch(() => null);
+  if (!r || !r.ok) { show("home"); $("#formMsg").textContent = "That race isn’t available any more."; $("#formMsg").hidden = false; return; }
+  const sm = r.d.summary;
+  R = { mode: "replay", rid: id, run: r.d, player: new Player(r.d.events, sm.start, sm.target), sel: "cerebras" };
+  R.player.speed = [1, 2, 5].includes(opts.speed) ? opts.speed : 1;
+  startRaceView("replay");
+  if (opts.auto) { $("#rPaused").hidden = false; history.replaceState({}, "", `?replay=${encodeURIComponent(id)}`); }
+  $("#rBand").textContent = `Replay · recorded ${ago(sm.created)} · not live`;
+  const done = r.d.events.find(e => e.type === "lane_done" && e.lane === "cerebras");
+  $("#scTk").style.left = done && R.player.dur ? (done.wall / R.player.dur * 100).toFixed(2) + "%" : "-10px";
+  document.title = `Replay: ${sm.start} → ${sm.target} · Rabbit Hole`;
+  renderRace();
+}
+function paintBar() {
+  const p = R.player, pct = p.dur ? p.T / p.dur * 100 : 0;
+  $("#scFi").style.width = pct.toFixed(2) + "%"; $("#scKn").style.left = pct.toFixed(2) + "%";
+  $("#rtime").textContent = `${fmt(p.T).full.replace(/\.\d$/, "")} / ${fmt(p.dur).full.replace(/\.\d$/, "")}`;
+  const playing = p.playing;
+  if (R.cache.pp !== playing) { R.cache.pp = playing;
+    $("#pp").innerHTML = playing ? `<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z" fill="currentColor"/></svg>` : `<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4l14 8-14 8z" fill="currentColor"/></svg>`;
+    $("#pp").setAttribute("aria-label", playing ? "Pause replay" : "Play replay"); }
+  $$("#speeds button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.sp === p.speed)));
+}
+$("#pp").addEventListener("click", () => { const p = R.player; if (!p.playing && p.T >= p.dur) p.seek(0); p.playing = !p.playing; });
+$("#speeds").addEventListener("click", e => { const b = e.target.closest("button"); if (b && R && R.player) R.player.speed = +b.dataset.sp; });
+(() => { const sc = $("#scrub"); let drag = false;
+  const seekTo = ev => { const r = sc.getBoundingClientRect(); R.player.seek(Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width)) * R.player.dur); renderRace(); };
+  sc.addEventListener("pointerdown", ev => { if (!R || !R.player) return; drag = true; sc.setPointerCapture(ev.pointerId); seekTo(ev); });
+  sc.addEventListener("pointermove", ev => { if (drag) seekTo(ev); });
+  sc.addEventListener("pointerup", () => drag = false); sc.addEventListener("pointercancel", () => drag = false);
+  sc.addEventListener("keydown", ev => { if (!R || !R.player) return; if (ev.key === "ArrowRight") R.player.seek(R.player.T + 5); if (ev.key === "ArrowLeft") R.player.seek(R.player.T - 5); });
+})();
+async function copyLink(btn) {
+  const url = `${location.origin}${location.pathname}?replay=${encodeURIComponent(R.rid)}`;
+  try { await navigator.clipboard.writeText(url); } catch { prompt("Copy this link", url); }
+  $$("#copyM, #copyD").forEach(b => b.textContent = "Link copied"); setTimeout(() => $$("#copyM, #copyD").forEach(b => b.textContent = "Copy link"), 1800);
+}
+$("#copyM").addEventListener("click", copyLink); $("#copyD").addEventListener("click", copyLink);
+document.addEventListener("click", e => {
+  if (e.target.closest("[data-notes]")) { const on = document.body.classList.toggle("notes"); $$("[data-notes]").forEach(b => b.setAttribute("aria-pressed", String(on))); }
+  if (e.target.closest("[data-story]") || e.target.closest("#rStory")) { e.preventDefault(); openAnswerFromRace(); }
+  if (e.target.closest("[data-latest]")) { e.preventDefault(); const id = latestRun(); if (id) nav(`?replay=${id}`); }
+});
+
+// live race
+function watch(rid, meta = {}) {
+  stopLive();
+  R = { mode: "live", rid, S: fresh(meta.start, meta.target), origin: performance.now(), sel: "cerebras" };
+  startRaceView("live"); document.title = `Racing: ${meta.start || ""} → ${meta.target || ""} · Rabbit Hole`;
+  connect(rid);
+  renderRace();
+}
+function connect(rid) {
+  const me = R; let gotAny = false;
+  const es = new EventSource(API + `/api/race/${rid}/events`); me.es = es;
+  es.onmessage = m => {
+    const e = JSON.parse(m.data); gotAny = true;
+    if (e.type === "sync") { me.S = fresh(me.S.start, me.S.target); me.origin = performance.now() - e.wall * 1000; return; }  // full history follows
+    apply(me.S, e);
+    if (e.type === "race_started") document.title = `Racing: ${e.start} → ${e.target} · Rabbit Hole`;
+    if (e.type === "race_done") { es.close(); me.es = null; loadStats(); loadRuns(); }
+  };
+  es.onerror = async () => {
+    es.close(); me.es = null; if (R !== me || me.S.done) return;
+    if (!gotAny) { const r = await api(`/api/runs/${rid}`).catch(() => null); if (r && r.ok && R === me) { history.replaceState({}, "", `?replay=${rid}`); return openReplay(rid); } }
+    me.retry = setTimeout(() => { if (R === me) connect(rid); }, 2500);
+  };
+}
+
+// ---------- busy / limit states ----------
+let STATE_LIVE = null;
+function showBusy(d) {
+  show("state"); const lv = d.live || {};
+  STATE_LIVE = lv.id ? { at: performance.now() - (lv.elapsed || 0) * 1000 } : null;
+  $("#sBody").innerHTML = `<span class="small">One live race at a time</span><h2>Someone is racing right now</h2><p>Watch theirs live. Your turn opens as soon as it finishes.</p>
+    ${lv.id ? `<div class="livecard"><span class="live"><i class="breathe"></i>Live · ${esc(lv.start)} → ${esc(lv.target)}</span><span class="g"><span>${img("cerebras", 14)}Cerebras</span><span data-sl></span><span class="fog">${img("gpu", 14)}NVIDIA GPU</span><span data-sl></span></span></div>` : ""}`;
+  $("#sActs").innerHTML = (lv.id ? `<a class="btn primary" href="?watch=${esc(lv.id)}" data-watch="${esc(lv.id)}">Watch it live</a>` : "") + `<a class="btn quiet" href="#" data-latest>Play a replay instead</a>`;
+}
+function showLimit(d) {
+  show("state"); STATE_LIVE = null; const n = d.limit || 4;
+  $("#sBody").innerHTML = `<span class="small">${n} of ${n} live races used this hour</span><h2>Enjoy the replays, come back soon</h2>
+    <p>Each visitor gets ${n} live races an hour, so the free credits last.${d.minutes ? ` Your next one opens in <span class="ember">${d.minutes} min</span>.` : ""}</p>
+    <div class="bars" aria-hidden="true">${"<span></span>".repeat(n)}</div>`;
+  $("#sActs").innerHTML = `<a class="btn primary" href="#" data-latest>Play the latest replay</a><a class="btn quiet" href="./#recent" data-home>Browse past races</a>`;
+}
+function renderStateLive() { if (!STATE_LIVE) return; const t = (performance.now() - STATE_LIVE.at) / 1000; $$("[data-sl]").forEach(el => el.textContent = fmt(t).full); }
+document.addEventListener("click", e => { const a = e.target.closest("[data-watch]"); if (!a) return; e.preventDefault(); history.pushState({}, "", `?watch=${a.dataset.watch}`); watch(a.dataset.watch); });
+
+// ---------- answer ----------
+let A = null; // { S, rid, live }
+function openAnswerFromRace() {
+  const full = R.mode === "replay" ? applyAll(R.run.events, R.run.summary.start, R.run.summary.target) : raceS();  // a replay's answer shows the final result
+  A = { S: full, rid: R.rid, live: R.mode === "live" && !full.done, replayable: R.mode === "replay" || full.done };
+  history.pushState({}, "", `?answer=${encodeURIComponent(R.rid)}`); stopLiveKeep(); paintAnswer(); show("answer"); window.scrollTo(0, 0);
+}
+function stopLiveKeep() { /* keep the live stream running so the answer can update */ }
+async function openAnswer(id) {
+  if (R && R.rid === id && R.mode === "live") { A = { S: R.S, rid: id, live: !R.S.done, replayable: R.S.done }; if (!R.es && !R.S.done) connect(id); }
+  else {
+    const r = await api(`/api/runs/${encodeURIComponent(id)}`).catch(() => null);
+    if (!r || !r.ok) { show("home"); $("#formMsg").textContent = "That race isn’t available any more."; $("#formMsg").hidden = false; return; }
+    A = { S: applyAll(r.d.events, r.d.summary.start, r.d.summary.target), rid: id, live: false, replayable: true };
+  }
+  paintAnswer(); show("answer"); window.scrollTo(0, 0);
+}
+function chainOf(S) { const id = S.first || "cerebras", L = S.lanes[id]; if (!L) return { L: null, steps: [] };
+  return { L, id, steps: [{ title: L.startPage || S.start, url: wurl(L.startPage || S.start), reason: "Start page", t: 0, start: true }, ...L.trail] }; }
+function postText(S) {
+  const { steps } = chainOf(S), c = S.lanes.cerebras, g = S.lanes.gpu;
+  const cl = c && c.result === "done" ? `Kimi K3.1 Pro on @Cerebras: ${fmtS(c.end)}.` : "Kimi K3.1 Pro on @Cerebras.";
+  let gl = "";
+  if (g && !S.gpuPaused) gl = g.result === "done" ? ` On GPUs: ${fmtS(g.end)}.` : g.result === "error" ? " On GPUs: it didn’t finish." : " On GPUs: still not there after 5 min.";
+  return `How is ${S.start} connected to ${S.target}?\n${steps.map(s => s.title).join(" → ")}\n${cl}${gl}\n${SITE} @Kimi_Moonshot #KimiOnCerebras`;
+}
+function splitStory(t) { const m = String(t).match(/^(.+?[.!?])\s+(.+)$/s); return m ? [m[1], m[2]] : [t, ""]; }
+function paintAnswer() {
+  const S = A.S, { L, id, steps } = chainOf(S);
+  $("#aK").textContent = L && L.result === "done" ? `Found in ${clicks(L.hops)}` : "Not found yet";
+  $("#aH").innerHTML = `${esc(S.start)} <span class="haze">to</span> ${esc(S.target)}`;
+  const tv = (lid) => {
+    const X = S.lanes[lid];
+    if (!X) return `<div><dt>${img(lid, 16)}${NAME[lid]}</dt><dd>${kimiRun(12)}</dd><dd class="tv haze">Resting</dd><dd class="ts">The GPU side is resting today.</dd></div>`;
+    let v, sub;
+    if (X.result === "done") { v = `<span class="${S.first === lid ? "ember" : ""}">${fmtS(X.end)}</span>`; sub = `${clicks(X.hops)} · ${fmtS(X.ai)} AI thinking`; }
+    else if (X.result === "stopped") { v = `<span class="haze">5:00 <small>stopped</small></span>`; sub = X.hops ? `Stopped on page ${X.pageNo}.` : "Stopped. Still on page 1."; }
+    else if (X.result === "error") { v = `<span class="haze">Error</span>`; sub = "Ended with an error."; }
+    else { v = `<span class="haze">Racing…</span>`; sub = "Still running."; }
+    return `<div><dt>${img(lid, 16)}${NAME[lid]}</dt><dd>${kimiRun(12)}</dd><dd class="tv">${v}</dd><dd class="ts desk-only">${sub}</dd></div>`;
+  };
+  $("#aTimes").innerHTML = tv("cerebras") + tv("gpu");
+  $("#aChain").innerHTML = steps.map((s, i) => `<li><span class="n"><span class="mob-only">${i}</span><span class="desk-only">${String(i + 1).padStart(2, "0")}</span></span>
+    <div class="st"><span><a class="tt" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>${s.auto ? `<span class="dl">direct link</span>` : ""}</span><span class="rs">${esc(s.reason)}</span></div>
+    <span class="tm">${s.start ? '<span class="mob-only">start</span><span class="desk-only">0:00.0</span>' : fmt(s.t).full}</span></li>`).join("");
+  const story = S.story;
+  if (story) { const [a, b] = splitStory(story); $("#aStoryD").innerHTML = `<p class="s1">${esc(a)}</p>${b ? `<p class="s2">${esc(b)}</p>` : ""}`; $("#aStoryM").textContent = story; }
+  else { const w = S.storyWriting || A.live ? "Kimi is writing the story…" : "No story this time."; $("#aStoryD").innerHTML = `<p class="wr">${w}</p>`; $("#aStoryM").textContent = w; }
+  const post = postText(S), href = "https://x.com/intent/post?text=" + encodeURIComponent(post);
+  $("#aPost").textContent = post; $("#aX").href = href; $("#aXm").href = href;
+  const rl = A.replayable ? `?replay=${encodeURIComponent(A.rid)}` : `?watch=${encodeURIComponent(A.rid)}`;
+  ["#aReplayD", "#aReplayM"].forEach(s => { $(s).href = rl; $(s).textContent = A.replayable ? (s === "#aReplayM" ? "Watch replay" : "Watch the replay") : "Back to the race"; });
+  A.painted = (S.story || "") + S.done + S.storyWriting;
+}
+["#aReplayD", "#aReplayM"].forEach(s => $(s).addEventListener("click", e => { e.preventDefault(); const u = $(s).getAttribute("href");
+  if (u.startsWith("?watch=") && R && R.rid === A.rid && R.mode === "live") { history.pushState({}, "", u); startRaceView("live"); renderRace(); } else nav(u); }));
+
+// ---------- share image (1200×675, follows the ShareCard design) ----------
+const loadImg = src => new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+function splitWord(g, word, maxW) {  // a single word wider than the box gets broken into pieces
+  const out = []; let cur = "";
+  for (const ch of word) { if (cur && g.measureText(cur + ch).width > maxW) { out.push(cur); cur = ch; } else cur += ch; }
+  return [...out, cur];
+}
+function wrapTokens(g, tokens, maxW, font) {
+  g.font = font; const lines = [[]]; let w = 0; const sp = g.measureText(" ").width;
+  for (const tk of tokens) for (const word of tk.t.split(/\s+/).filter(Boolean).flatMap(wd => g.measureText(wd).width > maxW ? splitWord(g, wd, maxW) : [wd])) {
+    const ww = g.measureText(word).width, need = (lines.at(-1).length ? sp : 0) + ww;
+    if (w + need > maxW && lines.at(-1).length) { lines.push([]); w = 0; }
+    lines.at(-1).push({ t: word, c: tk.c, w: ww }); w += (lines.at(-1).length > 1 ? sp : 0) + ww;
+  }
+  return { lines, sp };
+}
+function drawMark(g, x, y, s) {
+  const k = s / 30; g.save(); g.translate(x, y); g.scale(k, k); g.lineWidth = 2;
+  g.strokeStyle = "#D6B28A"; g.beginPath(); g.arc(15, 15, 13.5, 0, 7); g.stroke();
+  g.globalAlpha = .6; g.beginPath(); g.arc(15, 17.2, 9.4, 0, 7); g.stroke();
+  g.globalAlpha = .35; g.beginPath(); g.arc(15, 19.4, 5.3, 0, 7); g.stroke();
+  g.globalAlpha = 1; g.fillStyle = "#D6B28A"; g.beginPath(); g.arc(15, 21, 2, 0, 7); g.fill(); g.restore();
+}
+function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+async function shareImage(S) {
+  await Promise.all(["500 50px 'Hubot Sans'", "700 14px 'Hubot Sans'", "400 17px 'Instrument Sans'"].map(f => document.fonts.load(f).catch(() => {})));
+  const [lc, lg, lk, lo, lcb, lot] = await Promise.all([LOGO.cerebras, LOGO.gpu, LOGO.kimi, LOGO.claw, MARK_W.cbText[0], MARK_W.clawText[0]].map(loadImg));
+  const W = 1200, H = 675, c = document.createElement("canvas"); c.width = W * 2; c.height = H * 2;
+  const g = c.getContext("2d"); g.scale(2, 2); g.textBaseline = "alphabetic";
+  const HUB = "'Hubot Sans', system-ui, sans-serif", INS = "'Instrument Sans', system-ui, sans-serif";
+  g.fillStyle = "#111110"; g.fillRect(0, 0, W, H);
+  // left column
+  drawMark(g, 60, 52, 22); g.fillStyle = "#F5F4F0"; g.font = `700 14px ${HUB}`; g.fillText("Rabbit Hole", 94, 68);
+  const hz = "#A6A9A3", pe = "#F5F4F0";
+  const qTok = [{ t: "How is", c: hz }, { t: S.start, c: pe }, { t: "connected to", c: hz }, { t: S.target + "?", c: pe }];
+  let qSize = 50, qT;
+  for (qSize of [50, 44, 38, 34, 30, 26]) { qT = wrapTokens(g, qTok, 500, `500 ${qSize}px ${HUB}`); if (qT.lines.length * qSize * 0.98 <= 250) break; }
+  const qLH = Math.round(qSize * 0.98);
+  if (qT.lines.length * qLH > 250) { qT.lines = qT.lines.slice(0, Math.floor(250 / qLH)); qT.lines.at(-1).push({ t: "…", c: hz, w: g.measureText("…").width }); }
+  const story = S.story ? splitStory(S.story)[0] : `${chainOf(S).steps.length - 1} clicks through real Wikipedia articles.`;
+  const sT = wrapTokens(g, [{ t: story, c: "#C8CAC4" }], 480, `400 17px ${INS}`);
+  const qH = qT.lines.length * qLH, sH = Math.min(sT.lines.length, 4) * 25.5, blockH = qH + 18 + sH, top = 92 + (531 - 92 - blockH) / 2;
+  let y = top + qSize * 0.8;
+  g.font = `500 ${qSize}px ${HUB}`;
+  for (const line of qT.lines) { let x = 60; for (const wd of line) { g.fillStyle = wd.c; g.fillText(wd.t, x, y); x += wd.w + qT.sp; } y += qLH; }
+  const sy = y - qLH + 8 + 18; g.fillStyle = "#D6B28A"; g.fillRect(60, sy, 2, sH);
+  g.font = `400 17px ${INS}`; g.fillStyle = "#C8CAC4"; let yy = sy + 19;
+  sT.lines.slice(0, 4).forEach((line, i, arr) => { let txt = line.map(w => w.t).join(" "); if (i === 3 && sT.lines.length > 4) txt += "…"; g.fillText(txt, 76, yy); yy += 25.5; });
+  // times
+  g.fillStyle = "rgba(245,244,240,0.15)"; g.fillRect(60, 531, 500, 1); g.fillRect(310, 531, 1, 92);
+  const cer = S.lanes.cerebras, gpu = S.lanes.gpu;
+  const lane = (x, logo, name, val, col, small) => {
+    if (logo) g.drawImage(logo, x, 547, 18, 18); g.fillStyle = pe; g.font = `700 13px ${HUB}`; g.fillText(name, x + 27, 561);
+    g.font = `500 52px ${HUB}`; g.fillStyle = col; g.fillText(val, x, 619);
+    if (small) { const w = g.measureText(val).width; g.font = `500 15px ${HUB}`; g.fillText(small, x + w + 6, 619); }
+  };
+  lane(60, lc, "Cerebras", cer && cer.result === "done" ? fmtS(cer.end) : "—", "#D6B28A");
+  if (gpu) lane(330, lg, "NVIDIA GPU", gpu.result === "done" ? fmtS(gpu.end) : gpu.result === "error" ? "Error" : "5:00", "#A6A9A3", gpu.result === "stopped" ? "stopped" : "");
+  else lane(330, lg, "NVIDIA GPU", "Resting", "#A6A9A3");
+  // right panel: the chain
+  const px = 616, py = 52, pw = 524, ph = 571;
+  g.fillStyle = "#191816"; rr(g, px, py, pw, ph, 24); g.fill();
+  g.strokeStyle = "#D6B28A"; g.lineWidth = 2; g.beginPath(); g.moveTo(px + pw - 10, py - 12); g.lineTo(px + pw + 12, py - 12); g.lineTo(px + pw + 12, py + 10); g.stroke();
+  g.beginPath(); g.moveTo(px - 12, py + ph - 10); g.lineTo(px - 12, py + ph + 12); g.lineTo(px + 10, py + ph + 12); g.stroke();
+  let steps = chainOf(S).steps; if (steps.length > 7) steps = [...steps.slice(0, 3), { title: "…", gap: true }, ...steps.slice(-3)];
+  const avail = ph - 34 - 96, rowH = Math.min(62, avail / steps.length); let ry = py + 34 + (avail - rowH * steps.length) / 2;
+  steps.forEach((s, i) => {
+    const n = s.gap ? "" : String(chainOf(S).steps.indexOf(s) + 1).padStart(2, "0");
+    g.fillStyle = "#D6B28A"; g.font = `700 14px ${HUB}`; g.fillText(n, px + 36, ry + rowH / 2 + 5);
+    g.fillStyle = pe; g.font = `500 25px ${HUB}`; let t = s.title; const room = s.auto ? 300 : 380; while (g.measureText(t).width > room && t.length > 4) t = t.slice(0, -2); if (t !== s.title) t += "…";
+    g.fillText(t, px + 76, ry + rowH / 2 + 9);
+    if (s.auto) { const w = g.measureText(t).width; g.fillStyle = "#D6B28A"; g.font = `700 11px ${HUB}`; g.fillText("Direct link", px + 76 + w + 14, ry + rowH / 2 + 8); }
+    if (i < steps.length - 1) { g.fillStyle = "rgba(245,244,240,0.15)"; g.fillRect(px + 36, ry + rowH, pw - 72, 1); }
+    ry += rowH;
+  });
+  // panel footer
+  const fy = py + ph - 62; g.fillStyle = "rgba(245,244,240,0.15)"; g.fillRect(px + 36, fy, pw - 72, 1);
+  g.font = `700 12px ${HUB}`; let fx = px + 36;
+  if (lk) g.drawImage(lk, fx, fy + 14, 16, 16); g.fillStyle = hz; g.fillText("Kimi K3.1 Pro", fx + 22, fy + 27); fx += 22 + g.measureText("Kimi K3.1 Pro").width + 18;
+  if (lc) g.drawImage(lc, fx, fy + 14, 16, 16); if (lcb) { g.drawImage(lcb, fx + 21, fy + 14.5, 14 * MARK_W.cbText[1], 14); fx += 21 + 14 * MARK_W.cbText[1] + 18; }
+  if (lo) g.drawImage(lo, fx, fy + 14, 16, 16); if (lot) g.drawImage(lot, fx + 21, fy + 16, 12 * MARK_W.clawText[1], 12);
+  g.fillStyle = hz; g.fillText("#KimiOnCerebras", px + 36, fy + 49); g.fillStyle = pe; g.textAlign = "right"; g.fillText(SITE, px + pw - 36, fy + 49); g.textAlign = "left";
+  return c;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-img]"); if (!b || !A) return;
+  const old = b.textContent; b.textContent = "Making image…";
+  try {
+    const c = await shareImage(A.S); const blob = await new Promise(r => c.toBlob(r, "image/png"));
+    const name = `rabbit-hole-${A.S.start}-${A.S.target}.png`.replace(/[^\w.-]+/g, "-").toLowerCase();
+    const file = new File([blob], name, { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [file] }) && matchMedia("(max-width: 899px)").matches) await navigator.share({ files: [file], text: postText(A.S) }).catch(() => {});
+    else { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+  } finally { b.textContent = old; }
+});
+
+// ---------- video cards (?card=intro|end) ----------
+function showCard(q) {
+  $$(".view").forEach(s => s.hidden = true); document.body.classList.add("carding"); const st = $("#vstage"); st.hidden = false;
+  const from = q.get("from") || "Pizza", to = q.get("to") || "Black holes";
+  if (q.get("card") === "intro") {
+    st.innerHTML = `<div class="vcard vi"><p class="vb">${mark(34)}Rabbit Hole</p><div><h1 class="rise d1">How is <span>${esc(from)}</span> connected to <span>${esc(to)}</span>?</h1><p class="vs">Same AI. Same question. Two different chips.</p></div>
+      <div class="vlanes"><div><b aria-label="Cerebras">${img("cerebras", 52)}${wm("cbText", 42)}</b>${kimiRun(26)}</div><div><b aria-label="NVIDIA GPU">${img("gpu", 52)}${wm("nvText", 30)}<span style="font-size:36px;color:var(--haze)">GPU</span></b>${kimiRun(26)}</div></div></div>`;
+  } else {
+    const full = (q.get("chain") || "Pizza|Pizza theorem|Geometry|General relativity|Black hole").split("|").filter(Boolean);
+    const chain = full.length > 6 ? [...full.slice(0, 2), "…", ...full.slice(-3)] : full;  // long chains: keep the ends
+    const longest = Math.max(...chain.map(c => c.length));
+    const fs = longest > 26 ? 40 : longest > 18 ? 50 : 64;
+    const shade = i => ["#55574F", "#6B6D66", "#A6A9A3", "#C8CAC4"][Math.min(3, Math.round(i * 3 / Math.max(1, chain.length - 2)))];
+    st.innerHTML = `<div class="vcard ve"><div class="vl"><p class="vk">Found in ${clicks(full.length - 1)}</p><ol>${chain.map((c, i) => `<li class="${i === chain.length - 1 ? "last" : ""}" style="padding-left:${Math.min(i, 5) * 48}px;animation-delay:${i * .25}s"><i style="border-color:${shade(i)}"></i><span style="font-size:${fs}px;white-space:normal">${esc(c)}</span></li>`).join("")}</ol></div>
+      <div class="vr"><p class="vb">${mark(34)}Rabbit Hole</p><dl><div><dt aria-label="Cerebras">${img("cerebras", 40)}${wm("cbText", 33)}</dt><dd>${esc(q.get("cb") || "29.5")} s</dd></div><div><dt aria-label="NVIDIA GPU">${img("gpu", 40)}${wm("nvText", 24)}<span style="font-size:30px;color:var(--haze)">GPU</span></dt><dd class="g">${esc(q.get("gpu") || "still thinking at 5:00")}</dd></div></dl>
+      <div class="vf"><p class="run" style="font-size:26px;gap:10px">Both running ${img("kimi", 26)}Kimi K3.1 Pro · agent on ${img("claw", 26)}${wm("clawText", 20)}</p><p style="font-size:44px;font-weight:600">${SITE}</p></div></div></div>`;
+  }
+  const fit = () => { const k = Math.min(innerWidth / 1920, innerHeight / 1080); const el = st.firstElementChild; el.style.transform = `scale(${k})`; el.style.left = (innerWidth - 1920 * k) / 2 + "px"; el.style.top = (innerHeight - 1080 * k) / 2 + "px"; };
+  fit(); addEventListener("resize", fit);
+}
+
+// ---------- main loop ----------
+let last = performance.now(), acc = 0;
+function loop(now) {
+  requestAnimationFrame(loop);  // schedule first, so one bad frame can't stop the clocks
+  try { tick(now); } catch (err) { console.warn(err); }
+}
+function tick(now) {
+  const dt = Math.min(1, (now - last) / 1000); last = now;
+  if (VIEW === "race" && R && R.player) R.player.step(dt);
+  if (VIEW === "home" && PV) { PV.player.step(dt); if (PV.player.T >= PV.loopAt) { PV.player.seek(0); PV.player.playing = true; } }
+  acc += dt;
+  if (acc >= .05) { acc = 0;
+    if (VIEW === "race" && R) renderRace();
+    else if (VIEW === "home") renderPreview();
+    else if (VIEW === "state") renderStateLive();
+    else if (VIEW === "answer" && A && A.live) { if (A.S.done) { A.live = false; A.replayable = true; } const k = (A.S.story || "") + A.S.done + A.S.storyWriting; if (k !== A.painted) paintAnswer(); }
+  }
+}
+
+// ---------- boot ----------
+hydrate();
+if (Q().get("film") === "1") document.body.classList.add("film");
+api("/api/health").then(r => { if (r.ok && r.d.replay_only) $("#pausedBanner").hidden = false; }).catch(() => {});
+loadStats(); loadRuns(); route(); requestAnimationFrame(loop);
+</script>
+</body>
+</html>

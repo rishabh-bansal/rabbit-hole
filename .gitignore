@@ -1,0 +1,19 @@
+# secrets
+.env
+*.env
+!.env.example
+
+# python
+.venv/
+__pycache__/
+*.pyc
+
+# runtime data
+backend/runs/*.json
+backend/wiki_cache.json
+
+# build / tooling
+cloudflare/dist/
+.wrangler/
+node_modules/
+.DS_Store

@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rabbit Hole · Race</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Hubot+Sans:wdth,wght@100..125,500..700&amp;family=Instrument+Sans:wght@400..700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#111110}
+a{color:#F5F4F0}a:hover{color:#D6B28A}
+@keyframes rh-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes rh-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}@keyframes rh-glow{0%{box-shadow:0 0 0 0 rgba(214,178,138,.45)}100%{box-shadow:0 0 0 18px rgba(214,178,138,0)}}.rh-in{animation:rh-in .6s cubic-bezier(.19,1,.22,1) both}.rh-rise{animation:rh-rise .9s cubic-bezier(.19,1,.22,1) both}.rh-d1{animation-delay:.08s}.rh-d2{animation-delay:.16s}.rh-d3{animation-delay:.24s}.rh-d4{animation-delay:.32s}.rh-win{animation:rh-in .7s cubic-bezier(.19,1,.22,1) both}.rh-win .rh-glow{animation:rh-glow 1.6s ease-out 2}a,button{transition:transform .35s cubic-bezier(.19,1,.22,1),background-color .35s,color .35s}a:active,button:active{transform:scale(.98)}:focus-visible{outline:2px solid #D6B28A;outline-offset:3px}input:focus{outline:none}label:focus-within{box-shadow:inset 0 0 0 1px #D6B28A}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; background: #111110; color: #F5F4F0; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.5">
+
+<header style="flex: none; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 32px; padding: 20px 40px; border-bottom: 1px solid rgba(245,244,240,0.1)">
+<a href="Ask.dc.html" style="flex: 0 1 260px; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: #F5F4F0; text-decoration: none; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: 16px; font-weight: 600"><svg width="20" height="20" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="#D6B28A" stroke-width="2"></circle><circle cx="15" cy="18" r="8.5" fill="none" stroke="#D6B28A" stroke-opacity="0.55" stroke-width="2"></circle><circle cx="15" cy="21" r="3" fill="#D6B28A"></circle></svg>Rabbit Hole</a>
+<h1 style="flex: 1 1 420px; margin: 0; text-align: center; font-size: 20px; font-weight: 500; letter-spacing: -0.01em; color: #A6A9A3">How is <span style="color: #F5F4F0">Pizza</span> connected to <span style="color: #F5F4F0">Black hole</span>?</h1>
+<div style="flex: 0 1 260px; display: flex; justify-content: flex-end">
+<sc-if value="{{ isLive }}" hint-placeholder-val="{{ true }}"><span style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #C8CAC4"><span aria-hidden="true" style="width: 7px; height: 7px; border-radius: 50%; background: #F5F4F0; opacity: {{ pulse }}"></span>Live</span></sc-if>
+<sc-if value="{{ isReplay }}" hint-placeholder-val="{{ false }}"><span style="display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(245,244,240,0.4); font-size: 14px; font-weight: 600">Replay · not live</span></sc-if>
+</div>
+</header>
+
+<main style="flex: 1 1 auto; min-height: 0; display: flex; flex-wrap: wrap">
+
+<section aria-label="Cerebras lane" style="flex: 1 1 520px; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 28px; padding: 36px 40px 28px; border-right: 1px solid rgba(245,244,240,0.1)">
+<div style="display: flex; align-items: center; gap: 10px">
+<img src="/_blob/6a083dba817a3ba983061109cfb27531" alt="" style="flex: none; width: 18px; height: 18px; display: block">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Cerebras</h2>
+<span style="display: inline-flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 400; color: #A6A9A3">running <img src="/_blob/90769b34a964e73087dec077661f4455" alt="" style="width: 14px; height: 14px; display: block">Kimi K3.1 Pro</span>
+<span class="rh-glow" style="margin-left: auto; padding: 2px 8px; border-radius: 999px; font-size: 14px; color: {{ cer.stateColor }}">{{ cer.state }}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<p style="margin: 0; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: clamp(56px, 6vw, 88px); font-weight: 500; font-stretch: 105%; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: {{ cer.clockColor }}">{{ cer.clockMain }}<span style="color: #55574F">{{ cer.clockDec }}</span></p>
+<p style="margin: 0; font-size: 14px; color: #A6A9A3">{{ cer.meta }}</p>
+</div>
+
+<sc-if value="{{ cer.isRunning }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 20px; border-top: 1px solid rgba(245,244,240,0.1)">
+<span style="font-size: 13px; color: #A6A9A3">Now reading · page {{ cer.pageNo }}</span>
+<a href="{{ cer.url }}" style="font-size: 28px; font-weight: 600; line-height: 1.15; letter-spacing: -0.015em; color: #F5F4F0; text-decoration: none">{{ cer.title }}</a>
+<p style="margin: 4px 0 0; display: flex; align-items: center; gap: 10px; font-size: 15px; color: {{ cer.statusColor }}"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #F15A29; opacity: {{ pulse }}"></span>{{ cer.status }}</p>
+</div>
+</sc-if>
+<sc-if value="{{ cer.isDone }}" hint-placeholder-val="{{ false }}">
+<div class="rh-win" style="display: flex; flex-direction: column; gap: 8px; padding-top: 20px; border-top: 1px solid rgba(214,178,138,0.5)">
+<p style="margin: 0; font-size: 28px; font-weight: 600; line-height: 1.15; letter-spacing: -0.015em">Found it in 4 clicks</p>
+<sc-if value="{{ cer.storyWriting }}" hint-placeholder-val="{{ false }}"><p style="margin: 0; font-size: 15px; color: #A6A9A3">Kimi is writing the story…</p></sc-if>
+<sc-if value="{{ cer.storyReady }}" hint-placeholder-val="{{ false }}"><a href="Answer.dc.html" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 15px; font-weight: 600; color: #D6B28A; text-decoration: none">Read the story<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a></sc-if>
+</div>
+</sc-if>
+
+<ol style="flex: 1 1 auto; min-height: 0; overflow: hidden; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; justify-content: {{ trailJustify }}">
+<sc-for list="{{ cer.trail }}" as="step" hint-placeholder-count="2">
+<li class="rh-in" style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 12px; padding: 10px 0; border-top: 1px solid rgba(245,244,240,0.07)">
+<span style="font-size: 13px; color: #55574F; font-variant-numeric: tabular-nums">{{ step.n }}</span>
+<div style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 15px; font-weight: 500; color: {{ step.titleColor }}">{{ step.title }}</span>
+<span style="font-size: 13px; color: #A6A9A3">{{ step.reason }}</span>
+<sc-if value="{{ step.showNote }}" hint-placeholder-val="{{ false }}"><span style="margin-top: 4px; font-size: 13px; font-style: italic; line-height: 1.45; color: #C8CAC4">“{{ step.note }}”</span></sc-if>
+</div>
+<span style="font-size: 13px; color: #55574F; font-variant-numeric: tabular-nums">{{ step.time }}</span>
+</li>
+</sc-for>
+</ol>
+</section>
+
+<section aria-label="{{ gpuAria }}" style="position: relative; flex: {{ gpuFlex }}; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 28px; padding: 36px 40px 28px">
+<div style="display: flex; align-items: center; gap: 10px">
+<img src="/_blob/578edb2ae16e7b58a80d1c14f20d6cef" alt="" style="flex: none; width: 18px; height: 18px; display: block">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">NVIDIA GPU</h2>
+<span style="display: inline-flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 400; color: #A6A9A3">running <img src="/_blob/90769b34a964e73087dec077661f4455" alt="" style="width: 14px; height: 14px; display: block">Kimi K3.1 Pro</span>
+<span style="margin-left: auto; font-size: 14px; color: #A6A9A3">{{ gpu.state }}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<p style="margin: 0; font-family: 'Hubot Sans', system-ui, sans-serif; font-size: clamp(56px, 6vw, 88px); font-weight: 500; font-stretch: 105%; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: {{ gpu.clockColor }}">{{ gpu.clockMain }}<span style="color: #55574F">{{ gpu.clockDec }}</span></p>
+<p style="margin: 0; font-size: 14px; color: #A6A9A3">{{ gpu.meta }}</p>
+</div>
+<sc-if value="{{ gpu.isRunning }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 20px; border-top: 1px solid rgba(245,244,240,0.1)">
+<span style="font-size: 13px; color: {{ gpu.labelColor }}">{{ gpu.pageLabel }}</span>
+<a href="https://en.wikipedia.org/wiki/Pizza" style="font-size: 28px; font-weight: 600; line-height: 1.15; letter-spacing: -0.015em; color: #F5F4F0; text-decoration: none">Pizza</a>
+<p style="margin: 4px 0 0; display: flex; align-items: center; gap: 10px; font-size: 15px; color: #C8CAC4"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #76B900; opacity: {{ pulse }}"></span>{{ gpu.status }}</p>
+</div>
+</sc-if>
+<sc-if value="{{ gpu.isStopped }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 20px; border-top: 1px solid rgba(245,244,240,0.1)">
+<p class="rh-in" style="margin: 0; font-size: 28px; font-weight: 600; line-height: 1.15; letter-spacing: -0.015em">Stopped at 5 minutes</p>
+<p style="margin: 0; font-size: 15px; color: #A6A9A3">Still not there. It was still deciding where to go from Pizza.</p>
+</div>
+</sc-if>
+<ol style="margin: 0; padding: 0; list-style: none">
+<li style="display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; column-gap: 12px; padding: 10px 0; border-top: 1px solid rgba(245,244,240,0.07)">
+<span style="font-size: 13px; color: #55574F">1</span>
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 500">Pizza</span><span style="font-size: 13px; color: #A6A9A3">Start page · no clicks yet</span></div>
+<span style="font-size: 13px; color: #55574F">0:00.0</span>
+</li>
+</ol>
+<sc-if value="{{ solo }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; inset: 0; z-index: 2; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 40px; background: #111110">
+<p style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.01em">The GPU side is resting today</p>
+<p style="margin: 0; max-width: 30em; font-size: 15px; color: #A6A9A3">Its daily budget ran out, so live races run on Cerebras only. Replays still show both lanes.</p>
+<a href="Ask.dc.html" style="align-self: flex-start; min-height: 44px; display: inline-flex; align-items: center; font-weight: 600; color: #D6B28A; text-decoration: none">Watch a replay</a>
+</div>
+</sc-if>
+</section>
+
+</main>
+
+<sc-if value="{{ isReplay }}" hint-placeholder-val="{{ false }}">
+<div style="flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 12px 40px; border-top: 1px solid rgba(245,244,240,0.1)">
+<button type="button" aria-label="{{ playLabel }}" onClick="{{ togglePlay }}" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 50%; background: #F5F4F0; color: #111110; cursor: pointer"><sc-if value="{{ playing }}" hint-placeholder-val="{{ true }}"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z" fill="currentColor"></path></svg></sc-if><sc-if value="{{ paused }}" hint-placeholder-val="{{ false }}"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4l14 8-14 8z" fill="currentColor"></path></svg></sc-if></button>
+<div style="display: inline-flex; gap: 2px"><sc-for list="{{ speeds }}" as="sp" hint-placeholder-count="3"><button type="button" aria-pressed="{{ sp.pressed }}" onClick="{{ sp.pick }}" style="min-width: 44px; min-height: 44px; border: 0; border-radius: 10px; background: {{ sp.bg }}; color: {{ sp.fg }}; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer">{{ sp.label }}</button></sc-for></div>
+<button type="button" aria-label="Seek in the replay" onClick="{{ seek }}" style="flex: 1 1 300px; position: relative; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer"><span aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 21px; height: 2px; background: rgba(245,244,240,0.12)"></span><span aria-hidden="true" style="position: absolute; left: 0; top: 21px; height: 2px; width: {{ progPct }}%; background: #C8CAC4"></span><span aria-hidden="true" style="position: absolute; top: 16px; left: 9.83%; width: 2px; height: 12px; background: #F15A29"></span><span aria-hidden="true" style="position: absolute; top: 17px; left: {{ progPct }}%; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: #F5F4F0"></span></button>
+<span style="font-size: 14px; color: #A6A9A3; font-variant-numeric: tabular-nums">{{ curTime }} / 5:00.0</span>
+<button type="button" onClick="{{ copyLink }}" style="min-height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: #191816; color: #F5F4F0; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer">{{ copyLabel }}</button>
+</div>
+</sc-if>
+
+<footer style="flex: none; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding: 12px 40px 16px; border-top: 1px solid rgba(245,244,240,0.1); font-size: 13px; color: #A6A9A3">
+<button type="button" aria-pressed="{{ notesPressed }}" onClick="{{ toggleNotes }}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0; border: 0; background: transparent; color: #C8CAC4; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 14px; cursor: pointer"><span aria-hidden="true" style="position: relative; width: 28px; height: 16px; border-radius: 999px; background: {{ switchBg }}"><span style="position: absolute; top: 2px; left: {{ knobLeft }}px; width: 12px; height: 12px; border-radius: 50%; background: {{ knobBg }}"></span></span>Show thinking notes</button>
+<span>Same model in both lanes. Only the chip differs. Clocks are real elapsed time.</span>
+<span>Waiting saved by Cerebras: <span style="color: #D6B28A; font-variant-numeric: tabular-nums">{{ odo }}</span> over {{ odoRaces }} races</span>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mode":{"editor":"enum","options":["live","replay"],"default":"live","section":"Race"},"gpu":{"editor":"enum","options":["on","paused"],"default":"on","section":"Race"},"thinking":{"editor":"boolean","default":false,"section":"Race"},"animate":{"editor":"boolean","default":true,"section":"Playback"},"speed":{"editor":"enum","options":["1","2","5"],"default":"1","section":"Playback"},"moment":{"editor":"range","min":0,"max":310,"step":0.1,"unit":"s","default":36,"section":"Playback"},"$preview":{"width":1440,"height":810}}'>
+var CHAIN = [
+  { title: 'Pizza', slug: 'Pizza', links: 270 },
+  { title: 'Pizza theorem', slug: 'Pizza_theorem', links: 31 },
+  { title: 'Geometry', slug: 'Geometry', links: 640 },
+  { title: 'General relativity', slug: 'General_relativity', links: 588 },
+  { title: 'Black hole', slug: 'Black_hole', links: 0 }
+];
+var REASONS = ['Start page', 'A pizza-slicing puzzle is real math.', 'The theorem is plane geometry.', 'Einstein described gravity as geometry.', 'Direct link: the target was on the page.'];
+var NOTES = ['', 'I weighed Naples, Mozzarella and Pizza theorem. Only the theorem leaves food for math.', 'Only 31 links here. Geometry is the widest door toward physics.', 'I weighed Euclid, Topology and General relativity. Relativity is geometry applied to gravity.', 'Black hole is linked from this page, so I clicked it straight away.'];
+var CER = { open: [0, 9.6, 14.9, 24.6, 29.1], think: [2.2, 11.0, 16.6, -1, -1], leave: [9.6, 14.9, 24.6, 29.1, 29.5], direct: 27.9, doneAt: 29.5 };
+var GPU_READ = 2.6;
+var STOP = 300;
+var BASE_SAVED = 789.2;
+var STORY_AT = 34.5;
+
+function fmt(x) {
+  var tenths = Math.max(0, Math.floor(x * 10 + 0.0001));
+  var m = Math.floor(tenths / 600);
+  var rem = tenths - m * 600;
+  var s = Math.floor(rem / 10);
+  var d = rem - s * 10;
+  var mm = m + ':' + (s < 10 ? '0' : '') + s;
+  return { main: mm, dec: '.' + d, full: mm + '.' + d };
+}
+function fmtS(x) { return x < 60 ? (Math.floor(x * 10) / 10).toFixed(1) + ' s' : fmt(x).full; }
+function fmtMS(x) { var m = Math.floor(x / 60); return m + ' min ' + Math.floor(x - m * 60) + ' s'; }
+
+function cerAt(t, notes) {
+  var done = t >= CER.doneAt;
+  var page = 0;
+  for (var i = 0; i < 5; i++) { if (t >= CER.open[i]) { page = i; } }
+  var think = 0;
+  for (var j = 0; j < 5; j++) { if (CER.think[j] >= 0 && t > CER.think[j]) { think += Math.min(t, CER.leave[j]) - CER.think[j]; } }
+  var status = (page > 0 && t - CER.open[page] < 0.5) ? 'Opening the next page…' : 'Reading the page…';
+  if (CER.think[page] >= 0 && t >= CER.think[page]) { status = 'Thinking about ' + CHAIN[page].links + ' links…'; }
+  var direct = page === 3 && t >= CER.direct;
+  if (direct) { status = 'Direct link to Black hole. Clicking.'; }
+  var trail = [];
+  for (var k = 1; k <= page; k++) {
+    trail.push({ n: String(k), title: CHAIN[k].title, reason: REASONS[k], note: NOTES[k], showNote: notes, time: fmt(CER.open[k]).full, titleColor: k === page ? '#F5F4F0' : '#C8CAC4' });
+  }
+  var clock = fmt(Math.min(t, CER.doneAt));
+  return {
+    isDone: done, isRunning: !done,
+    state: done ? 'Finished first' : 'Racing', stateColor: done ? '#D6B28A' : '#A6A9A3',
+    clockMain: clock.main, clockDec: clock.dec, clockColor: done ? '#D6B28A' : '#F5F4F0',
+    meta: done ? '4 clicks · ' + fmtS(think) + ' AI thinking · 29.5 s total' : page + (page === 1 ? ' click' : ' clicks') + ' · ' + fmtS(think) + ' thinking',
+    pageNo: String(page + 1), title: CHAIN[page].title, url: 'https://en.wikipedia.org/wiki/' + CHAIN[page].slug,
+    status: status, statusColor: direct ? '#D6B28A' : '#C8CAC4',
+    trail: trail, storyWriting: done && t < STORY_AT, storyReady: done && t >= STORY_AT
+  };
+}
+
+function gpuAt(t) {
+  var stopped = t >= STOP;
+  var think = t > GPU_READ ? Math.min(t, STOP) - GPU_READ : 0;
+  var clock = fmt(Math.min(t, STOP));
+  var stuck = t >= CER.doneAt && !stopped;
+  return {
+    isStopped: stopped, isRunning: !stopped,
+    state: stopped ? 'Stopped' : 'Racing',
+    clockMain: clock.main, clockDec: clock.dec, clockColor: stopped ? '#A6A9A3' : '#F5F4F0',
+    meta: '0 clicks · ' + fmtS(think) + ' thinking',
+    pageLabel: stuck ? 'Still on page 1' : 'Now reading · page 1',
+    labelColor: stuck ? '#F5F4F0' : '#A6A9A3',
+    status: t < GPU_READ ? 'Reading the page…' : 'Thinking about 270 links…'
+  };
+}
+
+class Component extends DCLogic {
+  componentDidMount() {
+    var self = this;
+    this.last = Date.now();
+    this.timer = setInterval(function () {
+      var now = Date.now();
+      var dt = Math.min(0.25, (now - self.last) / 1000);
+      self.last = now;
+      var p = self.props || {};
+      var st = self.state || {};
+      if (p.animate === false || p.animate === 'false' || st.paused) { return; }
+      var sp = typeof st.speed === 'number' ? st.speed : (parseFloat(p.speed) || 1);
+      var cur = typeof st.t === 'number' ? st.t : 0;
+      var nt = cur + dt * sp;
+      if (nt > STOP + 12) { nt = 0; }
+      self.setState({ t: nt });
+    }, 60);
+  }
+  componentWillUnmount() { if (this.timer) { clearInterval(this.timer); } }
+  renderVals() {
+    var self = this;
+    var p = this.props || {};
+    var st = this.state || {};
+    var animate = !(p.animate === false || p.animate === 'false');
+    var replay = p.mode === 'replay';
+    var solo = p.gpu === 'paused';
+    var mom = parseFloat(p.moment);
+    var t = animate ? (typeof st.t === 'number' ? st.t : 0) : (isNaN(mom) ? 36 : Math.max(0, mom));
+    var notes = (st.notes === true || st.notes === false) ? st.notes : (p.thinking === true || p.thinking === 'true');
+    var cerDone = t >= CER.doneAt;
+    var gpuEnded = t >= STOP;
+    var saved = BASE_SAVED;
+    var races = 3;
+    if (!solo) {
+      if (replay) { saved = BASE_SAVED + STOP - CER.doneAt; races = 4; }
+      else { if (cerDone) { saved += Math.min(t, STOP) - CER.doneAt; } if (gpuEnded) { races = 4; } }
+    }
+    var speed = typeof st.speed === 'number' ? st.speed : (parseFloat(p.speed) || 1);
+    var paused = !!st.paused;
+    return {
+      isLive: !replay, isReplay: replay, solo: solo,
+      cer: cerAt(t, notes), gpu: gpuAt(t),
+      gpuFlex: solo ? '0 1 420px' : '1 1 520px',
+      gpuAria: solo ? 'NVIDIA GPU lane, resting today' : 'NVIDIA GPU lane',
+      trailJustify: notes ? 'flex-end' : 'flex-start',
+      odo: fmtMS(saved), odoRaces: String(races),
+      pulse: animate && !paused ? (0.3 + 0.7 * (0.5 + 0.5 * Math.sin(Date.now() / 300))).toFixed(2) : '1',
+      notesPressed: notes ? 'true' : 'false',
+      switchBg: notes ? '#D6B28A' : '#2A2926', knobBg: notes ? '#111110' : '#A6A9A3', knobLeft: notes ? 14 : 2,
+      toggleNotes: function () { self.setState({ notes: !notes }); },
+      playing: !paused, paused: paused, playLabel: paused ? 'Play replay' : 'Pause replay',
+      togglePlay: function () { self.setState({ paused: !paused }); },
+      speeds: [1, 2, 5].map(function (v) { var on = v === speed; return { label: v + '×', pressed: on ? 'true' : 'false', bg: on ? '#2A2926' : 'transparent', fg: on ? '#F5F4F0' : '#A6A9A3', pick: function () { self.setState({ speed: v }); } }; }),
+      progPct: (Math.min(t, STOP) / STOP * 100).toFixed(2),
+      curTime: fmt(Math.min(t, STOP)).full,
+      seek: function (e) { try { var r = e.currentTarget.getBoundingClientRect(); self.setState({ t: Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * STOP }); } catch (err) {} },
+      copyLabel: st.copied ? 'Link copied' : 'Copy link',
+      copyLink: function () { self.setState({ copied: true }); setTimeout(function () { self.setState({ copied: false }); }, 1800); }
+    };
+  }
+}
+</script>
+</body>
+</html>
