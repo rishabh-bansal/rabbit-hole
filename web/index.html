@@ -221,7 +221,11 @@ input:focus { outline: none; }
 .rrow .rc { display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end; font: 400 16px var(--hub); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .rrow .rm { font-size: 13px; color: var(--haze); }
 .rrow .rg { display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end; font-size: 12px; color: var(--haze); white-space: nowrap; }
-.rrow .via, .rrow .rk, .rrow .rw, .rrow .rp, .rhead { display: none; }
+.rrow .via, .rrow .rk, .rrow .rw, .rhead { display: none; }
+.rrow { grid-template-columns: minmax(0, 1fr) auto 28px; }
+.rrow .rp { grid-column: 3; grid-row: 1 / span 2; align-self: center; width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(245,244,240,.3);
+  display: inline-flex; align-items: center; justify-content: center; color: var(--pearl); transition: background-color .35s, color .35s; }
+.rrow:hover .rp, .rrow:active .rp { background: var(--pearl); color: var(--ink); }
 .showall { align-self: flex-start; margin-top: 6px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--pearl); font-size: 14px; font-weight: 600; }
 .showall:hover { color: var(--ember); }
 
@@ -318,7 +322,7 @@ body.film .stripe, body.carding .stripe { display: none; }
   .rrow .rp { width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(245,244,240,.3); display: inline-flex; align-items: center; justify-content: center; color: var(--pearl); transition: background-color .35s, color .35s; }
   .rrow:hover .rp { background: var(--pearl); color: var(--ink); }
 }
-@media (min-width: 900px) and (max-width: 1100px) { .rhead, .rrow { grid-template-columns: minmax(0, 1fr) 84px 150px; } .rhead .ck, .rhead .wh, .rhead .pl, .rrow .rk, .rrow .rw, .rrow .rp { display: none !important; } }
+@media (min-width: 900px) and (max-width: 1100px) { .rhead, .rrow { grid-template-columns: minmax(0, 1fr) 84px 150px 28px; } .rhead .ck, .rhead .wh, .rrow .rk, .rrow .rw { display: none !important; } }
 
 /* ---------------- RACE ---------------- */
 .rtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 20px; }
@@ -797,7 +801,10 @@ const raceName = (a, b) => `<span class="rn"><span>${esc(a)}</span><span class="
 function paintFame() {
   const done = RUNS.filter(r => r.lanes.cerebras), el = $("#fame");
   if (done.length < 2) { el.hidden = true; return; }
-  const by = (f, dir = 1) => [...done].sort((a, b) => dir * (f(a) - f(b)) || a.lanes.cerebras.seconds - b.lanes.cerebras.seconds)[0];
+  // each award goes to a different race when possible, so the case shows variety
+  const used = new Set();
+  const by = (f, dir = 1) => { const pool = done.filter(r => !used.has(r.id)); const pick = [...(pool.length ? pool : done)]
+    .sort((a, b) => dir * (f(a) - f(b)) || a.lanes.cerebras.seconds - b.lanes.cerebras.seconds)[0]; used.add(pick.id); return pick; };
   const fastest = by(r => r.lanes.cerebras.seconds), deepest = by(r => r.lanes.cerebras.hops, -1);
   const saved = by(r => (gpuSecs(r) ?? 0) - r.lanes.cerebras.seconds, -1);
   const cards = [
