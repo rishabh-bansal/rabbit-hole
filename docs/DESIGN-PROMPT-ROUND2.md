@@ -43,11 +43,30 @@ The From and To fields now check Wikipedia as you type:
 - Start is blocked until both topics are valid.
 Please design the dropdown, the confirmation, and both error states for mobile and desktop.
 
-### 5. "Built with" line in the footer
-A line at the bottom of the home page: "Built with Claude Code and Claude Design. Powered by Kimi
-K3.1 Pro on Cerebras, raced against the same model on NVIDIA GPUs, run by an OpenClaw agent. Every
-step is a real link on Wikipedia." Make it feel like a tasteful credit, with the brand logos (Kimi,
-Cerebras, NVIDIA, OpenClaw, Wikipedia, Claude) where it helps. Mobile and desktop.
+### 5. Footer: "Built with Claude", the logo row, and "Looking to contribute?"
+The bottom of the home page now has three parts:
+- A credit line: "Built with Claude. Powered by Kimi K3.1 Pro on Cerebras, raced against the same
+  model on NVIDIA GPUs, run by an OpenClaw agent. Every step is a real link on Wikipedia."
+- A row of brand logos: Claude, Kimi K3.1 Pro, Cerebras, NVIDIA, OpenClaw (colour icons plus
+  wordmarks from @lobehub/icons). They must sit together as one calm, even row (the wordmarks have
+  very different shapes: lowercase "cerebras", all-caps "NVIDIA").
+- "Looking to contribute? GitHub →": the project is open source at
+  github.com/rishabh-bansal/rabbit-hole. Make this an inviting button for developers, not a
+  footnote.
+Mobile and desktop.
+
+### 7. Hackathon stripe at the very top
+A thin bar above everything: "Built for the Cerebras × Kimi hackathon. Sign up now →", linking to
+the hackathon's sign-up page. It should invite people to join without shouting, fit on one line on
+a 375 px phone (or wrap gracefully), and stay out of the video cards and film mode.
+
+### 8. Everything must survive long content
+Real races produce long and odd titles: "Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch",
+"List of people who have walked on the Moon", "History of science and technology in the United
+Kingdom", and chains of up to 12 clicks. Please show, for the race screen, answer page, recent
+races, hall of fame, share image, link preview and video end card, how long titles wrap or
+truncate and how a 12-step chain collapses (we currently keep the first 2 and last 3 with "…" in
+the images, and shrink the question text until it fits).
 
 ### 6. Link preview image (the card people see when the link is shared on X, WhatsApp, Slack)
 1200×630. It is generated automatically from real race data, so design it as a template:
@@ -64,11 +83,12 @@ Also a fallback version for when there is no race yet: "How are two things conne
 - Pizza → Pizza theorem → Geometry → General relativity → Black hole: Cerebras 29.4 s, GPU stopped at 5:00
 - Cat → Ancient Egypt → Solar deity → Moon: Cerebras 40.5 s, GPU stopped at 5:00
 - Coffee → Haitian Revolution → French Revolution: Cerebras 40.8 s, GPU ended with an error
-- Waiting saved by Cerebras so far: about 16 min over 5 races
+- Waiting saved by Cerebras so far: about 24 min over 6 races
+- A long one for stress tests: Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch → Anglesey → Wales → United Kingdom → … → Exploration of the Moon → List of people who have walked on the Moon (12 clicks, 52.6 s)
 - Surprise me examples: Super Mario → Mitochondria, Frida Kahlo → Black hole, Surfing → Mount Everest
 
 ## Keep
 Everything else from your first design stays as it is (race screen, replay, answer page, states,
 video cards). Keep the same wording rules: sentence case, no tracked caps, lanes identified by
 logo not colour, ember only for wins and highlights. Logos come from @lobehub/icons (colour
-icons, plus the Cerebras, NVIDIA and OpenClaw wordmarks).
+icons, plus the Claude, Cerebras, NVIDIA and OpenClaw wordmarks).
