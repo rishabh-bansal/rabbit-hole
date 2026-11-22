@@ -134,7 +134,8 @@ the Cerebras key stops working.
 - **Check before you make people wait.** When the shared Cerebras endpoint is full, OpenClaw keeps
   retrying inside a single call, so a race used to sit silent for 5 minutes. Now every race starts
   with a quick system check (agent gateway up, Cerebras answering), each fast-lane call is capped at
-  75 s, and if the Cerebras lane fails the whole race stops early with an honest message.
+  45 s, and if the Cerebras lane fails the whole race stops early with an honest message. Races
+  where Cerebras never finished are kept on the server but hidden from the public list.
 - **Surprise pairs that are surprising but reachable.** `backend/make_pairs.py` searches Wikipedia's
   link graph for well-known topics from different worlds that are exactly two clicks apart.
 - **Crawlers don't run JavaScript.** Link previews and SEO tags are written into the HTML by a Pages

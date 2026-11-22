@@ -18,7 +18,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Awaitable, Callable
 
-from openai import APIConnectionError, APIError, APIStatusError, AsyncOpenAI, RateLimitError
+from openai import (APIConnectionError, APIError, APIStatusError, AsyncOpenAI, AuthenticationError,
+                    PermissionDeniedError, RateLimitError)
 
 from wiki import Wiki
 
@@ -27,7 +28,7 @@ MAX_LINKS_SHOWN = 400
 QUEUE_RETRY_SECONDS = 60
 # The fast lane normally answers in 2-10 s. If one call takes longer than this, the provider is
 # overloaded (OpenClaw keeps retrying 429s inside a single call), so give up instead of waiting.
-FAST_CALL_CAP = float(os.getenv("RH_FAST_CALL_CAP", "75"))
+FAST_CALL_CAP = float(os.getenv("RH_FAST_CALL_CAP", "45"))
 on_fast_answer: Callable[[], None] | None = None  # set by the server: records "Cerebras is answering"
 
 SYSTEM = """You are playing the Wikipedia game. Goal: reach the TARGET article from the START article
@@ -174,11 +175,9 @@ async def run_lane(lane: Lane, wiki: Wiki, start: str, target: str, emit: Emit) 
                   "model_seconds": round(model_ms / 1000, 2), "completion_tokens": tokens, "hops": len(path) - 1}
         await emit(result)
         return result
-    except asyncio.CancelledError:
-        await emit({**base, "type": "lane_stopped", "t": time.perf_counter() - t0})
-        raise
     except (APIError, RuntimeError, Exception) as exc:  # noqa: BLE001
-        err = {**base, "type": "lane_error", "error": str(exc)[:240], "t": time.perf_counter() - t0}
+        err = {**base, "type": "lane_error", "error": str(exc)[:240], "t": time.perf_counter() - t0,
+               "auth": isinstance(exc, (AuthenticationError, PermissionDeniedError))}
         await emit(err)
         return err
     finally:

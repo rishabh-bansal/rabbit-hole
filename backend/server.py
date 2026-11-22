@@ -51,35 +51,63 @@ RUNS.mkdir(exist_ok=True)
 
 
 def save_run(rid: str, body, history: list[dict]) -> None:
-    """Keep every finished race so it can be replayed exactly as it happened."""
+    """Keep every race so it can be replayed exactly as it happened (atomic write)."""
     lanes_done = {e["lane"]: e for e in history if e.get("type") == "lane_done"}
     summary = {
         "id": rid, "start": body.start, "target": body.target, "created": time.time(),
         "lanes": {k: {"seconds": v["seconds"], "hops": v["hops"], "path": [p["title"] for p in v["path"]]} for k, v in lanes_done.items()},
-        "outcome": {e["lane"]: e["type"] for e in history if e.get("type") in ("lane_timeout", "lane_error")},
+        "outcome": {e["lane"]: e["type"] for e in history if e.get("type") in ("lane_timeout", "lane_error", "lane_stopped")},
+        "aborted": any(e.get("type") == "race_aborted" for e in history),
         "story": next((e["text"] for e in history if e.get("type") == "story"), ""),
     }
-    (RUNS / f"{rid}.json").write_text(json.dumps({"summary": summary, "events": history}))
+    tmp = RUNS / f".{rid}.tmp"
+    tmp.write_text(json.dumps({"summary": summary, "events": history}))
+    os.replace(tmp, RUNS / f"{rid}.json")
+
+
+_sum_cache: dict = {"key": None, "list": []}
+
+
+def _summaries() -> list[dict]:
+    """All saved race summaries, newest first. Re-read only when the runs folder changes."""
+    try:
+        key = (RUNS.stat().st_mtime_ns, len(list(RUNS.glob("*.json"))))
+    except OSError:
+        return []
+    if key != _sum_cache["key"]:
+        out = []
+        for f in sorted(RUNS.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True):
+            try:
+                sm = json.loads(f.read_text())["summary"]
+                if isinstance(sm, dict) and isinstance(sm.get("lanes"), dict):
+                    out.append(sm)
+            except Exception:  # noqa: BLE001 - a broken file never breaks the list
+                continue
+        _sum_cache.update(key=key, list=out)
+    return _sum_cache["list"]
+
+
+def _finished(sm: dict) -> bool:
+    return bool((sm.get("lanes") or {}).get("cerebras"))
 
 
 @app.get("/api/runs")
 async def list_runs(limit: int = 30):
-    files = sorted(RUNS.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True)[:limit]
-    out = []
-    for f in files:
-        try:
-            out.append(json.loads(f.read_text())["summary"])
-        except Exception:  # noqa: BLE001
-            continue
-    return {"runs": out}
+    """Public list of past races. Races where Cerebras didn't finish stay on disk as a record but
+    are never shown (they're almost always the shared endpoint being overloaded, not a result)."""
+    limit = max(1, min(limit, 100))
+    return {"runs": [sm for sm in _summaries() if _finished(sm)][:limit]}
 
 
 @app.get("/api/runs/{rid}")
 async def get_run(rid: str):
-    f = RUNS / f"{rid.replace('/', '')}.json"
+    f = RUNS / f"{Path(rid).name}.json"
     if not f.exists():
         raise HTTPException(404, "unknown run")
-    return json.loads(f.read_text())
+    try:
+        return json.loads(f.read_text())
+    except Exception:  # noqa: BLE001
+        raise HTTPException(404, "unknown run") from None
 
 
 def _summary(rid: str) -> dict | None:
@@ -92,11 +120,7 @@ def _summary(rid: str) -> dict | None:
 
 def _featured() -> dict | None:
     """The race to show on the home page preview: latest race that Cerebras finished."""
-    for f in sorted(RUNS.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True):
-        s = _summary(f.stem)
-        if s and s.get("lanes", {}).get("cerebras"):
-            return s
-    return None
+    return next((sm for sm in _summaries() if _finished(sm)), None)
 
 
 @app.get("/api/runs/{rid}/summary")
@@ -154,15 +178,33 @@ async def surprise():
         ga, gb = random.sample(list(TOPICS), 2)
         start, target = random.choice(TOPICS[ga]), random.choice(TOPICS[gb])
     # start loading the first page now, so the race begins the moment the countdown ends
-    asyncio.create_task(_warm(start, target))
+    _spawn_warm(start, target)
     return {"start": start, "target": target}
 
 
+_warm_tasks: set[asyncio.Task] = set()
+_warm_hits: dict[str, list[float]] = {}
+
+
+def _spawn_warm(start: str, target: str) -> None:
+    if len(_warm_tasks) >= 4 or _busy():  # never compete with a live race for Wikipedia
+        return
+    t = asyncio.create_task(_warm(start, target))
+    _warm_tasks.add(t)
+    t.add_done_callback(_warm_tasks.discard)
+
+
 @app.get("/api/warm")
-async def warm(start: str = "", target: str = ""):
+async def warm(request: Request, start: str = "", target: str = ""):
     """The page calls this once a typed topic checks out, so Wikipedia is already fetched at Start."""
-    if 0 < len(start) <= 120 and len(target) <= 120:
-        asyncio.create_task(_warm(start, target or start))
+    ip, now = _client_ip(request), time.time()
+    hits = [t for t in _warm_hits.get(ip, []) if now - t < 60]
+    if 0 < len(start) <= 120 and len(target) <= 120 and len(hits) < 20:
+        hits.append(now)
+        _spawn_warm(start, target or start)
+    _warm_hits[ip] = hits
+    if len(_warm_hits) > 5000:
+        _warm_hits.clear()
     return Response(status_code=204)
 
 
@@ -178,21 +220,20 @@ async def stats():
     """Time saved by Cerebras across all races: how much longer the GPU side took (a GPU that gave
     up counts as the time it had spent when it stopped)."""
     saved, races_n = 0.0, 0
-    for f in RUNS.glob("*.json"):
+    for sm in _summaries():
         try:
-            d = json.loads(f.read_text())
+            lanes_ = sm["lanes"]
+            cb = lanes_.get("cerebras")
+            if not cb:
+                continue
+            gpu = (lanes_.get("gpu") or {}).get("seconds")
+            if gpu is None and (sm.get("outcome") or {}).get("gpu") == "lane_timeout":
+                gpu = LANE_TIMEOUT
+            if gpu is not None:
+                saved += max(0.0, float(gpu) - float(cb["seconds"]))
+                races_n += 1
         except Exception:  # noqa: BLE001
             continue
-        lanes = d["summary"]["lanes"]
-        cb = lanes.get("cerebras")
-        if not cb:
-            continue
-        gpu = lanes.get("gpu", {}).get("seconds")
-        if gpu is None and d["summary"]["outcome"].get("gpu") == "lane_timeout":
-            gpu = LANE_TIMEOUT
-        if gpu is not None:
-            saved += max(0.0, gpu - cb["seconds"])
-            races_n += 1
     return {"seconds_saved": round(saved, 1), "races": races_n}
 
 
@@ -200,9 +241,9 @@ async def tell_story(start: str, target: str, path: list[dict]) -> str:
     """Kimi on Cerebras (through OpenClaw) turns the chain into a 3-sentence mini story."""
     from openai import AsyncOpenAI
     if OPENCLAW:
-        client, model = AsyncOpenAI(base_url=OPENCLAW, api_key=OC_TOKEN, timeout=90, max_retries=3), "openclaw/storyteller"
+        client, model = AsyncOpenAI(base_url=OPENCLAW, api_key=OC_TOKEN, timeout=40, max_retries=1), "openclaw/storyteller"
     else:
-        client, model = AsyncOpenAI(base_url="https://api.cerebras.ai/v1", api_key=os.getenv("CEREBRAS_API_KEY", ""), timeout=90, max_retries=3), FAST_MODEL
+        client, model = AsyncOpenAI(base_url="https://api.cerebras.ai/v1", api_key=os.getenv("CEREBRAS_API_KEY", ""), timeout=40, max_retries=1), FAST_MODEL
     chain = " → ".join(p["title"] for p in path)
     notes = "\n".join(f"- {p['title']}: {p['reason']}" for p in path[1:])
     try:
@@ -221,7 +262,6 @@ async def tell_story(start: str, target: str, path: list[dict]) -> str:
 class RaceIn(BaseModel):
     start: str = Field(min_length=1, max_length=120)
     target: str = Field(min_length=1, max_length=120)
-    lanes: list[str] = Field(default_factory=lambda: ["cerebras", "gpu"])
 
 
 # ---- protection for free credits (Cerebras trial, NVIDIA free credits, Wikipedia) ----
@@ -234,16 +274,30 @@ _day = {"date": "", "races": 0, "gpu": 0}
 
 
 def _client_ip(request: Request) -> str:
+    """The visitor's IP. Only our Cloudflare Pages proxy (which knows the shared secret) may tell us;
+    otherwise use the connection address (Caddy's X-Forwarded-For via uvicorn's proxy headers).
+    Headers like CF-Connecting-IP are ignored: anyone hitting the server directly could fake them."""
     secret = os.getenv("RH_PROXY_SECRET", "")
     if secret and request.headers.get("x-rh-proxy") == secret and request.headers.get("x-rh-client-ip"):
-        return request.headers["x-rh-client-ip"]  # visitor IP from our Cloudflare Pages proxy
-    return (request.headers.get("cf-connecting-ip") or request.headers.get("x-forwarded-for", "").split(",")[0].strip()
-            or (request.client.host if request.client else "?"))
+        return request.headers["x-rh-client-ip"][:64]
+    return request.client.host if request.client else "?"
 
 
-def _check_quota(request: Request) -> bool:
-    """Raises if this visitor or the day is over budget. Returns whether the GPU lane may run."""
-    if REPLAY_ONLY_FILE.exists() or os.getenv("RH_REPLAY_ONLY") == "1":
+_auto_pause = {"until": 0.0}   # set when the Cerebras key/model stops working; expires on its own
+
+
+def _paused() -> bool:
+    return REPLAY_ONLY_FILE.exists() or os.getenv("RH_REPLAY_ONLY") == "1" or time.time() < _auto_pause["until"]
+
+
+def _auto_pause_now() -> None:
+    _auto_pause["until"] = time.time() + 1800  # 30 minutes, then the next race re-checks
+
+
+def _quota_check(request: Request) -> None:
+    """Raises if live races are paused, the day is used up, or this visitor is over the hourly limit.
+    Costs nothing and records nothing, so it runs before any Wikipedia or Cerebras work."""
+    if _paused():
         raise HTTPException(503, {"code": "paused", "message": "Live races are paused for today. Replays keep playing."})
     today = time.strftime("%Y-%m-%d")
     if _day["date"] != today:
@@ -252,12 +306,20 @@ def _check_quota(request: Request) -> bool:
         raise HTTPException(503, {"code": "paused", "message": "We hit today’s limit. Replays keep playing, and live races are back tomorrow."})
     ip, now = _client_ip(request), time.time()
     hits = [t for t in _ip_hits.get(ip, []) if now - t < 3600]
+    _ip_hits[ip] = hits
     if len(hits) >= PER_IP_PER_HOUR:
         wait = max(1, int((3600 - (now - min(hits))) / 60) + 1)
         raise HTTPException(429, {"code": "ip_limit", "limit": PER_IP_PER_HOUR, "minutes": wait,
                                   "message": f"Each visitor gets {PER_IP_PER_HOUR} live races an hour, so the free credits last."})
-    hits.append(now)
-    _ip_hits[ip] = hits
+
+
+def _quota_commit(request: Request) -> bool:
+    """Count a race that is really starting. Returns whether the GPU lane may run today."""
+    _ip_hits.setdefault(_client_ip(request), []).append(time.time())
+    if len(_ip_hits) > 20000:
+        cutoff = time.time() - 3600
+        for k in [k for k, v in _ip_hits.items() if not v or v[-1] < cutoff]:
+            _ip_hits.pop(k, None)
     _day["races"] += 1
     gpu_ok = _day["gpu"] < GPU_DAILY
     if gpu_ok:
@@ -275,9 +337,13 @@ race_mod.on_fast_answer = lambda: _health.update(cerebras_ok=time.time())
 
 async def _ping_cerebras() -> str:
     """'ok', 'busy' (queue full) or 'down'. A real answer in the last 45 s counts as ok."""
-    from openai import AsyncOpenAI, AuthenticationError, NotFoundError, RateLimitError
+    from openai import AsyncOpenAI, AuthenticationError, NotFoundError, PermissionDeniedError, RateLimitError
     if time.time() - _health["cerebras_ok"] < 45:
         return "ok"
+    if time.time() - _health["cerebras_busy"] < 30:  # don't add to an overloaded queue on every click
+        return "busy"
+    if time.time() - _health.get("cerebras_down", 0.0) < 30:
+        return "down"
     client = AsyncOpenAI(base_url="https://api.cerebras.ai/v1", api_key=os.getenv("CEREBRAS_API_KEY", ""), timeout=15, max_retries=0)
     try:
         for attempt in range(3):
@@ -288,10 +354,15 @@ async def _ping_cerebras() -> str:
                 return "ok"
             except RateLimitError:
                 await asyncio.sleep(1.5 + attempt)
-            except (AuthenticationError, NotFoundError):
-                REPLAY_ONLY_FILE.touch()  # hackathon access ended: switch the site to replays
+            except (AuthenticationError, PermissionDeniedError):
+                _auto_pause_now()  # key access gone (e.g. the hackathon ended): replays only, re-checked in 30 min
+                _health["cerebras_down"] = time.time()
+                return "down"
+            except NotFoundError:  # model id unknown to this path: say "down" but don't pause the whole site
+                _health["cerebras_down"] = time.time()
                 return "down"
             except Exception:  # noqa: BLE001
+                _health["cerebras_down"] = time.time()
                 return "down"
         _health["cerebras_busy"] = time.time()
         return "busy"
@@ -311,45 +382,59 @@ async def _ping_gateway() -> bool:
         return False
 
 
+def _busy() -> bool:
+    return bool(current and current in races and not races[current]["done"].is_set())
+
+
 @app.get("/api/status")
 async def status():
     """Quick system check the page can show before a race (cached, cheap)."""
     recent_busy = time.time() - _health["cerebras_busy"] < 90
     return {"cerebras": "ok" if time.time() - _health["cerebras_ok"] < 120 else ("busy" if recent_busy else "unknown"),
-            "busy": bool(current and not races[current]["done"].is_set())}
+            "busy": _busy()}
 
 
 @app.get("/api/health")
 async def health():
     return {"ok": True, "mode": "openclaw" if OPENCLAW else "direct", "today": _day,
-            "replay_only": REPLAY_ONLY_FILE.exists() or os.getenv("RH_REPLAY_ONLY") == "1",
+            "replay_only": _paused(),
             "fast_model": os.getenv("RH_CEREBRAS_AGENT", "racer-cerebras") if OPENCLAW else FAST_MODEL,
-            "busy": bool(current and not races[current]["done"].is_set()), "live": _live()}
+            "busy": _busy(), "live": _live()}
 
 
 def _live() -> dict | None:
-    if current and not races[current]["done"].is_set():
+    if _busy():
         r = races[current]
         return {"id": current, "start": r["start"], "target": r["target"], "elapsed": round(time.time() - r["t0"], 1)}
     return None
 
 
+def _prune_races() -> None:
+    """Keep the last 20 finished races in memory for late viewers; older ones replay from disk."""
+    finished = [k for k, r in races.items() if r["done"].is_set() and k != current]
+    for k in finished[:-20]:
+        races.pop(k, None)
+
+
 @app.post("/api/race")
 async def start_race(body: RaceIn, request: Request):
     global current
-    if current and not races[current]["done"].is_set():
+    if _busy():
         raise HTTPException(429, {"code": "busy", "message": "Someone is racing right now.", "live": _live()})
-    for t in (body.start, body.target):
-        info = await wiki.resolve(t)
-        field = "start" if t is body.start else "target"
-        if not info["exists"]:
-            raise HTTPException(422, {"code": "bad_input", "field": field, "kind": "missing", "value": t,
-                                      "message": f"No Wikipedia article called “{t}”.", "options": await wiki.suggest(t)})
-        if info["disambiguation"]:
-            raise HTTPException(422, {"code": "bad_input", "field": field, "kind": "ambiguous", "value": t,
-                                      "message": f"“{t}” is ambiguous. Be more specific:", "options": await wiki.senses(info["title"])})
-    if current and not races[current]["done"].is_set():  # someone started while we were checking Wikipedia
-        raise HTTPException(429, {"code": "busy", "message": "Someone is racing right now.", "live": _live()})
+    _quota_check(request)  # paused / daily / per-visitor: free to check, so do it before any real work
+    try:
+        for field, t in (("start", body.start), ("target", body.target)):
+            info = await wiki.resolve(t)
+            if not info["exists"]:
+                raise HTTPException(422, {"code": "bad_input", "field": field, "kind": "missing", "value": t,
+                                          "message": f"No Wikipedia article called “{t}”.", "options": await wiki.suggest(t)})
+            if info["disambiguation"]:
+                raise HTTPException(422, {"code": "bad_input", "field": field, "kind": "ambiguous", "value": t,
+                                          "message": f"“{t}” is ambiguous. Be more specific:", "options": await wiki.senses(info["title"])})
+    except HTTPException:
+        raise
+    except Exception:  # noqa: BLE001
+        raise HTTPException(503, {"code": "wiki_down", "message": "Wikipedia isn’t answering right now. Try again in a moment."}) from None
     # pre-flight: don't start a race the system can't run (and don't count it against the visitor)
     if not await _ping_gateway():
         raise HTTPException(503, {"code": "engine_down", "message": "The race engine is restarting. Try again in a minute."})
@@ -357,20 +442,18 @@ async def start_race(body: RaceIn, request: Request):
     if cb != "ok":
         raise HTTPException(503, {"code": "cerebras_busy" if cb == "busy" else "cerebras_down",
                                   "message": "Cerebras is at capacity right now. The shared hackathon endpoint is turning requests away."})
-    if current and not races[current]["done"].is_set():
+    if _busy():  # someone started while we were checking
         raise HTTPException(429, {"code": "busy", "message": "Someone is racing right now.", "live": _live()})
-    gpu_ok = _check_quota(request)  # after input checks, so a typo doesn't use up a visitor's races
-    if not gpu_ok:
-        body.lanes = [l for l in body.lanes if l != "gpu"]
+    _quota_check(request)
+    gpu_ok = _quota_commit(request)
     rid = uuid.uuid4().hex[:10]
-    q: asyncio.Queue = asyncio.Queue()
     history: list[dict] = []
     done = asyncio.Event()
     t0 = time.time()
-    races[rid] = {"queue": q, "history": history, "done": done, "t0": t0, "start": body.start, "target": body.target}
+    _prune_races()
+    races[rid] = {"history": history, "done": done, "t0": t0, "start": body.start, "target": body.target}
     current = rid
-
-    story_task = {"t": None}
+    story_task: dict = {"t": None}
 
     async def make_story(path):
         await emit({"type": "story_started"})
@@ -380,51 +463,67 @@ async def start_race(body: RaceIn, request: Request):
 
     async def emit(e: dict):
         e = {**e, "wall": round(time.time() - t0, 2)}
-        if e.get("type") == "lane_error" and e.get("lane") == "cerebras" and any(
-                k in e.get("error", "").lower() for k in ("401", "403", "model_not_found", "does not exist", "no access")):
-            REPLAY_ONLY_FILE.touch()  # hackathon access ended: switch the site to replays automatically
+        if e.get("type") == "lane_error" and e.get("lane") == "cerebras" and e.get("auth"):
+            _auto_pause_now()  # the key/model stopped working (e.g. hackathon access ended): replays only for a while
+        e.pop("auth", None)
         history.append(e)
-        await q.put(e)
         if e.get("type") == "lane_done" and story_task["t"] is None:  # story as soon as the first lane wins
             story_task["t"] = asyncio.create_task(make_story(e["path"]))
 
     async def run():
-        chosen = [l for l in lanes() if l.id in body.lanes]
-        await emit({"type": "race_started", "start": body.start, "target": body.target, "gpu_paused": not gpu_ok,
-                    "lanes": [{"id": l.id, "label": l.label} for l in chosen]})
+        chosen = [l for l in lanes() if gpu_ok or l.id != "gpu"]
+        tasks: dict[str, asyncio.Task] = {}
+
         async def capped(l):
             try:
                 return await asyncio.wait_for(run_lane(l, wiki, body.start, body.target, emit), LANE_TIMEOUT)
             except asyncio.TimeoutError:
                 await emit({"type": "lane_timeout", "lane": l.id, "after": LANE_TIMEOUT})
-        tasks = {l.id: asyncio.create_task(capped(l)) for l in chosen}
-        if "cerebras" in tasks:
-            res = await tasks["cerebras"]
-            if not res or res.get("type") != "lane_done":
-                # the fast lane couldn't run: stop everything now instead of making people wait 5 minutes
-                for k, t in tasks.items():
-                    if k != "cerebras" and not t.done():
-                        t.cancel()
-                await emit({"type": "race_aborted", "reason": (res or {}).get("error") or "Cerebras ran out of time."})
-        await asyncio.gather(*tasks.values(), return_exceptions=True)
-        wiki.save()
-        if story_task["t"]:
-            await story_task["t"]
-        await emit({"type": "race_done"})
-        done.set()
-        save_run(rid, body, history)
+                return None
+            except asyncio.CancelledError:
+                await emit({"type": "lane_stopped", "lane": l.id, "t": round(time.time() - t0, 2)})
+                raise
+
+        try:
+            await emit({"type": "race_started", "start": body.start, "target": body.target, "gpu_paused": not gpu_ok,
+                        "lanes": [{"id": l.id, "label": l.label} for l in chosen]})
+            tasks = {l.id: asyncio.create_task(capped(l)) for l in chosen}
+            if "cerebras" in tasks:
+                try:
+                    res = await asyncio.shield(tasks["cerebras"])
+                except asyncio.CancelledError:
+                    raise
+                except Exception as exc:  # noqa: BLE001
+                    res = {"type": "lane_error", "error": str(exc)[:240]}
+                if not res or res.get("type") != "lane_done":
+                    # the fast lane couldn't run: stop everything now instead of making people wait 5 minutes
+                    for k, t in tasks.items():
+                        if k != "cerebras" and not t.done():
+                            t.cancel()
+                    await emit({"type": "race_aborted", "reason": (res or {}).get("error") or "Cerebras ran out of time."})
+            await asyncio.gather(*tasks.values(), return_exceptions=True)
+            if story_task["t"]:
+                try:
+                    await asyncio.wait_for(asyncio.shield(story_task["t"]), 45)
+                except Exception:  # noqa: BLE001 - a slow story never holds the race slot
+                    story_task["t"].cancel()
+        except asyncio.CancelledError:
+            for t in tasks.values():
+                t.cancel()
+            if story_task["t"]:
+                story_task["t"].cancel()
+            raise
+        finally:
+            await emit({"type": "race_done"})
+            done.set()
+            try:
+                save_run(rid, body, history)
+            except Exception:  # noqa: BLE001
+                pass
+            await wiki.asave()
 
     races[rid]["task"] = asyncio.create_task(run())
     return {"race_id": rid}
-
-
-@app.post("/api/race/{rid}/stop")
-async def stop_race(rid: str):
-    r = races.get(rid)
-    if r and not r["done"].is_set():
-        r["task"].cancel()
-        r["done"].set()
-    return {"stopped": True}
 
 
 @app.get("/api/race/{rid}/events")

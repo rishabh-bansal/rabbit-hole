@@ -45,6 +45,7 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 html, body { margin: 0; background: var(--ink); color: var(--pearl); font: 400 15px/1.5 var(--ins); -webkit-font-smoothing: antialiased; }
 body { min-height: 100vh; overflow-wrap: anywhere; }
 a { color: inherit; text-decoration: none; }
@@ -74,7 +75,7 @@ input:focus { outline: none; }
 .d1 { animation-delay: .08s; } .d2 { animation-delay: .16s; } .d3 { animation-delay: .24s; } .d4 { animation-delay: .32s; }
 .rh-win { animation: rh-in .7s var(--ease) both; }
 .breathe { animation: breathe 1s ease-in-out infinite alternate; }
-@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 /* shared bits */
 .brand { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font: 600 15px var(--ins); }
@@ -122,8 +123,10 @@ input:focus { outline: none; }
 .sugg li[aria-selected="true"], .sugg li:hover { background: var(--smoke); }
 .ferr a { color: var(--ember); }
 .opts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-.chip { flex: none; min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--night); color: var(--fog); font-size: 14px; white-space: nowrap; }
-.chip.on { background: var(--smoke); }
+.chip { flex: none; min-height: 34px; margin: 5px 0; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; box-shadow: inset 0 0 0 1px rgba(245,244,240,.16);
+  color: var(--fog); font-size: 14px; white-space: nowrap; }
+.chip:hover { box-shadow: inset 0 0 0 1px rgba(245,244,240,.32); }
+.chip.on { box-shadow: inset 0 0 0 1px rgba(245,244,240,.55); color: var(--pearl); }
 .chips { display: flex; gap: 8px; overflow-x: auto; padding: 14px 20px 2px; margin: 0 -20px; scrollbar-width: none; }
 .chips::-webkit-scrollbar { display: none; }
 .formmsg { margin: 10px 0 0; font-size: 13px; color: var(--fog); }
@@ -143,18 +146,7 @@ input:focus { outline: none; }
 .recent { display: flex; flex-direction: column; margin: 26px 0 0; padding-bottom: 40px; }
 .recent-h { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 8px; gap: 10px; }
 .recent-h h2 { margin: 0; font-size: 15px; font-weight: 600; }
-.runrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "t time" "sub when"; gap: 2px 12px; padding: 12px 0; border-top: 1px solid rgba(245,244,240,.08); }
-.r-t { grid-area: t; font-size: 15px; font-weight: 500; }
-.r-c { grid-area: c; display: none; }
-.r-time { grid-area: time; font: 400 15px var(--hub); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
-.r-sub { grid-area: sub; font-size: 13px; color: var(--haze); }
-.r-when { grid-area: when; font-size: 13px; color: var(--haze); text-align: right; white-space: nowrap; }
 .empty { padding: 12px 0; border-top: 1px solid rgba(245,244,240,.08); color: var(--haze); font-size: 14px; }
-.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 32px; padding: 24px 0 40px; border-top: 1px solid var(--line); font-size: 13px; color: var(--haze); }
-.logos { display: inline-flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.logos span { display: inline-flex; align-items: center; gap: 6px; }
-.credits { gap: 18px; }
-
 @media (min-width: 900px) {
   .wrap { max-width: 1160px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
   #v-home .top { padding: 18px 0; }
@@ -180,13 +172,6 @@ input:focus { outline: none; }
   .pv-st { order: 3; font-size: 14px; color: var(--fog); white-space: normal; }
   .recent { margin: 0 0 96px; padding: 0; }
   .recent-h h2 { font-size: 16px; margin-bottom: 4px; }
-  .runrow { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) auto auto; grid-template-areas: "t c time when"; align-items: baseline; gap: 4px 28px; padding: 18px 0; border-top: 1px solid var(--line); }
-  .r-t { font-size: 17px; }
-  .r-c { display: block; font-size: 14px; color: var(--haze); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .r-time { font: 400 14px var(--ins); color: var(--haze); }
-  .r-time b { font: 400 16px var(--hub); color: var(--ember); }
-  .r-sub { display: none; }
-  .r-when { font-size: 14px; }
 }
 
 /* countdown */
@@ -198,9 +183,6 @@ input:focus { outline: none; }
 @keyframes cd-pop { from { opacity: 0; transform: scale(1.5); } 60% { opacity: 1; } to { opacity: 1; transform: scale(1); } }
 
 /* surprise me: its own button, not a preset */
-.chip.surprise { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--ember); box-shadow: inset 0 0 0 1px rgba(214,178,138,.55); font-weight: 600; }
-.chip.surprise svg { transition: transform .5s var(--ease); }
-.chip.surprise:hover svg, .chip.surprise.rolling svg { transform: rotate(180deg); }
 
 /* hall of fame: one trophy case */
 .fame { position: relative; margin: 6px 0 18px; border-radius: 16px; background: var(--night); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
@@ -231,22 +213,6 @@ input:focus { outline: none; }
 .showall { align-self: flex-start; margin-top: 6px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--pearl); font-size: 14px; font-weight: 600; }
 .showall:hover { color: var(--ember); }
 
-/* the old hall of fame cards */
-.fame-old { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(230px, 1fr); gap: 10px; overflow-x: auto; margin: 4px -20px 18px; padding: 2px 20px 4px; scrollbar-width: none; }
-
-.fcard { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 14px; background: var(--night); overflow: hidden; isolation: isolate; }
-.fcard::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; z-index: -1;
-  background: conic-gradient(from var(--a, 0deg), rgba(214,178,138,.0), rgba(214,178,138,.7), rgba(214,178,138,.0) 40%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: spin 6s linear infinite; }
-@property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
-@keyframes spin { to { --a: 360deg; } }
-.fcard .fi { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ember); }
-.fcard .fi i { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: rgba(214,178,138,.12); }
-.fcard .ft { font-size: 15px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fcard .fv { font: 500 24px/1.1 var(--hub); color: var(--pearl); font-variant-numeric: tabular-nums; }
-.fcard .fv small { font: 400 13px var(--ins); color: var(--haze); }
-.fcard:hover { background: #1E1D1A; }
-
 /* surprise pill, try chips, start gate */
 .spill { align-self: center; display: inline-flex; align-items: center; gap: 8px; height: 34px; margin: 5px 0; padding: 0 14px; border: 0; border-radius: 999px;
   background: var(--night); box-shadow: inset 0 0 0 1px rgba(245,244,240,.16); color: var(--pearl); font-size: 14px; font-weight: 500; position: relative; }
@@ -258,9 +224,6 @@ input:focus { outline: none; }
 .tryrow > .small { flex: none; }
 .tryrow .chips { margin: 0; padding: 0; flex: 1; min-width: 0; }
 .chips { padding-top: 0; }
-.chip { min-height: 34px; margin: 5px 0; background: transparent; box-shadow: inset 0 0 0 1px rgba(245,244,240,.16); color: var(--fog); }
-.chip:hover { box-shadow: inset 0 0 0 1px rgba(245,244,240,.32); }
-.chip.on { background: transparent; box-shadow: inset 0 0 0 1px rgba(245,244,240,.55); color: var(--pearl); }
 .gate { margin: 0; font-size: 13px; color: var(--fog); text-align: center; }
 .field.drop { animation: rh-drop .45s var(--ease) both; box-shadow: inset 0 0 0 1px var(--ember); }
 .field.roll input { color: var(--haze); }
@@ -268,6 +231,7 @@ input:focus { outline: none; }
 /* race names: each end truncates on its own, so both stay visible */
 .rn { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
 .rn > span:not(.ar) { min-width: 0; max-width: 62%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto; }
+.rn > span:first-child { flex-shrink: 0; }  /* a short start like "Coffee" keeps its full name; the 62% cap still trims long ones */
 .rn .ar { flex: none; color: var(--mute); }
 
 /* hackathon stripe */
@@ -290,7 +254,6 @@ body.film .stripe, body.carding .stripe { display: none; }
 .built .blogos > span { display: inline-flex; align-items: center; gap: 8px; color: var(--fog); }
 .built .kt { font: 700 16px var(--ins); letter-spacing: .02em; color: var(--pearl); }
 .built .fine { margin: 0; font-size: 12px; color: var(--mute); }
-@media (min-width: 900px) { }
 @media (min-width: 900px) {
   .built { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 22px 40px; padding: 40px 0 48px; border-top: 1px solid var(--line); }
   .built .credit { grid-column: 1; grid-row: 1; max-width: 40em; font-size: 15px; }
@@ -309,24 +272,33 @@ body.film .stripe, body.carding .stripe { display: none; }
   .fcell .fv { grid-column: 1 / -1; grid-row: 2; font-size: 30px; }
   .fcell .ft { grid-column: 1 / -1; grid-row: 3; }
   .fame-h { padding: 16px 20px 8px; }
-  .rhead, .rrow { display: grid; grid-template-columns: minmax(0, 1fr) 56px 84px 150px 96px 28px; align-items: center; gap: 0 24px; padding: 14px 12px; }
-  .rhead { padding: 10px 12px; font-size: 12px; color: var(--haze); border-bottom: 1px solid var(--line); }
-  .rhead span { display: inline-flex; align-items: center; gap: 6px; } .rhead .num { justify-content: flex-end; }
-  .rrow { border-top: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
+  /* recent races: the Claude Design table (Ask board), exact spec */
+  .rhead, .rrow { display: grid; grid-template-columns: minmax(0, 1fr) 56px 84px 150px 96px 28px; align-items: center; column-gap: 24px; }
+  .rhead { padding: 4px 12px 10px; font-size: 12px; color: var(--haze); border: 0; }
+  .rhead span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .rhead .num { justify-content: flex-end; }
+  .rhead img { width: 13px; height: 13px; }
+  .rrow { padding: 14px 12px; border: 0; border-top: 1px solid rgba(245,244,240,.08); border-radius: 0; color: var(--pearl); }
+  .rrow:hover { background: var(--night); }
   .rrow .rmain { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-  .rrow .rn { font-size: 16px; }
+  .rrow .rn { gap: 0; font-size: 16px; font-weight: 500; }
+  .rrow .rn .ar { padding: 0 5px; }
   .rrow .via, .rrow .rk, .rrow .rw, .rrow .rp { display: block; }
   .rrow .via { font-size: 13px; color: var(--haze); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .rrow .rk, .rrow .rw { text-align: right; font: 400 15px var(--hub); font-variant-numeric: tabular-nums; color: var(--fog); }
-  .rrow .rw { font: 400 14px var(--ins); color: var(--haze); white-space: nowrap; }
-  .rrow .rc { font-size: 16px; color: var(--pearl); } .rrow .rc img { display: none; }
-  .rrow .rg { justify-content: flex-start; font-size: 14px; } .rrow .rg img { display: none; }
+  .rrow .rk { text-align: right; font: 400 15px var(--hub); font-variant-numeric: tabular-nums; color: var(--fog); }
+  .rrow .rc { justify-content: flex-end; font: 500 16px var(--hub); font-variant-numeric: tabular-nums; color: var(--pearl); white-space: nowrap; }
+  .rrow .rc img, .rrow .rg img { display: none; }
+  .rrow .rg { justify-content: flex-start; font-size: 14px; color: var(--haze); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rrow .rg .gw { display: inline-block; } .rrow .rg .gw::first-letter { text-transform: uppercase; }
+  .rrow .rw { text-align: right; font-size: 14px; color: var(--haze); white-space: nowrap; }
   .rrow .rm { display: none; }
-  .rrow .rp { width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(245,244,240,.3); display: inline-flex; align-items: center; justify-content: center; color: var(--pearl); transition: background-color .35s, color .35s; }
-  .rrow:hover .rp { background: var(--pearl); color: var(--ink); }
-  .rrow .rp { grid-column: auto; grid-row: auto; justify-self: end; }  /* the phone layout pins it to column 3; the table doesn't */
+  .rrow .rp { grid-column: auto; grid-row: auto; justify-self: end; width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(245,244,240,.2);
+    display: flex; align-items: center; justify-content: center; color: var(--fog); }
+  .rrow:hover .rp { background: var(--pearl); color: var(--ink); box-shadow: none; }
+  .showall { margin-top: 6px; padding: 0 12px; color: var(--fog); }
+  .fame { margin: 0 0 24px; }
+  .recent-h { padding-bottom: 16px; }
 }
-@media (min-width: 900px) and (max-width: 1100px) { .rhead, .rrow { grid-template-columns: minmax(0, 1fr) 84px 150px 28px; } .rhead .ck, .rhead .wh, .rrow .rk, .rrow .rw { display: none !important; } }
 
 /* ---------------- RACE ---------------- */
 .rtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 20px; }
@@ -417,15 +389,15 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
 
 @media (min-width: 900px) {
   #v-race { min-height: 100vh; display: flex; flex-direction: column; }
-  .rtop { flex-wrap: wrap; gap: 12px 32px; padding: 20px 40px; border-bottom: 1px solid var(--line); }
-  .rtop .brand { flex: 0 1 260px; font-size: 16px; gap: 10px; }
-  .rtop .q { flex: 1 1 420px; margin: 0; text-align: center; font-size: 20px; }
-  .rtop-r { flex: 0 1 260px; justify-content: flex-end; }
+  .rtop { display: grid; grid-template-columns: minmax(150px, 1fr) minmax(0, 2.4fr) minmax(150px, 1fr); align-items: center; gap: 12px 24px; padding: 20px 40px; border-bottom: 1px solid var(--line); }
+  .rtop .brand { font-size: 16px; gap: 10px; }
+  .rtop .q { margin: 0; text-align: center; font-size: 20px; }
+  .rtop-r { justify-content: flex-end; }
   .rtop .live { font-size: 14px; } .rtop .live i { width: 7px; height: 7px; }
   .rtop .tag { height: 30px; padding: 0 12px; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(245,244,240,.4); font-size: 14px; font-weight: 600; }
-  .lanes { flex: 1 1 auto; display: flex; flex-wrap: wrap; padding: 0; }
+  .lanes, #v-race.replay .lanes { flex: 1 1 auto; display: flex; flex-wrap: wrap; padding: 0; }
   .lane, .lane:not(.sel) { display: flex; }
-  .lane { flex: 1 1 520px; min-width: 0; gap: 28px; margin: 0; padding: 36px 40px 28px; }
+  .lane { flex: 1 1 380px; min-width: 0; gap: 28px; margin: 0; padding: 36px 40px 28px; }
   .lane + .lane, .lane + .rest { border-left: 1px solid var(--line); }
   .lclock .clock { font-size: clamp(56px, 6vw, 88px); font-stretch: 105%; }
   .now { gap: 6px; padding-top: 20px; border-top: 1px solid var(--line); }
@@ -603,7 +575,7 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
     <section class="recent" id="recent" aria-labelledby="recentTitle">
       <div class="recent-h"><h2 id="recentTitle">Recent races</h2><span class="small" id="savedShort"></span></div>
       <div class="fame" id="fame" hidden></div>
-      <div class="rtable" id="runs" role="list"><div class="empty">Loading races…</div></div>
+      <div class="rtable" id="runs"><div class="empty">Loading races…</div></div>
       <button class="showall" id="showAll" type="button" hidden></button>
     </section>
     <footer class="built">
@@ -611,7 +583,7 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
       <p class="credit">Built with Claude. Powered by Kimi K3.1 Pro on Cerebras, raced against the same model on NVIDIA GPUs, run by an OpenClaw agent. Every step is a real link on Wikipedia.</p>
       <span class="blogos"><span><span data-logo="claude" data-s="20"></span><span data-wm="claudeText" data-h="16"></span></span><span><span data-logo="kimi" data-s="20"></span><span class="kt">Kimi</span><span class="haze" style="font-size:14px">K3.1 Pro</span></span><span><span data-logo="cerebras" data-s="20"></span><span data-wm="cbText" data-h="18"></span></span><span><span data-logo="gpu" data-s="20"></span><span data-wm="nvText" data-h="13"></span></span><span><span data-logo="claw" data-s="20"></span><span data-wm="clawText" data-h="15"></span></span></span>
       <p class="fine">airabbithole.pages.dev · Same model in both lanes, Kimi K3.1 Pro. Clocks are real elapsed time. GPU lane: NVIDIA API catalog, free tier (build.nvidia.com). Its time includes waiting in NVIDIA’s free queue. Text from Wikipedia, CC BY-SA 4.0.</p>
-    </div>
+    </footer>
   </div>
 </section>
 
@@ -640,7 +612,7 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
   <div class="rbar" id="rbar" hidden>
     <button class="pp" id="pp" type="button" aria-label="Pause replay"></button>
     <div class="speeds" id="speeds"><button type="button" data-sp="1">1×</button><button type="button" data-sp="2">2×</button><button type="button" data-sp="5">5×</button></div>
-    <button class="scrub" id="scrub" type="button" aria-label="Seek in the replay"><span class="tr"></span><span class="fi" id="scFi"></span><span class="tk" id="scTk"></span><span class="kn" id="scKn"></span></button>
+    <button class="scrub" id="scrub" type="button" role="slider" aria-label="Replay position" aria-valuemin="0" aria-valuemax="300" aria-valuenow="0"><span class="tr"></span><span class="fi" id="scFi"></span><span class="tk" id="scTk"></span><span class="kn" id="scKn"></span></button>
     <span class="rtime" id="rtime"></span>
     <button class="btn desk-only" id="copyD" type="button">Copy link</button>
   </div>
@@ -688,7 +660,8 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
 
 <!-- ============ VIDEO CARDS ============ -->
 <div class="vstage" id="vstage" hidden></div>
-<div class="cd" id="cd" hidden aria-live="assertive"></div>
+<div class="cd" id="cd" hidden aria-hidden="true"></div>
+<p class="sr-only" id="cdLive" aria-live="assertive"></p>
 
 <script>
 "use strict";
@@ -708,12 +681,12 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": 
 const img = (k, s) => `<img class="lg" src="${LOGO[k]}" alt="" width="${s}" height="${s}">`;
 const mark = s => `<svg width="${s}" height="${s}" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="13.5" fill="none" stroke="#D6B28A" stroke-width="2"/><circle cx="15" cy="18" r="8.5" fill="none" stroke="#D6B28A" stroke-opacity="0.55" stroke-width="2"/><circle cx="15" cy="21" r="3" fill="#D6B28A"/></svg>`;
 const wm = (k, h) => { const [src, r] = MARK_W[k]; return `<img class="lg" src="${src}" alt="" height="${h}" width="${Math.round(h * r)}">`; };
-const credits = h => `<span class="logos credits"><span title="Built with Claude">${img("claude", h)}${wm("claudeText", h - 3)}</span><span>${img("kimi", h)}Kimi K3.1 Pro</span><span title="Cerebras">${img("cerebras", h)}${wm("cbText", h)}</span><span title="OpenClaw">${img("claw", h)}${wm("clawText", h - 4)}</span></span>`;
 const kimiRun = s => `<span class="run">running ${img("kimi", s)}Kimi K3.1 Pro</span>`;
 const wurl = t => "https://en.wikipedia.org/wiki/" + encodeURIComponent(String(t).replace(/ /g, "_"));
+const safeUrl = (u, title) => /^https:\/\/en\.wikipedia\.org\//.test(String(u || "")) ? u : wurl(title);
+const LANE_IDS = ["cerebras", "gpu"];
 function hydrate(root = document) {
   root.querySelectorAll("[data-mark]").forEach(el => { el.outerHTML = mark(+el.dataset.mark); });
-  root.querySelectorAll("[data-credits]").forEach(el => { el.outerHTML = credits(16); });
   root.querySelectorAll("[data-wm]").forEach(el => { el.outerHTML = wm(el.dataset.wm, +el.dataset.h); });
   root.querySelectorAll("[data-logo]").forEach(el => { el.outerHTML = img(el.dataset.logo, +el.dataset.s || 16); });
 }
@@ -739,20 +712,20 @@ function apply(S, e) {
   const w = e.wall || 0;
   switch (e.type) {
     case "race_started":
-      S.start = e.start; S.target = e.target; S.targetTitle = S.targetTitle || e.target; S.gpuPaused = !!e.gpu_paused;
-      S.ids = (e.lanes || []).map(l => l.id); S.lanes = {}; S.ids.forEach(id => S.lanes[id] = laneObj(id, e.start)); return;
+      S.started = true; S.start = e.start; S.target = e.target; S.targetTitle = S.targetTitle || e.target; S.gpuPaused = !!e.gpu_paused;
+      S.ids = (e.lanes || []).map(l => l.id).filter(id => LANE_IDS.includes(id)); S.lanes = {}; S.ids.forEach(id => S.lanes[id] = laneObj(id, e.start)); return;
     case "story_started": S.storyWriting = true; return;
     case "story": S.story = (e.text || "").replace(/[*_`#]+/g, "").trim(); S.storyWriting = false; return;
     case "race_done": S.done = true; S.storyWriting = false; S.endWall = w; return;
-    case "race_aborted": S.aborted = e.reason || "Cerebras was unavailable."; return;
+    case "race_aborted": S.aborted = e.reason || "Cerebras was unavailable."; S.abortAt = w; return;
   }
   const L = S.lanes[e.lane]; if (!L) return;
   switch (e.type) {
-    case "lane_started": L.page = L.startPage = e.page; L.url = e.url || wurl(e.page); L.pageNo = 1; L.status = "reading"; if (e.target) S.targetTitle = e.target; break;
+    case "lane_started": L.page = L.startPage = e.page; L.url = safeUrl(e.url, e.page); L.pageNo = 1; L.status = "reading"; if (e.target) S.targetTitle = e.target; break;
     case "thinking": L.links = e.options || 0; L.status = "thinking"; L.ai = e.ai || 0; L.thinkSince = w; break;
     case "hop":
-      L.trail.push({ title: e.page, reason: e.reason || "", note: e.thinking || "", t: e.t || 0, auto: !!e.auto, url: e.url || wurl(e.page) });
-      L.page = e.page; L.url = e.url || wurl(e.page); L.pageNo = L.trail.length + 1; L.hops = e.hop || L.trail.length; L.ai = e.ai ?? L.ai; L.thinkSince = null;
+      L.trail.push({ title: e.page, reason: e.reason || "", note: e.thinking || "", t: e.t || 0, auto: !!e.auto, url: safeUrl(e.url, e.page) });
+      L.page = e.page; L.url = safeUrl(e.url, e.page); L.pageNo = L.trail.length + 1; L.hops = e.hop || L.trail.length; L.ai = e.ai ?? L.ai; L.thinkSince = null;
       L.status = e.auto ? "direct" : "reading"; break;
     case "lane_done": L.result = "done"; L.end = e.seconds; L.endWall = w; L.ai = e.model_seconds ?? L.ai; L.hops = e.hops ?? L.hops; L.thinkSince = null;
       if (!S.first) { S.first = L.id; S.firstWall = w; } break;
@@ -781,19 +754,12 @@ async function api(path, opts) {
 let STATS = { seconds_saved: 0, races: 0 };
 async function loadStats() { const r = await api("/api/stats").catch(() => null); if (r && r.ok) STATS = r.d; paintOdo(); }
 function paintOdo(extra = 0, extraRace = 0) {
-  const txt = `Waiting saved by Cerebras: <b>${fmtMS(STATS.seconds_saved + extra)}</b> over ${STATS.races + extraRace} races`;
+  const txt = `Waiting saved by Cerebras: <b>${fmtMS(STATS.seconds_saved + extra)}</b> over ${(Number(STATS.races) || 0) + extraRace} races`;
   $$("[data-odo]").forEach(el => el.innerHTML = txt);
-  $("#savedShort").innerHTML = `saved <span class="ember">${fmtMS(STATS.seconds_saved)}</span> over ${STATS.races} races`;
+  $("#savedShort").innerHTML = `saved <span class="ember">${fmtMS(STATS.seconds_saved)}</span> over ${Number(STATS.races) || 0} races`;
 }
 let RUNS = [];
 async function loadRuns() { const r = await api("/api/runs").catch(() => null); RUNS = (r && r.ok && r.d.runs) || []; paintRuns(); pickPreview(); }
-function gpuText(r, short) {
-  const g = r.lanes.gpu, o = (r.outcome || {}).gpu;
-  if (g) return `GPU ${fmtS(g.seconds)}`;
-  if (o === "lane_timeout") return short ? "GPU stopped at 5 min" : "GPU stopped at 5:00";
-  if (o === "lane_error") return "GPU ended with an error";
-  return "Cerebras only";
-}
 const ICON = {
   watch: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4M12 2v3"/></svg>`,
   bolt: `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>`,
@@ -817,8 +783,9 @@ function paintFame() {
     { r: deepest, icon: "hole", label: "Deepest rabbit hole", value: clicks(deepest.lanes.cerebras.hops) },
     { r: saved, icon: "hourglass", label: "Most waiting saved", value: fmtMS((gpuSecs(saved) ?? 0) - saved.lanes.cerebras.seconds) },
   ];
+  const shown = cards.filter(c => c.icon !== "hourglass" || ((gpuSecs(c.r) ?? 0) - c.r.lanes.cerebras.seconds) > 0);
   el.innerHTML = `<div class="fame-h"><b>Hall of fame</b><span>best of ${done.length} races</span></div><div class="fame-g">` +
-    cards.map(c => `<a class="fcell" href="?replay=${encodeURIComponent(c.r.id)}" data-replay="${esc(c.r.id)}" aria-label="${esc(c.label)}: ${esc(c.value)}, ${esc(c.r.start)} to ${esc(c.r.target)}. Watch the replay.">
+    shown.map(c => `<a class="fcell" href="?replay=${encodeURIComponent(c.r.id)}" data-replay="${esc(c.r.id)}" aria-label="${esc(c.label)}: ${esc(c.value)}, ${esc(c.r.start)} to ${esc(c.r.target)}. Watch the replay.">
       <i>${ICON[c.icon]}</i><span class="fl">${c.label}</span><span class="fv">${c.value}</span><span class="ft">${raceName(c.r.start, c.r.target)}</span></a>`).join("") + `</div>`;
   el.hidden = false;
 }
@@ -829,18 +796,18 @@ function paintRuns() {
   const el = $("#runs");
   if (!RUNS.length) { el.innerHTML = `<div class="empty">No races yet. Start the first one.</div>`; $("#showAll").hidden = true; return; }
   const list = SHOW_ALL ? RUNS : RUNS.slice(0, 4);
-  el.innerHTML = `<div class="rhead" aria-hidden="true"><span>Race</span><span class="num ck">Clicks</span><span class="num">${img("cerebras", 13)}Cerebras</span><span>${img("gpu", 13)}NVIDIA GPU <span class="tier">free tier</span></span><span class="num wh">When</span><span class="pl"></span></div>` +
+  el.innerHTML = `<div class="rhead" aria-hidden="true"><span>Race</span><span class="num ck">Clicks</span><span class="num">${img("cerebras", 13)}Cerebras</span><span title="NVIDIA API catalog, free tier">${img("gpu", 13)}NVIDIA GPU</span><span class="num wh">When</span><span class="pl"></span></div>` +
     list.map(r => {
       const c = r.lanes.cerebras, mid = c ? c.path.slice(1, -1) : [];
-      const via = mid.length ? "via " + (mid.length > 3 ? [...mid.slice(0, 2), "…", mid.at(-1)] : mid).join(" · ") : "direct link";
+      const via = !c ? "did not finish" : mid.length ? "via " + (mid.length > 3 ? [...mid.slice(0, 2), "…", mid.at(-1)] : mid).join(" · ") : "direct link";
       const time = c ? fmtS(c.seconds) : "—", gw = gpuWords(r);
       const label = `${r.start} to ${r.target}: Cerebras ${c ? time + " in " + clicks(c.hops) : "did not finish"}, NVIDIA GPU ${gw}, ${ago(r.created)}. Watch the replay.`;
-      return `<a class="rrow" role="listitem" href="?replay=${encodeURIComponent(r.id)}" data-replay="${esc(r.id)}" aria-label="${esc(label)}">
+      return `<a class="rrow" href="?replay=${encodeURIComponent(r.id)}" data-replay="${esc(r.id)}" aria-label="${esc(label)}">
         <span class="rmain">${raceName(r.start, r.target)}<span class="via">${esc(via)}</span></span>
-        <span class="rk">${c ? c.hops : "—"}</span>
+        <span class="rk">${c ? Number(c.hops) || 0 : "—"}</span>
         <span class="rc">${img("cerebras", 13)}${time}</span>
         <span class="rm">${c ? clicks(c.hops) + " · " : ""}${ago(r.created)}</span>
-        <span class="rg">${img("gpu", 13)}${gw.charAt(0).toUpperCase() === gw.charAt(0) ? gw : gw}</span>
+        <span class="rg" title="NVIDIA API catalog, free tier">${img("gpu", 13)}<span class="gw">${gw}</span></span>
         <span class="rw">${ago(r.created)}</span>
         <span class="rp" aria-hidden="true"><svg width="9" height="9" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z" fill="currentColor"/></svg></span></a>`;
     }).join("");
@@ -880,17 +847,23 @@ function renderPreview() {
 
 // ---------- views & routing ----------
 let VIEW = "home";
-function show(v) { VIEW = v; $$(".view").forEach(s => s.hidden = s.id !== "v-" + v); $("#vstage").hidden = true; }
+function show(v) { VIEW = v; document.body.classList.remove("carding"); $$(".view").forEach(s => s.hidden = s.id !== "v-" + v); $("#vstage").hidden = true; }
 function nav(url, replace) { history[replace ? "replaceState" : "pushState"]({}, "", url || location.pathname); route(); }
-window.addEventListener("popstate", route);
+let LAST_SEARCH = null, ROUTE_SEQ = 0;
+// every URL change we make updates LAST_SEARCH, so popstate can tell real navigation from a hash-only change
+for (const m of ["pushState", "replaceState"]) { const orig = history[m].bind(history); history[m] = (...args) => { orig(...args); LAST_SEARCH = location.search; }; }
+window.addEventListener("popstate", () => { if (location.search === LAST_SEARCH && VIEW === "home") return; route(); });  // hash-only changes (#recent) aren't navigation
 document.addEventListener("click", e => {
   const a = e.target.closest("a"); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
-  if (a.hasAttribute("data-home")) { e.preventDefault(); nav(location.pathname); window.scrollTo(0, 0); }
+  if (a.hasAttribute("data-home")) {
+    e.preventDefault(); const hash = a.hash; nav(location.pathname);
+    const target = hash && document.querySelector(hash); if (target) target.scrollIntoView(); else window.scrollTo(0, 0);
+  }
   else if (a.dataset.replay) { e.preventDefault(); nav(`?replay=${encodeURIComponent(a.dataset.replay)}`); window.scrollTo(0, 0); }
 });
 const Q = () => new URLSearchParams(location.search);
 async function route() {
-  stopLive();
+  stopLive(); ROUTE_SEQ++; LAST_SEARCH = location.search;
   const q = Q();
   if (q.get("card")) return showCard(q);
   if (q.get("replay")) return openReplay(q.get("replay"), { speed: +q.get("speed") || 1 });
@@ -900,42 +873,45 @@ async function route() {
   if (q.get("from")) $("#start").value = q.get("from");
   if (q.get("to")) $("#target").value = q.get("to");
   paintChips();
-  if (q.get("autostart")) startRace();
+  if (q.get("autostart")) {  // only once: Back must not start another race
+    q.delete("autostart"); history.replaceState({}, "", location.pathname + (q.toString() ? "?" + q : "")); LAST_SEARCH = location.search;
+    startRace();
+  }
 }
 
 // ---------- home form ----------
 function paintChips() {
   const s = $("#start").value.trim(), t = $("#target").value.trim();
-  $("#chips").innerHTML = `<button type="button" class="chip surprise" data-surprise hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="8" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="8" cy="16" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/></svg>Surprise me</button>` +
+  $("#chips").innerHTML =
     EXAMPLES.map(([a, b]) => `<button type="button" class="chip${a === s && b === t ? " on" : ""}" data-a="${esc(a)}" data-b="${esc(b)}">${esc(a)} → ${esc(b)}</button>`).join("");
 }
+let rolling = false;
 const ROLL = ["Octopus", "Jazz", "Tokyo", "Chess", "Volcano", "Cleopatra", "Bitcoin", "Saturn", "Sushi", "Vikings", "Origami", "Mars", "Penguin", "Tetris", "Opera", "Sahara"];
 $("#surprise").addEventListener("click", async () => {
-  const b = $("#surprise"); if (b.disabled || starting) return;
+  const b = $("#surprise"); if (b.disabled || starting || rolling) return;
+  rolling = true; const seq = ROUTE_SEQ;
   b.disabled = true; b.classList.add("rolling"); clearErrors();
+  ["#go", "#start", "#target"].forEach(sel => $(sel).disabled = true);
   const fs = $("#f-start"), ft = $("#f-target"); fs.classList.add("roll"); ft.classList.add("roll");
   let k = 0; const spin = setInterval(() => { $("#start").value = ROLL[k++ % ROLL.length]; $("#target").value = ROLL[(k * 7) % ROLL.length]; }, 70);
   const [r] = await Promise.all([api("/api/surprise").catch(() => null), new Promise(res => setTimeout(res, 650))]);
   clearInterval(spin); fs.classList.remove("roll"); ft.classList.remove("roll");
   b.classList.remove("rolling"); b.disabled = false;
-  if (!r || !r.ok) { $("#formMsg").textContent = "Couldn’t pick topics right now. Try again."; $("#formMsg").hidden = false; return; }
+  const unlock = () => { rolling = false; ["#start", "#target"].forEach(sel => $(sel).disabled = false); paintGate(); };
+  if (!r || !r.ok) { unlock(); $("#start").value = TOPIC.start.title || "Pizza"; $("#target").value = TOPIC.target.title || "Black hole"; $("#formMsg").textContent = "Couldn’t pick topics right now. Try again."; $("#formMsg").hidden = false; return; }
   $("#start").value = r.d.start; $("#target").value = r.d.target; paintChips();
   TOPIC.start = { state: "ok", title: r.d.start, desc: "" }; TOPIC.target = { state: "ok", title: r.d.target, desc: "" };
   [fs, ft].forEach(f => { f.classList.remove("drop"); void f.offsetWidth; f.classList.add("drop"); });
-  setTimeout(() => { fs.classList.remove("drop"); ft.classList.remove("drop"); startRace(); }, 450);
+  setTimeout(() => { fs.classList.remove("drop"); ft.classList.remove("drop"); unlock();
+    if (seq === ROUTE_SEQ && VIEW === "home") startRace(); }, 450);
 });
 $("#chips").addEventListener("click", async e => {
   const b = e.target.closest("button"); if (!b) return;
-  if (b.hasAttribute("data-surprise")) {
-    b.classList.add("rolling"); const r = await api("/api/surprise").catch(() => null);
-    if (r && r.ok) { $("#start").value = r.d.start; $("#target").value = r.d.target; TOPIC.start = { state: "unknown" }; TOPIC.target = { state: "unknown" }; clearErrors(); paintChips(); startRace(); }
-    return;
-  }
   $("#start").value = b.dataset.a; $("#target").value = b.dataset.b; clearErrors(); paintChips(); TOPIC.start = { state: "unknown" }; TOPIC.target = { state: "unknown" };
 });
 ["start", "target"].forEach(id => $("#" + id).addEventListener("input", () => paintChips()));
 $("#ask").addEventListener("submit", e => { e.preventDefault(); startRace(); });
-function clearErrors() { ["start", "target"].forEach(id => { $("#f-" + id).classList.remove("bad"); $("#e-" + id).hidden = true; }); $("#formMsg").hidden = true; }
+function clearErrors() { ["start", "target"].forEach(id => { $("#f-" + id).classList.remove("bad"); $("#e-" + id).hidden = true; }); $("#formMsg").hidden = true; paintGate(); }
 function fieldError(d) {
   const id = d.field === "target" ? "target" : "start", box = $("#e-" + id);
   $("#f-" + id).classList.add("bad");
@@ -984,6 +960,7 @@ function lookup(text) {
 function paintGate() {
   const bad = ["start", "target"].find(id => ["missing", "ambiguous"].includes(TOPIC[id].state) && TOPIC[id].text === $("#" + id).value.trim());
   const go = $("#go"), gate = $("#gate");
+  if (typeof rolling !== "undefined" && rolling) return;
   if (bad && !starting) { go.disabled = true; gate.textContent = TOPIC[bad].state === "missing" ? `Fix “${TOPIC[bad].text}” to start` : `Pick a meaning for “${TOPIC[bad].text}” to start`; gate.hidden = false; }
   else { if (!starting) go.disabled = false; gate.hidden = true; }
 }
@@ -1052,28 +1029,29 @@ function setupTopic(id, nextId) {
 }
 setupTopic("start", "target"); setupTopic("target");
 
-// fast 3-2-1 (about a second), played while the race request is already on its way
+// fast 3-2-1 (about a second), played once the race has started on the server
 function countdown(pair = "") {
   const el = $("#cd");  // under reduced motion the numbers still show, just without the zoom
   let stopped = false, t = []; el.hidden = false;
   const done = new Promise(res => ["3", "2", "1", "Go"].forEach((n, i) => t.push(setTimeout(() => {
-    if (stopped) return; el.innerHTML = `<span class="${n === "Go" ? "go" : ""}">${n}</span><p>${esc(pair)}</p>`; if (n === "Go") t.push(setTimeout(res, 260));
+    if (stopped) return; el.innerHTML = `<span class="${n === "Go" ? "go" : ""}">${n}</span><p>${esc(pair)}</p>`; $("#cdLive").textContent = n; if (n === "Go") t.push(setTimeout(res, 260));
   }, i * 250))));
-  return { done, stop() { stopped = true; t.forEach(clearTimeout); el.hidden = true; el.innerHTML = ""; } };
+  return { done, stop() { stopped = true; t.forEach(clearTimeout); el.hidden = true; el.innerHTML = ""; $("#cdLive").textContent = ""; } };
 }
 let starting = false;
 async function startRace() {
-  if (starting) return;
+  if (starting || rolling) return;
   const start = $("#start").value.trim(), target = $("#target").value.trim();
   clearErrors();
   if (!start || !target) { $("#formMsg").textContent = "Type two topics first."; $("#formMsg").hidden = false; return; }
   const bad = ["start", "target"].filter(id => ["missing", "ambiguous"].includes(TOPIC[id].state) && TOPIC[id].text === $("#" + id).value.trim());
   if (bad.length) { bad.forEach(id => paintTopic(id, true)); return; }
-  starting = true; const go = $("#go"); go.disabled = true; go.textContent = "Checking the system…";
+  starting = true; const go = $("#go"); go.disabled = true; go.textContent = "Checking the system…"; const seq = ROUTE_SEQ;
   let cd = { done: Promise.resolve(), stop() {} };
   try {
     const r = await api("/api/race", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ start, target }) });
-    if (r.ok && r.d.race_id) { cd = countdown(`${start} → ${target}`); await cd.done; cd.stop(); history.pushState({}, "", `?watch=${r.d.race_id}`); return watch(r.d.race_id, { start, target }); }
+    if (seq !== ROUTE_SEQ) return;  // they left the home page meanwhile
+    if (r.ok && r.d.race_id) { cd = countdown(`${start} → ${target}`); await cd.done; cd.stop(); history.pushState({}, "", `?watch=${encodeURIComponent(r.d.race_id)}`); LAST_SEARCH = location.search; return watch(r.d.race_id, { start, target }); }
     cd.stop();
     const d = typeof r.d.detail === "object" && r.d.detail ? r.d.detail : { message: r.d.detail || "Something went wrong. Try again." };
     if (d.code === "bad_input") { show("home"); fieldError(d); }
@@ -1090,7 +1068,12 @@ const latestRun = () => (RUNS.find(r => r.lanes.cerebras && (r.outcome || {}).gp
 // ---------- race view ----------
 let R = null;            // { mode: "live"|"replay", S?, origin?, es?, rid, run?, player?, sel, key, tn, cache }
 function raceS() { return R.mode === "live" ? R.S : R.player.S; }
-function raceT() { if (R.mode === "replay") return R.player.T; const S = R.S; return S.done ? S.endWall : Math.max(0, (performance.now() - R.origin) / 1000); }
+function raceT() {
+  if (R.mode === "replay") return R.player.T;
+  const S = R.S; if (S.done) return S.endWall; if (S.abortAt != null && S.ids.every(x => S.lanes[x] && S.lanes[x].result)) return S.abortAt;
+  if (S.lost != null) return S.lost;
+  return Math.max(0, (performance.now() - R.origin) / 1000);
+}
 function stopLive() { if (R && R.es) { R.es.close(); R.es = null; } if (R && R.retry) clearTimeout(R.retry); }
 
 function boardRow(id) {
@@ -1189,7 +1172,7 @@ function renderRace() {
       if (won) { cls += " won rh-win"; et = `Found it in ${clicks(L.hops)}`; es = S.first === id && S.storyWriting ? "Kimi is writing the story…" : ""; }
       else if (L.result === "stopped" && S.aborted && L.end < 299) { et = "Stopped early"; es = "Cerebras couldn’t run this race, so there was nothing to race against. No point making you wait."; }
       else if (L.result === "stopped") { et = L.end >= 299 ? "Stopped at 5 minutes" : "Stopped"; es = `Still not there. It was still deciding where to go from ${L.page || S.start}.`; }
-      else { cls += " err"; et = `The ${NAME[id]} lane stopped on page ${L.pageNo}`; es = (/overloaded|capacity|didn.t answer/i.test(L.error) ? "Cerebras’s shared endpoint is overloaded right now, so it stopped answering." : "The model service stopped answering.") + (O && O.result === "done" ? ` The ${NAME[other]} result still counts.` : ""); }
+      else { cls += " err"; et = `The ${NAME[id]} lane stopped on page ${L.pageNo}`; es = (/overloaded|capacity|didn.t answer/i.test(L.error) ? (id === "cerebras" ? "Cerebras’s shared endpoint is overloaded right now, so it stopped answering." : "NVIDIA’s free endpoint is overloaded right now, so it stopped answering.") : "The model service stopped answering.") + (O && O.result === "done" ? ` The ${NAME[other]} result still counts.` : ""); }
       put(id, "endb", cls, "class"); put(id, "et", et, "text"); put(id, "es", es, "text"); put(id, "es", !es, "hide");
       put(id, "wstory", !(won && S.first === id && S.story), "hide");
     }
@@ -1204,8 +1187,12 @@ function renderRace() {
   $("#rStory").hidden = !S.story;
   if (S.story) $("#rStorySub").textContent = `Kimi wrote how ${S.start} leads to ${S.target}`;
   const live = R.mode === "live" && !S.done;
-  $("#v-race [data-odo-race]").innerHTML = `Waiting saved by Cerebras: <b>${fmtMS(STATS.seconds_saved + (live ? saved : 0))}</b> over ${STATS.races + (live && savedOn && g.result ? 1 : 0)} races`;
-  $("#rAbort").hidden = !S.aborted;
+  $("#v-race [data-odo-race]").innerHTML = `Waiting saved by Cerebras: <b>${fmtMS(STATS.seconds_saved + (live ? saved : 0))}</b> over ${(Number(STATS.races) || 0) + (live && savedOn && g.result ? 1 : 0)} races`;
+  $("#rAbort").hidden = !S.aborted && S.lost == null;
+  const abortKind = S.lost != null ? "lost" : "cerebras";
+  if (R.cache.abortKind !== abortKind && !$("#rAbort").hidden) { R.cache.abortKind = abortKind;
+    $("#rAbort").innerHTML = abortKind === "lost" ? "<b>Lost the connection to this race</b><span>It may still be running. Reload the page to reconnect, or watch a replay.</span>"
+      : "<b>This race was stopped early</b><span>Cerebras is overloaded right now, so we ended it instead of making you wait. Try again in a minute, or watch a replay.</span>"; }
   const ended = S.ids.every(x => S.lanes[x] && S.lanes[x].result) || S.done;
   const lv = $("#rLive"); const want = ended ? "Finished" : "Live";
   if (lv.dataset.t !== want) { lv.dataset.t = want; lv.innerHTML = ended ? "Finished" : `<i class="breathe"></i>Live`; }
@@ -1221,8 +1208,9 @@ function startRaceView(mode) {
   window.scrollTo(0, 0);
 }
 async function openReplay(id, opts = {}) {
-  stopLive();
+  stopLive(); const seq = ROUTE_SEQ;
   const r = await api(`/api/runs/${encodeURIComponent(id)}`).catch(() => null);
+  if (seq !== ROUTE_SEQ) return;  // the visitor moved on while this loaded
   if (!r || !r.ok) { show("home"); $("#formMsg").textContent = "That race isn’t available any more."; $("#formMsg").hidden = false; return; }
   const sm = r.d.summary;
   R = { mode: "replay", rid: id, run: r.d, player: new Player(r.d.events, sm.start, sm.target), sel: "cerebras" };
@@ -1239,6 +1227,8 @@ function paintBar() {
   const p = R.player, pct = p.dur ? p.T / p.dur * 100 : 0;
   $("#scFi").style.width = pct.toFixed(2) + "%"; $("#scKn").style.left = pct.toFixed(2) + "%";
   $("#rtime").textContent = `${fmt(p.T).full.replace(/\.\d$/, "")} / ${fmt(p.dur).full.replace(/\.\d$/, "")}`;
+  const sc = $("#scrub"); sc.setAttribute("aria-valuemax", String(Math.round(p.dur))); sc.setAttribute("aria-valuenow", String(Math.round(p.T)));
+  sc.setAttribute("aria-valuetext", `${fmt(p.T).full} of ${fmt(p.dur).full}`);
   const playing = p.playing;
   if (R.cache.pp !== playing) { R.cache.pp = playing;
     $("#pp").innerHTML = playing ? `<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z" fill="currentColor"/></svg>` : `<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4l14 8-14 8z" fill="currentColor"/></svg>`;
@@ -1263,7 +1253,7 @@ $("#copyM").addEventListener("click", copyLink); $("#copyD").addEventListener("c
 document.addEventListener("click", e => {
   if (e.target.closest("[data-notes]")) { const on = document.body.classList.toggle("notes"); $$("[data-notes]").forEach(b => b.setAttribute("aria-pressed", String(on))); }
   if (e.target.closest("[data-story]") || e.target.closest("#rStory")) { e.preventDefault(); openAnswerFromRace(); }
-  if (e.target.closest("[data-latest]")) { e.preventDefault(); const id = latestRun(); if (id) nav(`?replay=${id}`); }
+  if (e.target.closest("[data-latest]")) { e.preventDefault(); const id = latestRun(); if (id) nav(`?replay=${encodeURIComponent(id)}`); }
 });
 
 // live race
@@ -1275,18 +1265,26 @@ function watch(rid, meta = {}) {
   renderRace();
 }
 function connect(rid) {
-  const me = R; let gotAny = false;
-  const es = new EventSource(API + `/api/race/${rid}/events`); me.es = es;
+  const me = R; let gotAny = false; me.fails = me.fails || 0;
+  const es = new EventSource(API + `/api/race/${encodeURIComponent(rid)}/events`); me.es = es;
   es.onmessage = m => {
-    const e = JSON.parse(m.data); gotAny = true;
-    if (e.type === "sync") { me.S = fresh(me.S.start, me.S.target); me.origin = performance.now() - e.wall * 1000; return; }  // full history follows
+    const e = JSON.parse(m.data); gotAny = true; me.fails = 0;
+    if (e.type === "sync") {  // full history follows: reset the state in place (the answer page holds a reference)
+      const f = fresh(me.S.start, me.S.target); for (const k of Object.keys(me.S)) delete me.S[k]; Object.assign(me.S, f);
+      me.origin = performance.now() - e.wall * 1000; return; }
     apply(me.S, e);
     if (e.type === "race_started") document.title = `Racing: ${e.start} → ${e.target} · Rabbit Hole`;
     if (e.type === "race_done") { es.close(); me.es = null; loadStats(); loadRuns(); }
   };
   es.onerror = async () => {
     es.close(); me.es = null; if (R !== me || me.S.done) return;
-    if (!gotAny) { const r = await api(`/api/runs/${rid}`).catch(() => null); if (r && r.ok && R === me) { history.replaceState({}, "", `?replay=${rid}`); return openReplay(rid); } }
+    if (!gotAny) {  // the race isn't live: maybe it finished (open its replay), maybe it never existed
+      const r = await api(`/api/runs/${encodeURIComponent(rid)}`).catch(() => null);
+      if (R !== me) return;
+      if (r && r.ok) { history.replaceState({}, "", `?replay=${encodeURIComponent(rid)}`); return openReplay(rid); }
+      if (r && r.status === 404) { R = null; history.replaceState({}, "", location.pathname); show("home"); $("#formMsg").textContent = "That race isn’t available any more."; $("#formMsg").hidden = false; return; }
+    }
+    if (++me.fails > 24) { me.S.lost = raceT(); return; }  // about a minute of retries, then say so and stop the clock
     me.retry = setTimeout(() => { if (R === me) connect(rid); }, 2500);
   };
 }
@@ -1298,12 +1296,12 @@ function showBusy(d) {
   STATE_LIVE = lv.id ? { at: performance.now() - (lv.elapsed || 0) * 1000 } : null;
   $("#sBody").innerHTML = `<span class="small">One live race at a time</span><h2>Someone is racing right now</h2><p>Watch theirs live. Your turn opens as soon as it finishes.</p>
     ${lv.id ? `<div class="livecard"><span class="live"><i class="breathe"></i>Live · ${esc(lv.start)} → ${esc(lv.target)}</span><span class="g"><span>${img("cerebras", 14)}Cerebras</span><span data-sl></span><span class="fog">${img("gpu", 14)}NVIDIA GPU</span><span data-sl></span></span></div>` : ""}`;
-  $("#sActs").innerHTML = (lv.id ? `<a class="btn primary" href="?watch=${esc(lv.id)}" data-watch="${esc(lv.id)}">Watch it live</a>` : "") + `<a class="btn quiet" href="#" data-latest>Play a replay instead</a>`;
+  $("#sActs").innerHTML = (lv.id ? `<a class="btn primary" href="?watch=${encodeURIComponent(lv.id)}" data-watch="${esc(lv.id)}">Watch it live</a>` : "") + `<a class="btn quiet" href="#" data-latest>Play a replay instead</a>`;
 }
 function showLimit(d) {
-  show("state"); STATE_LIVE = null; const n = d.limit || 4;
+  show("state"); STATE_LIVE = null; const n = Math.min(10, Math.max(1, parseInt(d.limit, 10) || 4)); const mins = parseInt(d.minutes, 10) || 0;
   $("#sBody").innerHTML = `<span class="small">${n} of ${n} live races used this hour</span><h2>Enjoy the replays, come back soon</h2>
-    <p>Each visitor gets ${n} live races an hour, so the free credits last.${d.minutes ? ` Your next one opens in <span class="ember">${d.minutes} min</span>.` : ""}</p>
+    <p>Each visitor gets ${n} live races an hour, so the free credits last.${mins ? ` Your next one opens in <span class="ember">${mins} min</span>.` : ""}</p>
     <div class="bars" aria-hidden="true">${"<span></span>".repeat(n)}</div>`;
   $("#sActs").innerHTML = `<a class="btn primary" href="#" data-latest>Play the latest replay</a><a class="btn quiet" href="./#recent" data-home>Browse past races</a>`;
 }
@@ -1317,21 +1315,24 @@ function showUnavailable(d) {
 }
 document.addEventListener("click", e => { if (e.target.closest("[data-retry]")) { show("home"); startRace(); } });
 function renderStateLive() { if (!STATE_LIVE) return; const t = (performance.now() - STATE_LIVE.at) / 1000; $$("[data-sl]").forEach(el => el.textContent = fmt(t).full); }
-document.addEventListener("click", e => { const a = e.target.closest("[data-watch]"); if (!a) return; e.preventDefault(); history.pushState({}, "", `?watch=${a.dataset.watch}`); watch(a.dataset.watch); });
+document.addEventListener("click", e => { const a = e.target.closest("[data-watch]"); if (!a) return; e.preventDefault(); history.pushState({}, "", `?watch=${encodeURIComponent(a.dataset.watch)}`); LAST_SEARCH = location.search; watch(a.dataset.watch); });
 
 // ---------- answer ----------
 let A = null; // { S, rid, live }
 function openAnswerFromRace() {
   const full = R.mode === "replay" ? applyAll(R.run.events, R.run.summary.start, R.run.summary.target) : raceS();  // a replay's answer shows the final result
   A = { S: full, rid: R.rid, live: R.mode === "live" && !full.done, replayable: R.mode === "replay" || full.done };
-  history.pushState({}, "", `?answer=${encodeURIComponent(R.rid)}`); stopLiveKeep(); paintAnswer(); show("answer"); window.scrollTo(0, 0);
+  history.pushState({}, "", `?answer=${encodeURIComponent(R.rid)}`); paintAnswer(); show("answer"); window.scrollTo(0, 0);
 }
-function stopLiveKeep() { /* keep the live stream running so the answer can update */ }
 async function openAnswer(id) {
-  if (R && R.rid === id && R.mode === "live") { A = { S: R.S, rid: id, live: !R.S.done, replayable: R.S.done }; if (!R.es && !R.S.done) connect(id); }
+  if (R && R.rid === id && R.mode === "live" && R.S.started) { A = { S: R.S, rid: id, live: !R.S.done, replayable: R.S.done }; if (!R.es && !R.S.done) connect(id); }
   else {
+    const seq = ROUTE_SEQ;
     const r = await api(`/api/runs/${encodeURIComponent(id)}`).catch(() => null);
-    if (!r || !r.ok) { show("home"); $("#formMsg").textContent = "That race isn’t available any more."; $("#formMsg").hidden = false; return; }
+    if (seq !== ROUTE_SEQ) return;
+    if (r && r.status === 404) { history.replaceState({}, "", `?watch=${encodeURIComponent(id)}`); return watch(id); }  // still live: follow it
+    if (r && r.ok && !r.d.events.some(e => e.type === "lane_done")) { history.replaceState({}, "", `?replay=${encodeURIComponent(id)}`); return openReplay(id); }
+    if (!r || !r.ok) { history.replaceState({}, "", location.pathname); show("home"); $("#formMsg").textContent = "That race isn’t available any more."; $("#formMsg").hidden = false; return; }
     A = { S: applyAll(r.d.events, r.d.summary.start, r.d.summary.target), rid: id, live: false, replayable: true };
   }
   paintAnswer(); show("answer"); window.scrollTo(0, 0);
@@ -1342,20 +1343,32 @@ function postText(S) {
   const { steps } = chainOf(S), c = S.lanes.cerebras, g = S.lanes.gpu;
   const cl = c && c.result === "done" ? `Kimi K3.1 Pro on @Cerebras: ${fmtS(c.end)}.` : "Kimi K3.1 Pro on @Cerebras.";
   let gl = "";
-  if (g && !S.gpuPaused) gl = g.result === "done" ? ` On NVIDIA’s free GPU tier: ${fmtS(g.end)}.` : g.result === "error" ? " On NVIDIA’s free GPU tier: it didn’t finish." : " On NVIDIA’s free GPU tier: still not there after 5 min.";
-  return `How is ${S.start} connected to ${S.target}?\n${steps.map(s => s.title).join(" → ")}\n${cl}${gl}\n${SITE} @Kimi_Moonshot #KimiOnCerebras`;
+  if (g && !S.gpuPaused) gl = g.result === "done" ? ` On NVIDIA’s free GPU tier: ${fmtS(g.end)}.`
+    : g.result === "error" ? " On NVIDIA’s free GPU tier: it didn’t finish."
+    : g.result === "stopped" && g.end >= 299 ? " On NVIDIA’s free GPU tier: still not there after 5 min."
+    : g.result == null ? " On NVIDIA’s free GPU tier: still thinking." : "";
+  const build = chain => `How is ${S.start} connected to ${S.target}?\n${chain}\n${cl}${gl}\n${SITE} @Kimi_Moonshot #KimiOnCerebras`;
+  const xLen = t => t.length - SITE.length + 23;  // X counts any link as 23 characters
+  const names = steps.map(s => s.title);
+  let post = build(names.join(" → "));
+  if (xLen(post) > 280) { const c = names.map(n => capName(n, 24)); post = build((c.length > 5 ? [...c.slice(0, 2), "…", ...c.slice(-2)] : c).join(" → ")); }
+  if (xLen(post) > 280) post = build(`${names.length - 1} clicks through Wikipedia`);
+  if (xLen(post) > 280) post = `How is ${capName(S.start, 40)} connected to ${capName(S.target, 40)}?\n${cl}\n${SITE} @Kimi_Moonshot #KimiOnCerebras`;
+  return post;
 }
 function splitStory(t) { const m = String(t).match(/^(.+?[.!?])\s+(.+)$/s); return m ? [m[1], m[2]] : [t, ""]; }
 function paintAnswer() {
   const S = A.S, { L, id, steps } = chainOf(S);
   $("#aK").textContent = L && L.result === "done" ? `Found in ${clicks(L.hops)}` : "Not found yet";
   $("#aH").innerHTML = `${esc(S.start)} <span class="haze">to</span> ${esc(S.target)}`;
+  document.title = `${S.start} → ${S.target} · Rabbit Hole`;
   const tv = (lid) => {
     const X = S.lanes[lid];
     if (!X) return `<div><dt>${img(lid, 16)}${NAME[lid]}</dt><dd>${kimiRun(12)}</dd><dd class="tv haze">Resting</dd><dd class="ts">The GPU side is resting today.</dd></div>`;
     let v, sub;
     if (X.result === "done") { v = `<span class="${S.first === lid ? "ember" : ""}">${fmtS(X.end)}</span>`; sub = `${clicks(X.hops)} · ${fmtS(X.ai)} AI thinking`; }
-    else if (X.result === "stopped") { v = `<span class="haze">5:00 <small>stopped</small></span>`; sub = X.hops ? `Stopped on page ${X.pageNo}.` : "Stopped. Still on page 1."; }
+    else if (X.result === "stopped" && X.end >= 299) { v = `<span class="haze">5:00 <small>stopped</small></span>`; sub = X.hops ? `Stopped on page ${X.pageNo}.` : "Stopped. Still on page 1."; }
+    else if (X.result === "stopped") { v = `<span class="haze">Stopped</span>`; sub = "Stopped early, because Cerebras couldn’t run this race."; }
     else if (X.result === "error") { v = `<span class="haze">Error</span>`; sub = "Ended with an error."; }
     else { v = `<span class="haze">Racing…</span>`; sub = "Still running."; }
     return `<div><dt>${img(lid, 16)}${NAME[lid]}${TIER(lid)}</dt><dd>${kimiRun(12)}</dd><dd class="tv">${v}</dd><dd class="ts desk-only">${sub}</dd></div>`;
@@ -1439,17 +1452,18 @@ async function shareImage(S) {
     if (small) { const w = g.measureText(val).width; g.font = `500 15px ${HUB}`; g.fillText(small, x + w + 6, 619); }
   };
   lane(60, lc, "Cerebras", cer && cer.result === "done" ? fmtS(cer.end) : "—", "#D6B28A");
-  if (gpu) lane(330, lg, "NVIDIA GPU · free tier", gpu.result === "done" ? fmtS(gpu.end) : gpu.result === "error" ? "Error" : "5:00", "#A6A9A3", gpu.result === "stopped" ? "stopped" : "");
+  if (gpu) lane(330, lg, "NVIDIA GPU · free tier", gpu.result === "done" ? fmtS(gpu.end) : gpu.result === "error" ? "Error" : gpu.result === "stopped" && gpu.end < 299 ? "Stopped" : gpu.result == null ? "Racing" : "5:00", "#A6A9A3", gpu.result === "stopped" && gpu.end >= 299 ? "stopped" : "");
   else lane(330, lg, "NVIDIA GPU · free tier", "Resting", "#A6A9A3");
   // right panel: the chain
   const px = 616, py = 52, pw = 524, ph = 571;
   g.fillStyle = "#191816"; rr(g, px, py, pw, ph, 24); g.fill();
   g.strokeStyle = "#D6B28A"; g.lineWidth = 2; g.beginPath(); g.moveTo(px + pw - 10, py - 12); g.lineTo(px + pw + 12, py - 12); g.lineTo(px + pw + 12, py + 10); g.stroke();
   g.beginPath(); g.moveTo(px - 12, py + ph - 10); g.lineTo(px - 12, py + ph + 12); g.lineTo(px + 10, py + ph + 12); g.stroke();
-  let steps = chainOf(S).steps; if (steps.length > 7) steps = [...steps.slice(0, 3), { title: "…", gap: true }, ...steps.slice(-3)];
+  const allSteps = chainOf(S).steps.map((st, i) => ({ ...st, num: i + 1 }));
+  let steps = allSteps.length > 7 ? [...allSteps.slice(0, 3), { title: "…", gap: true }, ...allSteps.slice(-3)] : allSteps;
   const avail = ph - 34 - 96, rowH = Math.min(62, avail / steps.length); let ry = py + 34 + (avail - rowH * steps.length) / 2;
   steps.forEach((s, i) => {
-    const n = s.gap ? "" : String(chainOf(S).steps.indexOf(s) + 1).padStart(2, "0");
+    const n = s.gap ? "" : String(s.num).padStart(2, "0");
     g.fillStyle = "#D6B28A"; g.font = `700 14px ${HUB}`; g.fillText(n, px + 36, ry + rowH / 2 + 5);
     g.fillStyle = pe; g.font = `500 25px ${HUB}`; let t = s.title; const room = s.auto ? 300 : 380; while (g.measureText(t).width > room && t.length > 4) t = t.slice(0, -2); if (t !== s.title) t += "…";
     g.fillText(t, px + 76, ry + rowH / 2 + 9);
@@ -1473,14 +1487,16 @@ document.addEventListener("click", async e => {
     const c = await shareImage(A.S); const blob = await new Promise(r => c.toBlob(r, "image/png"));
     const name = `rabbit-hole-${A.S.start}-${A.S.target}.png`.replace(/[^\w.-]+/g, "-").toLowerCase();
     const file = new File([blob], name, { type: "image/png" });
-    if (navigator.canShare && navigator.canShare({ files: [file] }) && matchMedia("(max-width: 899px)").matches) await navigator.share({ files: [file], text: postText(A.S) }).catch(() => {});
-    else { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+    const download = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
+    if (navigator.canShare && navigator.canShare({ files: [file] }) && matchMedia("(max-width: 899px)").matches) {
+      try { await navigator.share({ files: [file], text: postText(A.S) }); } catch (err) { if (!err || err.name !== "AbortError") download(); }
+    } else download();
   } finally { b.textContent = old; }
 });
 
 // ---------- video cards (?card=intro|end) ----------
 function showCard(q) {
-  $$(".view").forEach(s => s.hidden = true); document.body.classList.add("carding"); const st = $("#vstage"); st.hidden = false;
+  VIEW = "card"; $$(".view").forEach(s => s.hidden = true); document.body.classList.add("carding"); const st = $("#vstage"); st.hidden = false;
   const from = q.get("from") || "Pizza", to = q.get("to") || "Black holes";
   if (q.get("card") === "intro") {
     st.innerHTML = `<div class="vcard vi"><p class="vb">${mark(34)}Rabbit Hole</p><div><h1 class="rise d1">How is <span>${esc(from)}</span> connected to <span>${esc(to)}</span>?</h1><p class="vs">Same AI. Same question. Two different chips.</p></div>

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import re
 from pathlib import Path
 from html.parser import HTMLParser
@@ -71,6 +72,30 @@ class _BodyLinks(HTMLParser):
             self.heading += data
 
 
+BAD_TITLE = re.compile(r"[|#<>\[\]{}\x00-\x1f]")
+MAX_LINKS, MAX_INFO, MAX_REDIRECTS = 4000, 12000, 4000
+
+
+def norm(title: str) -> str:
+    """Wikipedia titles are case-sensitive except for the first letter; '_' means space."""
+    t = re.sub(r"\s+", " ", title.replace("_", " ")).strip()
+    return t[:1].upper() + t[1:]
+
+
+def _trim(d: dict, cap: int) -> None:
+    """Keep caches bounded: drop the oldest quarter when a cache grows past its cap."""
+    if len(d) > cap:
+        for k in list(d)[: cap // 4]:
+            d.pop(k, None)
+
+
+def _retry_after(value: str | None) -> float:
+    try:
+        return min(30.0, max(1.0, float(value)))
+    except (TypeError, ValueError):
+        return 5.0
+
+
 class Wiki:
     def __init__(self, user_agent: str = UA) -> None:
         self._http = httpx.AsyncClient(headers={"User-Agent": user_agent}, timeout=httpx.Timeout(40, connect=10))
@@ -82,18 +107,26 @@ class Wiki:
         self._cache_file = CACHE_FILE
         try:
             data = json.loads(self._cache_file.read_text())
-            self._links, self._info = data.get("links", {}), data.get("info", {})
+            self._links = data.get("links", {})
+            # re-key by normalised title (older caches used lower-case keys, which mixed up "IT" and "It")
+            self._info = {norm(v["title"]): v for v in data.get("info", {}).values() if isinstance(v, dict) and v.get("title")}
             self._redirects = {k: set(v) for k, v in data.get("redirects", {}).items()}
         except Exception:  # noqa: BLE001 - no cache yet
             pass
 
     def save(self) -> None:
-        """Persist fetched pages so demo races never wait on Wikipedia."""
+        """Persist fetched pages so demo races never wait on Wikipedia (atomic write)."""
         try:
-            self._cache_file.write_text(json.dumps({"links": self._links, "info": self._info,
-                                                    "redirects": {k: sorted(v) for k, v in self._redirects.items()}}))
+            data = json.dumps({"links": self._links, "info": self._info,
+                               "redirects": {k: sorted(v) for k, v in self._redirects.items()}})
+            tmp = self._cache_file.with_suffix(".tmp")
+            tmp.write_text(data)
+            os.replace(tmp, self._cache_file)
         except Exception:  # noqa: BLE001
             pass
+
+    async def asave(self) -> None:
+        await asyncio.to_thread(self.save)
 
     async def _get(self, params: dict) -> dict:
         """Both lanes ask for the same pages at the same moment: share one request per page."""
@@ -117,16 +150,18 @@ class Wiki:
                 await asyncio.sleep(1 + attempt)
                 continue
             if r.status_code == 429 and attempt < 3:
-                await asyncio.sleep(float(r.headers.get("retry-after", 5)))
+                await asyncio.sleep(_retry_after(r.headers.get("retry-after")))
                 continue
             r.raise_for_status()
             return r.json()
         raise RuntimeError("Wikipedia rate limit")
 
     async def resolve(self, title: str) -> dict:
-        key = title.strip().lower()
+        key = norm(title)
         if key in self._info:
             return self._info[key]
+        if not key or BAD_TITLE.search(key) or len(key) > 255:  # "A|B" would look up two pages at once
+            return {"title": key, "exists": False, "disambiguation": False, "url": "", "summary": ""}
         d = await self._get({"action": "query", "titles": title, "redirects": 1,
                              "prop": "pageprops|extracts|info", "exintro": 1, "explaintext": 1,
                              "exsentences": 2, "ppprop": "disambiguation", "inprop": "url"})
@@ -139,7 +174,8 @@ class Wiki:
             "summary": re.sub(r"\s+", " ", page.get("extract", "")).strip()[:300],
         }
         self._info[key] = info
-        self._info[info["title"].lower()] = info
+        self._info[norm(info["title"])] = info
+        _trim(self._info, MAX_INFO)
         return info
 
     async def body_links(self, title: str) -> list[str]:
@@ -149,7 +185,7 @@ class Wiki:
         d = await self._get({"action": "parse", "page": canon, "prop": "text", "redirects": 1,
                              "disableeditsection": 1, "disabletoc": 1})
         p = _BodyLinks()
-        p.feed(d.get("parse", {}).get("text", ""))
+        await asyncio.to_thread(p.feed, d.get("parse", {}).get("text", ""))  # big pages: keep the event loop free
         seen, out = set(), []
         for t in p.links:
             k = t.lower()
@@ -157,6 +193,7 @@ class Wiki:
                 seen.add(k)
                 out.append(t)
         self._links[canon] = out
+        _trim(self._links, MAX_LINKS)
         return out
 
     async def target_redirects(self, title: str) -> set[str]:
@@ -167,6 +204,7 @@ class Wiki:
         page = (d.get("query", {}).get("pages") or [{}])[0]
         names = {canon} | {r["title"] for r in page.get("redirects", [])}
         self._redirects[canon] = names
+        _trim(self._redirects, MAX_REDIRECTS)
         return names
 
     async def suggest(self, text: str) -> list[str]:

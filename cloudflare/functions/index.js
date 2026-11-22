@@ -5,13 +5,12 @@
 const DEFAULT_SITE = "https://airabbithole.pages.dev";
 
 const fmt = x => (x < 60 ? `${(Math.floor(x * 10) / 10).toFixed(1)} s` : `${Math.floor(x / 60)}:${(x % 60).toFixed(1).padStart(4, "0")}`);
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 async function summary(ORIGIN, id) {
   if (!ORIGIN) return null;
   try {
     const path = id ? `/api/runs/${encodeURIComponent(id)}/summary` : "/api/featured";
-    const r = await fetch(ORIGIN + path, { cf: { cacheTtl: id ? 3600 : 60, cacheEverything: true } });
+    const r = await fetch(ORIGIN + path, { cf: { cacheTtl: id ? 3600 : 60, cacheEverything: true }, signal: AbortSignal.timeout(1500) });
     return r.ok ? await r.json() : null;
   } catch { return null; }
 }
