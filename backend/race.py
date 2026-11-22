@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import random
 import time
 from dataclasses import dataclass, field
@@ -24,6 +25,10 @@ from wiki import Wiki
 MAX_HOPS = 12
 MAX_LINKS_SHOWN = 400
 QUEUE_RETRY_SECONDS = 60
+# The fast lane normally answers in 2-10 s. If one call takes longer than this, the provider is
+# overloaded (OpenClaw keeps retrying 429s inside a single call), so give up instead of waiting.
+FAST_CALL_CAP = float(os.getenv("RH_FAST_CALL_CAP", "75"))
+on_fast_answer: Callable[[], None] | None = None  # set by the server: records "Cerebras is answering"
 
 SYSTEM = """You are playing the Wikipedia game. Goal: reach the TARGET article from the START article
 by clicking links inside articles. You are on one article and see its links. Pick the single link
@@ -129,7 +134,16 @@ async def run_lane(lane: Lane, wiki: Wiki, start: str, target: str, emit: Emit) 
             await emit({**base, "type": "thinking", "page": cur, "hop": hop + 1, "options": len(options),
                         "t": time.perf_counter() - t0, "ai": round(model_ms / 1000, 2)})
             h0 = time.perf_counter()
-            resp = await _call(client, lane, [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}])
+            msgs = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}]
+            if lane.id == "cerebras":
+                try:
+                    resp = await asyncio.wait_for(_call(client, lane, msgs), FAST_CALL_CAP)
+                except asyncio.TimeoutError:
+                    raise RuntimeError(f"Cerebras didn't answer for {int(FAST_CALL_CAP)} s. Its shared endpoint is overloaded right now.") from None
+                if on_fast_answer:
+                    on_fast_answer()
+            else:
+                resp = await _call(client, lane, msgs)
             ms = int((time.perf_counter() - h0) * 1000)
             model_ms += ms
             usage = getattr(resp, "usage", None)

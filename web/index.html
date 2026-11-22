@@ -52,6 +52,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 a, button { transition: transform .35s var(--ease), background-color .35s, color .35s; -webkit-tap-highlight-color: transparent; }
 a:active, button:active { transform: scale(.98); }
 :focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
+h1, h2, h3 { text-wrap: balance; }
 input:focus { outline: none; }
 .lg { display: block; flex: none; }
 .small { font-size: 13px; color: var(--haze); }
@@ -74,7 +75,7 @@ input:focus { outline: none; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 
 /* shared bits */
-.brand { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font: 600 15px var(--hub); }
+.brand { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font: 600 15px var(--ins); }
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
 .link-quiet { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; color: var(--haze); }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 0; border-radius: 10px;
@@ -99,7 +100,7 @@ input:focus { outline: none; }
 /* ---------------- HOME ---------------- */
 .wrap { padding: 0 20px; }
 .hero { display: flex; flex-direction: column; gap: 8px; padding: 18px 0 22px; }
-.hero h1 { margin: 0; font: 500 30px/1.1 var(--hub); letter-spacing: -.02em; }
+.hero h1 { margin: 0; font: 600 30px/1.1 var(--ins); letter-spacing: -.02em; }
 .hero .lead { margin: 0; font-size: 15px; color: var(--haze); }
 .ask { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
 .fwrap { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -109,6 +110,7 @@ input:focus { outline: none; }
 .field:focus-within, .field.bad { box-shadow: inset 0 0 0 1px var(--ember); }
 .ferr { margin: 0; font-size: 13px; color: var(--fog); text-align: left; }
 .ferr .ok { color: var(--ember); margin-right: 4px; }
+.ferr.desc { padding: 0 14px; color: var(--haze); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fwrap { position: relative; }
 .sugg { position: absolute; left: 0; right: 0; z-index: 20; margin: 0; padding: 6px; list-style: none; background: var(--night); border-radius: 12px;
   box-shadow: 0 16px 40px rgba(0,0,0,.55), inset 0 0 0 1px var(--line2); max-height: 336px; overflow-y: auto; text-align: left; animation: rh-in .35s var(--ease) both; }
@@ -124,9 +126,10 @@ input:focus { outline: none; }
 .chips::-webkit-scrollbar { display: none; }
 .formmsg { margin: 10px 0 0; font-size: 13px; color: var(--fog); }
 
-.preview { display: flex; flex-direction: column; gap: 10px; margin: 26px 0 0; padding: 14px 16px; border-radius: 14px; background: var(--night); }
-.pv-info { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12px; color: var(--haze); }
-.pv-q { margin: 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+.preview { display: flex; flex-direction: column; gap: 10px; margin: 26px 0 0; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.pv-info { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--haze); }
+.pv-info .pv-ago { margin-left: auto; flex: none; }
+.pv-q { margin: 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 15px; font-weight: 500; color: var(--pearl); }
 .pv-q img { display: inline-block; vertical-align: -2px; }
 .pv-sub { display: none; }
 .pv-lane { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: baseline; }
@@ -158,9 +161,11 @@ input:focus { outline: none; }
   .hero { align-items: center; text-align: center; gap: 18px; padding: 96px 0 64px; }
   .hero h1 { max-width: 16em; font-size: clamp(36px, 4.4vw, 56px); line-height: 1.05; letter-spacing: -.025em; text-wrap: balance; }
   .hero .lead { max-width: 34em; font-size: 18px; }
-  .ask { width: 100%; max-width: 760px; margin-top: 28px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  .ask { width: 100%; max-width: 760px; margin-top: 28px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  .ask .btn.primary { grid-column: 1 / -1; }
+  .gate { margin-top: 4px; }
   .field { padding: 12px 16px; }
-  .ask .btn.primary { min-height: 64px; }
+  .ask .btn.primary { min-height: 56px; }
   .chips { flex-wrap: wrap; justify-content: center; overflow: visible; margin: 0; padding: 0; }
   .preview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: 0 0 80px; padding: 0; border-radius: 0; background: none;
     border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
@@ -184,7 +189,9 @@ input:focus { outline: none; }
 
 /* countdown */
 .cd { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(17,17,16,.92); backdrop-filter: blur(6px); }
-.cd span { font: 500 clamp(120px, 28vw, 260px)/1 var(--hub); letter-spacing: -.04em; color: var(--pearl); font-variant-numeric: tabular-nums; animation: cd-pop .26s var(--ease) both; }
+.cd { flex-direction: column; gap: 18px; }
+.cd p { margin: 0; font-size: clamp(16px, 2vw, 22px); color: var(--fog); }
+.cd span { font: 500 clamp(200px, 30vw, 320px)/1 var(--hub); letter-spacing: -.04em; color: var(--pearl); font-variant-numeric: tabular-nums; animation: cd-pop .26s var(--ease) both; }
 .cd span.go { color: var(--ember); }
 @keyframes cd-pop { from { opacity: 0; transform: scale(1.5); } 60% { opacity: 1; } to { opacity: 1; transform: scale(1); } }
 
@@ -193,9 +200,34 @@ input:focus { outline: none; }
 .chip.surprise svg { transition: transform .5s var(--ease); }
 .chip.surprise:hover svg, .chip.surprise.rolling svg { transform: rotate(180deg); }
 
-/* hall of fame: the standout races */
-.fame { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(230px, 1fr); gap: 10px; overflow-x: auto; margin: 4px -20px 18px; padding: 2px 20px 4px; scrollbar-width: none; }
-.fame::-webkit-scrollbar { display: none; }
+/* hall of fame: one trophy case */
+.fame { position: relative; margin: 6px 0 18px; border-radius: 16px; background: var(--night); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
+.fame::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: rgba(214,178,138,.28); }
+.fame::after { content: ""; position: absolute; top: 0; left: -30%; width: 30%; height: 1px; background: linear-gradient(90deg, transparent, var(--ember), transparent); animation: glide 6s linear infinite; }
+@keyframes glide { from { left: -30%; } to { left: 100%; } }
+.fame-h { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 16px 6px; }
+.fame-h b { font-size: 14px; font-weight: 600; } .fame-h span { font-size: 12px; color: var(--haze); }
+.fcell { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 2px 12px; padding: 12px 16px; border-top: 1px solid var(--rule); transition: background-color .35s; }
+.fcell i { grid-row: 1 / span 2; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: var(--smoke); color: var(--ember); }
+.fcell .fl { font-size: 12px; color: var(--haze); }
+.fcell .ft { grid-column: 2; font-size: 14px; }
+.fcell .fv { grid-column: 3; grid-row: 1 / span 2; font: 500 20px var(--hub); font-variant-numeric: tabular-nums; white-space: nowrap; transition: color .35s; }
+.fcell:hover { background: #1E1D1A; } .fcell:hover .fv { color: var(--ember); }
+
+/* recent races */
+.rrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 12px 0; border-top: 1px solid rgba(245,244,240,.08); transition: background-color .35s; }
+.rrow:hover, .rrow:active { background: var(--night); }
+.rrow .rn { font-size: 15px; font-weight: 500; }
+.rrow .rc { display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end; font: 400 16px var(--hub); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rrow .rm { font-size: 13px; color: var(--haze); }
+.rrow .rg { display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end; font-size: 12px; color: var(--haze); white-space: nowrap; }
+.rrow .via, .rrow .rk, .rrow .rw, .rrow .rp, .rhead { display: none; }
+.showall { align-self: flex-start; margin-top: 6px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--pearl); font-size: 14px; font-weight: 600; }
+.showall:hover { color: var(--ember); }
+
+/* the old hall of fame cards */
+.fame-old { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(230px, 1fr); gap: 10px; overflow-x: auto; margin: 4px -20px 18px; padding: 2px 20px 4px; scrollbar-width: none; }
+
 .fcard { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 14px; background: var(--night); overflow: hidden; isolation: isolate; }
 .fcard::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; z-index: -1;
   background: conic-gradient(from var(--a, 0deg), rgba(214,178,138,.0), rgba(214,178,138,.7), rgba(214,178,138,.0) 40%);
@@ -209,22 +241,84 @@ input:focus { outline: none; }
 .fcard .fv small { font: 400 13px var(--ins); color: var(--haze); }
 .fcard:hover { background: #1E1D1A; }
 
+/* surprise pill, try chips, start gate */
+.spill { align-self: center; display: inline-flex; align-items: center; gap: 8px; height: 34px; margin: 5px 0; padding: 0 14px; border: 0; border-radius: 999px;
+  background: var(--night); box-shadow: inset 0 0 0 1px rgba(245,244,240,.16); color: var(--pearl); font-size: 14px; font-weight: 500; position: relative; }
+.spill::after { content: ""; position: absolute; inset: -5px 0; }
+.spill svg { color: var(--haze); transition: transform .6s var(--ease); }
+.spill:hover { background: var(--smoke); box-shadow: inset 0 0 0 1px rgba(245,244,240,.32); }
+.spill.rolling svg { transform: rotate(360deg); }
+.tryrow { display: flex; align-items: center; gap: 10px; margin-top: 10px; overflow: hidden; }
+.tryrow > .small { flex: none; }
+.tryrow .chips { margin: 0; padding: 0; flex: 1; min-width: 0; }
+.chips { padding-top: 0; }
+.chip { min-height: 34px; margin: 5px 0; background: transparent; box-shadow: inset 0 0 0 1px rgba(245,244,240,.16); color: var(--fog); }
+.chip:hover { box-shadow: inset 0 0 0 1px rgba(245,244,240,.32); }
+.chip.on { background: transparent; box-shadow: inset 0 0 0 1px rgba(245,244,240,.55); color: var(--pearl); }
+.gate { margin: 0; font-size: 13px; color: var(--fog); text-align: center; }
+.field.drop { animation: rh-drop .45s var(--ease) both; box-shadow: inset 0 0 0 1px var(--ember); }
+.field.roll input { color: var(--haze); }
+
+/* race names: each end truncates on its own, so both stay visible */
+.rn { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.rn > span:not(.ar) { min-width: 0; max-width: 62%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto; }
+.rn .ar { flex: none; color: var(--mute); }
+
 /* hackathon stripe */
 .stripe { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 2px 8px; min-height: 36px; padding: 6px 16px; background: var(--night); border-bottom: 1px solid var(--line);
   font-size: 13px; color: var(--fog); text-align: center; }
-.stripe b { font-weight: 600; color: var(--pearl); }
-.stripe .go { color: var(--ember); font-weight: 600; white-space: nowrap; }
-.stripe:hover .go { text-decoration: underline; }
+.stripe b { font-weight: 400; color: var(--haze); }
+.stripe { color: var(--haze); }
+.stripe .go { color: var(--pearl); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.stripe:hover .go { color: var(--ember); }
 body.film .stripe, body.carding .stripe { display: none; }
 
-/* built with */
-.built { display: flex; flex-direction: column; gap: 14px; margin: 0; padding: 20px 0 36px; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.6; color: var(--haze); }
-.built p { margin: 0; } .built b { color: var(--fog); font-weight: 500; }
-.built .blogos { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
-.built .blogos > span { display: inline-flex; align-items: center; gap: 7px; color: var(--fog); }
-.built .contrib { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; min-height: 44px; padding: 0 14px; border-radius: 10px; background: var(--night); color: var(--pearl); font-weight: 600; }
-.built .contrib:hover { background: var(--smoke); }
-@media (min-width: 900px) { .fame { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; margin: 8px 0 22px; padding: 0; } .built { padding: 0 0 40px; border: 0; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; } .built p { flex: 1 1 100%; } }
+/* footer */
+.built { display: flex; flex-direction: column; gap: 16px; margin: 8px 0 0; padding: 0 0 36px; font-size: 13px; line-height: 1.6; color: var(--haze); }
+.built .contrib { display: flex; align-items: center; gap: 10px; min-height: 56px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--pearl); }
+.built .contrib .c1 { flex: 1; font-size: 15px; font-weight: 600; }
+.built .contrib .c2 { font-weight: 600; } .built .contrib svg { order: 2; }
+.built .contrib:hover .c2 { color: var(--ember); }
+.built .credit { margin: 0; font-size: 14px; }
+.built .blogos { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 26px; opacity: .85; }
+.built .blogos > span { display: inline-flex; align-items: center; gap: 8px; color: var(--fog); }
+.built .kt { font: 700 16px var(--ins); letter-spacing: .02em; color: var(--pearl); }
+.built .fine { margin: 0; font-size: 12px; color: var(--mute); }
+@media (min-width: 900px) { }
+@media (min-width: 900px) {
+  .built { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 22px 40px; padding: 40px 0 48px; border-top: 1px solid var(--line); }
+  .built .credit { grid-column: 1; grid-row: 1; max-width: 40em; font-size: 15px; }
+  .built .contrib { grid-column: 2; grid-row: 1; min-height: 48px; padding: 0 18px; border: 0; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(245,244,240,.3); }
+  .built .contrib svg { order: 0; } .built .contrib .c1 { flex: none; font-size: 14px; } .built .contrib:hover { box-shadow: inset 0 0 0 1px var(--ember); }
+  .built .blogos, .built .fine { grid-column: 1 / -1; }
+  .spill { margin-top: 8px; }
+  .tryrow { justify-content: center; max-width: 940px; overflow: visible; }
+  .tryrow .chips { flex: 0 1 auto; flex-wrap: nowrap; }
+  .fame-g { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .fcell { grid-template-columns: 28px minmax(0, 1fr); grid-template-rows: auto auto auto; gap: 8px 10px; padding: 16px 20px 20px; border-top: 1px solid var(--rule); }
+  .fcell + .fcell { border-left: 1px solid var(--rule); }
+  .fcell i { grid-row: 1; width: 28px; height: 28px; }
+  .fcell .fl { grid-column: 2; align-self: center; font-size: 13px; }
+  .fcell .fv { grid-column: 1 / -1; grid-row: 2; font-size: 30px; }
+  .fcell .ft { grid-column: 1 / -1; grid-row: 3; }
+  .fame-h { padding: 16px 20px 8px; }
+  .rhead, .rrow { display: grid; grid-template-columns: minmax(0, 1fr) 56px 84px 150px 96px 28px; align-items: center; gap: 0 24px; padding: 14px 12px; }
+  .rhead { padding: 10px 12px; font-size: 12px; color: var(--haze); border-bottom: 1px solid var(--line); }
+  .rhead span { display: inline-flex; align-items: center; gap: 6px; } .rhead .num { justify-content: flex-end; }
+  .rrow { border-top: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
+  .rrow .rmain { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .rrow .rn { font-size: 16px; }
+  .rrow .via, .rrow .rk, .rrow .rw, .rrow .rp { display: block; }
+  .rrow .via { font-size: 13px; color: var(--haze); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rrow .rk, .rrow .rw { text-align: right; font: 400 15px var(--hub); font-variant-numeric: tabular-nums; color: var(--fog); }
+  .rrow .rw { font: 400 14px var(--ins); color: var(--haze); white-space: nowrap; }
+  .rrow .rc { font-size: 16px; color: var(--pearl); } .rrow .rc img { display: none; }
+  .rrow .rg { justify-content: flex-start; font-size: 14px; } .rrow .rg img { display: none; }
+  .rrow .rm { display: none; }
+  .rrow .rp { width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(245,244,240,.3); display: inline-flex; align-items: center; justify-content: center; color: var(--pearl); transition: background-color .35s, color .35s; }
+  .rrow:hover .rp { background: var(--pearl); color: var(--ink); }
+}
+@media (min-width: 900px) and (max-width: 1100px) { .rhead, .rrow { grid-template-columns: minmax(0, 1fr) 84px 150px; } .rhead .ck, .rhead .wh, .rhead .pl, .rrow .rk, .rrow .rw, .rrow .rp { display: none !important; } }
 
 /* ---------------- RACE ---------------- */
 .rtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 20px; }
@@ -246,7 +340,8 @@ body.film .stripe, body.carding .stripe { display: none; }
 .seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; margin: 18px 20px 0; padding: 4px; border-radius: 12px; background: var(--night); }
 .seg button { min-height: 44px; border: 0; border-radius: 9px; background: transparent; color: var(--haze); font-size: 14px; font-weight: 600; }
 .seg button[aria-pressed="true"] { background: var(--smoke); color: var(--pearl); }
-.lanes { padding: 0 20px 150px; }
+.lanes { padding: 0 20px 18px; }
+#v-race.replay .lanes { padding-bottom: 150px; }
 .lane { display: flex; flex-direction: column; margin-top: 22px; }
 .lane:not(.sel) { display: none; }
 .lhead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -283,8 +378,16 @@ body.notes .trail .note { display: block; }
 .rest img { opacity: .6; margin-top: 2px; }
 .rest b { display: block; font-size: 14px; font-weight: 600; } .rest span span { font-size: 13px; color: var(--haze); }
 .rest a { color: var(--ember); font-weight: 600; font-size: 14px; }
-.rfoot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: flex; flex-direction: column; gap: 4px; padding: 10px 20px calc(22px + env(safe-area-inset-bottom));
-  background: var(--ink); border-top: 1px solid var(--line); font-size: 12px; color: var(--haze); }
+.rfoot { display: flex; flex-direction: column; gap: 4px; padding: 6px 20px calc(28px + env(safe-area-inset-bottom)); font-size: 12px; color: var(--haze); }
+.rfoot .toggle { display: none; }
+.thead { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 22px; }
+.thead .toggle { min-height: 40px; font-size: 14px; }
+.thead + .trail { margin-top: 4px; }
+.trail .st > span:first-child { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.trail .rs { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+body.notes .trail .rs { -webkit-line-clamp: 3; }
+.trail .fold button { width: 100%; min-height: 40px; padding: 0; border: 0; background: none; color: var(--fog); font-size: 13px; text-align: left; }
+.trail .fold button:hover { color: var(--pearl); }
 .toggle { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--fog); font-size: 14px; }
 .sw { position: relative; width: 28px; height: 16px; border-radius: 999px; background: var(--smoke); transition: background .35s; }
 .sw i { position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--haze); transition: left .35s var(--ease), background .35s; }
@@ -339,13 +442,14 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
   .scrub { flex: 1 1 300px; height: 44px; }
   .scrub .tr, .scrub .fi { top: 21px; } .scrub .tk { top: 16px; } .scrub .kn { top: 17px; width: 10px; height: 10px; margin-left: -5px; }
   .rtime { font-size: 14px; }
+  .rfoot .toggle { display: inline-flex; }
   .rfoot, #v-race.replay .rfoot { position: static; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; padding: 12px 40px 16px; font-size: 13px; }
 }
 
 /* ---------------- ANSWER ---------------- */
 .ahead { padding: 14px 0 0; }
 .ahead .k { margin: 0; font-size: 14px; color: var(--haze); }
-.ahead h1 { margin: 4px 0 0; font: 500 30px/1.1 var(--hub); letter-spacing: -.02em; }
+.ahead h1 { margin: 4px 0 0; font: 600 30px/1.1 var(--ins); letter-spacing: -.02em; }
 .times { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 20px 0 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .times > div { padding: 12px 0 12px 14px; }
 .times > div:first-child { padding: 12px 12px 12px 0; border-right: 1px solid var(--line); }
@@ -373,12 +477,12 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
   .acol { display: flex; flex-direction: column; gap: 40px; min-width: 0; }
   .acol.r { gap: 32px; }
   .ahead { display: flex; flex-direction: column; gap: 18px; padding: 0; }
-  .ahead .k { font: 500 14px var(--hub); }
+  .ahead .k { font: 500 14px var(--ins); }
   .ahead h1 { margin: 0; font-size: clamp(40px, 4.4vw, 68px); line-height: .96; letter-spacing: -.012em; text-wrap: balance; }
   .times { margin: 0; border-bottom: 0; border-top-color: var(--line2); }
   .times > div, .times > div:first-child { display: flex; flex-direction: column; gap: 6px; padding: 22px 0 0 24px; }
   .times > div:first-child { padding: 22px 24px 0 0; border-right-color: var(--line2); }
-  .times dt { gap: 10px; font: 700 14px var(--hub); color: var(--pearl); }
+  .times dt { gap: 10px; font: 700 14px var(--ins); color: var(--pearl); }
   .times dd { margin: 0; }
   .times .run { font-size: 14px; }
   .times .tv { font-size: clamp(48px, 5.2vw, 80px); line-height: 1; letter-spacing: -.02em; }
@@ -386,28 +490,28 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
   .achain li { grid-template-columns: 44px minmax(0, 1fr) auto; column-gap: 16px; padding: 20px 0; border-top: 0; border-bottom: 1px solid var(--line2); }
   .achain .n { font: 700 15px var(--hub); letter-spacing: .08em; color: var(--ember); }
   .achain .st { gap: 4px; }
-  .achain .tt { font: 500 24px/1.05 var(--hub); }
+  .achain .tt { font: 600 24px/1.05 var(--ins); }
   .achain .rs { display: block; font-size: 15px; color: var(--haze); }
   .achain .tm { font: 600 14px var(--hub); color: var(--haze); }
   .storybox { position: relative; display: flex; flex-direction: column; gap: 18px; padding: clamp(26px, 3vw, 44px); border-radius: 24px; background: var(--night); }
   .storybox .c1, .storybox .c2 { position: absolute; width: 22px; height: 22px; }
   .storybox .c1 { top: -12px; right: -12px; border-top: 2px solid var(--ember); border-right: 2px solid var(--ember); }
   .storybox .c2 { bottom: -12px; left: -12px; border-bottom: 2px solid var(--ember); border-left: 2px solid var(--ember); }
-  .storybox .lb { font: 500 14px var(--hub); color: var(--haze); }
-  .storybox .s1 { margin: 0; font: 500 clamp(22px, 2vw, 30px)/1.2 var(--hub); letter-spacing: -.015em; text-wrap: pretty; }
+  .storybox .lb { font: 500 14px var(--ins); color: var(--haze); }
+  .storybox .s1 { margin: 0; font: 600 clamp(22px, 2vw, 30px)/1.2 var(--ins); letter-spacing: -.015em; text-wrap: pretty; }
   .storybox .s2 { margin: 0; color: var(--fog); }
   .storybox .wr { margin: 0; font-size: 20px; color: var(--fog); }
   .abtns { display: flex; flex-wrap: wrap; gap: 12px; }
-  .abtns .btn { min-height: 48px; padding: 0 22px; border-radius: 12px; font: 700 14px var(--hub); }
+  .abtns .btn { min-height: 48px; padding: 0 22px; border-radius: 12px; font: 700 14px var(--ins); }
   .post { display: flex; flex-direction: column; gap: 10px; padding-top: 22px; border-top: 1px solid var(--line2); }
-  .post span { font: 500 14px var(--hub); color: var(--haze); }
+  .post span { font: 500 14px var(--ins); color: var(--haze); }
   .post p { margin: 0; font-size: 15px; line-height: 1.6; color: var(--fog); white-space: pre-line; }
 }
 
 /* ---------------- STATES ---------------- */
 .state { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; padding: 8px 20px calc(26px + env(safe-area-inset-bottom)); }
 .sbody { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 24px 0; }
-.sbody h2 { margin: 0; font: 500 28px/1.15 var(--hub); letter-spacing: -.02em; }
+.sbody h2 { margin: 0; font: 600 28px/1.15 var(--ins); letter-spacing: -.02em; }
 .sbody p { margin: 0; color: var(--haze); }
 .livecard { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; padding: 16px; border-radius: 14px; background: var(--night); }
 .livecard .g { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; }
@@ -427,8 +531,8 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
 .vstage { position: fixed; inset: 0; background: var(--ink); overflow: hidden; }
 .vcard { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; box-sizing: border-box; padding: 96px 128px; background: var(--ink); }
 .vi { display: flex; flex-direction: column; justify-content: space-between; }
-.vi .vb, .ve .vb { margin: 0; display: flex; align-items: center; gap: 14px; font: 600 30px var(--hub); }
-.vi h1 { margin: 0; max-width: 13em; font: 500 124px/1.02 var(--hub); letter-spacing: -.035em; color: var(--haze); }
+.vi .vb, .ve .vb { margin: 0; display: flex; align-items: center; gap: 14px; font: 600 30px var(--ins); }
+.vi h1 { margin: 0; max-width: 13em; font: 600 124px/1.02 var(--ins); letter-spacing: -.035em; color: var(--haze); }
 .vi h1 span { color: var(--pearl); }
 .vi .vs { margin: 40px 0 0; font-size: 44px; line-height: 1.3; color: var(--fog); }
 .vlanes { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line2); }
@@ -442,7 +546,7 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
 .ve ol { margin: 0; padding: 0; list-style: none; }
 .ve li { display: flex; align-items: center; gap: 28px; padding: 18px 0; animation: rh-drop .7s var(--ease) both; }
 .ve li i { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--mute); }
-.ve li span { font: 500 64px/1 var(--hub); letter-spacing: -.03em; white-space: nowrap; }
+.ve li span { font: 600 64px/1 var(--ins); letter-spacing: -.03em; white-space: nowrap; }
 .ve li.last i { border: 0; background: var(--ember); } .ve li.last span { color: var(--ember); }
 .ve .vr { display: flex; flex-direction: column; justify-content: space-between; }
 .ve .vb { justify-content: flex-end; }
@@ -478,27 +582,27 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
         <div class="fwrap"><label class="field" id="f-target"><span>To</span><input id="target" aria-label="To" value="Black hole" maxlength="120" enterkeyhint="go" /></label><div class="ferr" id="e-target" hidden></div></div>
         <button class="btn primary" id="go" type="submit">Start the race</button>
       </form>
-      <div class="chips" id="chips"></div>
+      <p class="gate" id="gate" hidden></p>
+      <button class="spill" id="surprise" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Surprise me</button>
+      <div class="tryrow"><span class="small">Or try</span><div class="chips" id="chips"></div></div>
       <p class="formmsg" id="formMsg" hidden></p>
     </div>
     <a class="preview" id="preview" href="#" hidden>
-      <div class="pv-info"><span class="tag">Replay</span><p class="pv-q" id="pvQ"></p><p class="pv-sub small" id="pvSub"></p></div>
+      <div class="pv-info"><span class="tag">Replay</span><p class="pv-q" id="pvQ"></p><span class="pv-ago small mob-only" id="pvAgo"></span><p class="pv-sub small" id="pvSub"></p></div>
       <div class="pv-lane" id="pvC"><span class="pv-name"><span data-logo="cerebras" data-s="16"></span>Cerebras</span><span class="pv-clock" id="pvCc"></span><span class="pv-st" id="pvCs"></span></div>
       <div class="pv-lane" id="pvG"><span class="pv-name"><span data-logo="gpu" data-s="16"></span>NVIDIA GPU</span><span class="pv-clock" id="pvGc"></span><span class="pv-st" id="pvGs"></span></div>
     </a>
     <section class="recent" id="recent" aria-labelledby="recentTitle">
-      <div class="recent-h"><h2 id="recentTitle">Recent races</h2><span class="small mob-only" id="savedShort"></span></div>
+      <div class="recent-h"><h2 id="recentTitle">Recent races</h2><span class="small" id="savedShort"></span></div>
       <div class="fame" id="fame" hidden></div>
-      <div id="runs"><div class="empty">Loading races…</div></div>
+      <div class="rtable" id="runs" role="list"><div class="empty">Loading races…</div></div>
+      <button class="showall" id="showAll" type="button" hidden></button>
     </section>
-    <footer class="foot desk-only">
-      <span>Same model in both lanes, Kimi K3.1 Pro. Only the chip differs. Clocks are real elapsed time. Text from Wikipedia, CC BY-SA 4.0.</span>
-      <span>airabbithole.pages.dev</span>
-    </footer>
-    <div class="built">
-      <p>Built with <b>Claude</b>. Powered by <b>Kimi K3.1 Pro</b> on <b>Cerebras</b>, raced against the same model on <b>NVIDIA GPUs</b>, run by an <b>OpenClaw</b> agent. Every step is a real link on <b>Wikipedia</b>.</p>
-      <span class="blogos"><span><span data-logo="claude" data-s="18"></span><span data-wm="claudeText" data-h="13"></span></span><span><span data-logo="kimi" data-s="18"></span>Kimi K3.1 Pro</span><span><span data-logo="cerebras" data-s="18"></span><span data-wm="cbText" data-h="15"></span></span><span><span data-logo="gpu" data-s="18"></span><span data-wm="nvText" data-h="13"></span></span><span><span data-logo="claw" data-s="18"></span><span data-wm="clawText" data-h="13"></span></span></span>
-      <a class="contrib" href="https://github.com/rishabh-bansal/rabbit-hole" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.29-1.69-1.29-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>Looking to contribute? GitHub →</a>
+    <footer class="built">
+      <a class="contrib" href="https://github.com/rishabh-bansal/rabbit-hole" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.29-1.69-1.29-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg><span class="c1">Looking to contribute?</span><span class="c2">GitHub →</span></a>
+      <p class="credit">Built with Claude. Powered by Kimi K3.1 Pro on Cerebras, raced against the same model on NVIDIA GPUs, run by an OpenClaw agent. Every step is a real link on Wikipedia.</p>
+      <span class="blogos"><span><span data-logo="claude" data-s="20"></span><span data-wm="claudeText" data-h="16"></span></span><span><span data-logo="kimi" data-s="20"></span><span class="kt">Kimi</span><span class="haze" style="font-size:14px">K3.1 Pro</span></span><span><span data-logo="cerebras" data-s="20"></span><span data-wm="cbText" data-h="18"></span></span><span><span data-logo="gpu" data-s="20"></span><span data-wm="nvText" data-h="13"></span></span><span><span data-logo="claw" data-s="20"></span><span data-wm="clawText" data-h="15"></span></span></span>
+      <p class="fine">airabbithole.pages.dev · Same model in both lanes. Clocks are real elapsed time. Text from Wikipedia, CC BY-SA 4.0.</p>
     </div>
   </div>
 </section>
@@ -506,6 +610,7 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
 <!-- ============ RACE (live + replay) ============ -->
 <section id="v-race" class="view" hidden>
   <div class="band mob-only" id="rBand" hidden></div>
+  <div class="banner" id="rAbort" hidden><b>This race was stopped early</b><span>Cerebras is overloaded right now, so we ended it instead of making you wait. Try again in a minute, or watch a replay.</span></div>
   <div class="banner" id="rPaused" hidden><b>Live races are paused for today</b><span>We hit today’s limit. Replays keep playing, and live races are back tomorrow.</span></div>
   <header class="rtop">
     <a class="brand" href="./" data-home aria-label="Back to home"><span data-mark="18"></span>Rabbit Hole</a>
@@ -575,7 +680,7 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
 
 <!-- ============ VIDEO CARDS ============ -->
 <div class="vstage" id="vstage" hidden></div>
-<div class="cd" id="cd" hidden aria-hidden="true"></div>
+<div class="cd" id="cd" hidden aria-live="assertive"></div>
 
 <script>
 "use strict";
@@ -630,6 +735,7 @@ function apply(S, e) {
     case "story_started": S.storyWriting = true; return;
     case "story": S.story = (e.text || "").replace(/[*_`#]+/g, "").trim(); S.storyWriting = false; return;
     case "race_done": S.done = true; S.storyWriting = false; S.endWall = w; return;
+    case "race_aborted": S.aborted = e.reason || "Cerebras was unavailable."; return;
   }
   const L = S.lanes[e.lane]; if (!L) return;
   switch (e.type) {
@@ -668,7 +774,7 @@ async function loadStats() { const r = await api("/api/stats").catch(() => null)
 function paintOdo(extra = 0, extraRace = 0) {
   const txt = `Waiting saved by Cerebras: <b>${fmtMS(STATS.seconds_saved + extra)}</b> over ${STATS.races + extraRace} races`;
   $$("[data-odo]").forEach(el => el.innerHTML = txt);
-  $("#savedShort").innerHTML = `saved <span class="ember">${fmtMS(STATS.seconds_saved)}</span> of waiting`;
+  $("#savedShort").innerHTML = `saved <span class="ember">${fmtMS(STATS.seconds_saved)}</span> over ${STATS.races} races`;
 }
 let RUNS = [];
 async function loadRuns() { const r = await api("/api/runs").catch(() => null); RUNS = (r && r.ok && r.d.runs) || []; paintRuns(); pickPreview(); }
@@ -680,42 +786,55 @@ function gpuText(r, short) {
   return "Cerebras only";
 }
 const ICON = {
+  watch: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4M12 2v3"/></svg>`,
   bolt: `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>`,
   target: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>`,
   hole: `<svg width="15" height="15" viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="15" cy="15" r="12.5"/><circle cx="15" cy="18" r="7.5" stroke-opacity=".6"/><circle cx="15" cy="21" r="2.6" fill="currentColor"/></svg>`,
   hourglass: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 2h12M6 22h12M7 2c0 6 10 6 10 10S7 16 7 22M17 2c0 6-10 6-10 10s10 4 10 10"/></svg>`,
 };
 const gpuSecs = r => r.lanes.gpu ? r.lanes.gpu.seconds : (r.outcome || {}).gpu === "lane_timeout" ? 300 : null;
+const raceName = (a, b) => `<span class="rn"><span>${esc(a)}</span><span class="ar">→</span><span>${esc(b)}</span></span>`;
 function paintFame() {
   const done = RUNS.filter(r => r.lanes.cerebras), el = $("#fame");
   if (done.length < 2) { el.hidden = true; return; }
   const by = (f, dir = 1) => [...done].sort((a, b) => dir * (f(a) - f(b)) || a.lanes.cerebras.seconds - b.lanes.cerebras.seconds)[0];
-  const fastest = by(r => r.lanes.cerebras.seconds);
-  const deepest = by(r => r.lanes.cerebras.hops, -1);
+  const fastest = by(r => r.lanes.cerebras.seconds), deepest = by(r => r.lanes.cerebras.hops, -1);
   const saved = by(r => (gpuSecs(r) ?? 0) - r.lanes.cerebras.seconds, -1);
   const cards = [
-    { r: fastest, icon: "bolt", label: "Fastest find", value: fmtS(fastest.lanes.cerebras.seconds), sub: clicks(fastest.lanes.cerebras.hops) },
-    { r: deepest, icon: "hole", label: "Deepest rabbit hole", value: clicks(deepest.lanes.cerebras.hops), sub: fmtS(deepest.lanes.cerebras.seconds) },
-    { r: saved, icon: "hourglass", label: "Most waiting saved", value: fmtMS((gpuSecs(saved) ?? 0) - saved.lanes.cerebras.seconds), sub: "vs the GPU" },
+    { r: fastest, icon: "watch", label: "Fastest find", value: fmtS(fastest.lanes.cerebras.seconds) },
+    { r: deepest, icon: "hole", label: "Deepest rabbit hole", value: clicks(deepest.lanes.cerebras.hops) },
+    { r: saved, icon: "hourglass", label: "Most waiting saved", value: fmtMS((gpuSecs(saved) ?? 0) - saved.lanes.cerebras.seconds) },
   ];
-  el.innerHTML = cards.map(c => `<a class="fcard" href="?replay=${encodeURIComponent(c.r.id)}" data-replay="${esc(c.r.id)}">
-    <span class="fi"><i>${ICON[c.icon]}</i>${c.label}</span><span class="ft">${esc(c.r.start)} → ${esc(c.r.target)}</span>
-    <span class="fv">${c.value} <small>${c.sub}</small></span></a>`).join("");
+  el.innerHTML = `<div class="fame-h"><b>Hall of fame</b><span>best of ${done.length} races</span></div><div class="fame-g">` +
+    cards.map(c => `<a class="fcell" href="?replay=${encodeURIComponent(c.r.id)}" data-replay="${esc(c.r.id)}" aria-label="${esc(c.label)}: ${esc(c.value)}, ${esc(c.r.start)} to ${esc(c.r.target)}. Watch the replay.">
+      <i>${ICON[c.icon]}</i><span class="fl">${c.label}</span><span class="fv">${c.value}</span><span class="ft">${raceName(c.r.start, c.r.target)}</span></a>`).join("") + `</div>`;
   el.hidden = false;
 }
+let SHOW_ALL = false;
+const gpuWords = r => { const g = r.lanes.gpu, o = (r.outcome || {}).gpu; return g ? fmtS(g.seconds) : o === "lane_timeout" ? "stopped at 5:00" : o === "lane_error" ? "ended with an error" : "resting"; };
 function paintRuns() {
   paintFame();
   const el = $("#runs");
-  if (!RUNS.length) { el.innerHTML = `<div class="empty">No races yet. Start the first one.</div>`; return; }
-  el.innerHTML = RUNS.slice(0, 12).map(r => {
-    const c = r.lanes.cerebras, mid = c ? c.path.slice(1, -1).join(" · ") : "";
-    const time = c ? fmtS(c.seconds) : "—";
-    return `<a class="runrow" href="?replay=${encodeURIComponent(r.id)}" data-replay="${esc(r.id)}">
-      <span class="r-t">${esc(r.start)} → ${esc(r.target)}</span><span class="r-c">${esc(mid || "Direct link")}</span>
-      <span class="r-time"><b>${time}</b><span class="desk-only"> vs ${esc(gpuText(r))}</span></span>
-      <span class="r-sub">${c ? clicks(c.hops) + " · " : ""}${esc(gpuText(r, true))}</span><span class="r-when">${ago(r.created)}</span></a>`;
-  }).join("");
+  if (!RUNS.length) { el.innerHTML = `<div class="empty">No races yet. Start the first one.</div>`; $("#showAll").hidden = true; return; }
+  const list = SHOW_ALL ? RUNS : RUNS.slice(0, 4);
+  el.innerHTML = `<div class="rhead" aria-hidden="true"><span>Race</span><span class="num ck">Clicks</span><span class="num">${img("cerebras", 13)}Cerebras</span><span>${img("gpu", 13)}NVIDIA GPU</span><span class="num wh">When</span><span class="pl"></span></div>` +
+    list.map(r => {
+      const c = r.lanes.cerebras, mid = c ? c.path.slice(1, -1) : [];
+      const via = mid.length ? "via " + (mid.length > 3 ? [...mid.slice(0, 2), "…", mid.at(-1)] : mid).join(" · ") : "direct link";
+      const time = c ? fmtS(c.seconds) : "—", gw = gpuWords(r);
+      const label = `${r.start} to ${r.target}: Cerebras ${c ? time + " in " + clicks(c.hops) : "did not finish"}, NVIDIA GPU ${gw}, ${ago(r.created)}. Watch the replay.`;
+      return `<a class="rrow" role="listitem" href="?replay=${encodeURIComponent(r.id)}" data-replay="${esc(r.id)}" aria-label="${esc(label)}">
+        <span class="rmain">${raceName(r.start, r.target)}<span class="via">${esc(via)}</span></span>
+        <span class="rk">${c ? c.hops : "—"}</span>
+        <span class="rc">${img("cerebras", 13)}${time}</span>
+        <span class="rm">${c ? clicks(c.hops) + " · " : ""}${ago(r.created)}</span>
+        <span class="rg">${img("gpu", 13)}${gw.charAt(0).toUpperCase() === gw.charAt(0) ? gw : gw}</span>
+        <span class="rw">${ago(r.created)}</span>
+        <span class="rp" aria-hidden="true"><svg width="9" height="9" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z" fill="currentColor"/></svg></span></a>`;
+    }).join("");
+  const sa = $("#showAll"); sa.hidden = RUNS.length <= 4; sa.textContent = SHOW_ALL ? "Show fewer" : `Show all ${RUNS.length} races →`;
 }
+$("#showAll").addEventListener("click", () => { SHOW_ALL = !SHOW_ALL; paintRuns(); });
 
 // ---------- home: auto-playing replay ----------
 let PV = null;
@@ -728,7 +847,7 @@ async function pickPreview() {
   const p = new Player(run.d.events, r.start, r.target);
   const done = run.d.events.find(e => e.type === "lane_done" && e.lane === "cerebras");
   PV = { id: r.id, player: p, loopAt: Math.min(p.dur, (done ? done.wall : 40) + 8) };
-  $("#pvQ").innerHTML = `${esc(r.start)} → ${esc(r.target)}<span class="mob-only"> · both on ${img("kimi", 12)} Kimi K3.1 Pro</span>`;
+  $("#pvQ").innerHTML = `${esc(r.start)} → ${esc(r.target)}`; $("#pvAgo").textContent = ago(r.created);
   $("#pvSub").innerHTML = `Recorded ${ago(r.created)} · both lanes run Kimi K3.1 Pro`;
   $("#pvG").hidden = !run.d.events.some(e => e.type === "race_started" && (e.lanes || []).some(l => l.id === "gpu"));
   $("#preview").href = `?replay=${encodeURIComponent(r.id)}`; $("#preview").dataset.replay = r.id; $("#preview").hidden = false;
@@ -775,9 +894,24 @@ async function route() {
 // ---------- home form ----------
 function paintChips() {
   const s = $("#start").value.trim(), t = $("#target").value.trim();
-  $("#chips").innerHTML = `<button type="button" class="chip surprise" data-surprise><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="8" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="8" cy="16" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/></svg>Surprise me</button>` +
+  $("#chips").innerHTML = `<button type="button" class="chip surprise" data-surprise hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="8" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="8" cy="16" r="1.3" fill="currentColor"/><circle cx="16" cy="16" r="1.3" fill="currentColor"/></svg>Surprise me</button>` +
     EXAMPLES.map(([a, b]) => `<button type="button" class="chip${a === s && b === t ? " on" : ""}" data-a="${esc(a)}" data-b="${esc(b)}">${esc(a)} → ${esc(b)}</button>`).join("");
 }
+const ROLL = ["Octopus", "Jazz", "Tokyo", "Chess", "Volcano", "Cleopatra", "Bitcoin", "Saturn", "Sushi", "Vikings", "Origami", "Mars", "Penguin", "Tetris", "Opera", "Sahara"];
+$("#surprise").addEventListener("click", async () => {
+  const b = $("#surprise"); if (b.disabled || starting) return;
+  b.disabled = true; b.classList.add("rolling"); clearErrors();
+  const fs = $("#f-start"), ft = $("#f-target"); fs.classList.add("roll"); ft.classList.add("roll");
+  let k = 0; const spin = setInterval(() => { $("#start").value = ROLL[k++ % ROLL.length]; $("#target").value = ROLL[(k * 7) % ROLL.length]; }, 70);
+  const [r] = await Promise.all([api("/api/surprise").catch(() => null), new Promise(res => setTimeout(res, 650))]);
+  clearInterval(spin); fs.classList.remove("roll"); ft.classList.remove("roll");
+  b.classList.remove("rolling"); b.disabled = false;
+  if (!r || !r.ok) { $("#formMsg").textContent = "Couldn’t pick topics right now. Try again."; $("#formMsg").hidden = false; return; }
+  $("#start").value = r.d.start; $("#target").value = r.d.target; paintChips();
+  TOPIC.start = { state: "ok", title: r.d.start, desc: "" }; TOPIC.target = { state: "ok", title: r.d.target, desc: "" };
+  [fs, ft].forEach(f => { f.classList.remove("drop"); void f.offsetWidth; f.classList.add("drop"); });
+  setTimeout(() => { fs.classList.remove("drop"); ft.classList.remove("drop"); startRace(); }, 450);
+});
 $("#chips").addEventListener("click", async e => {
   const b = e.target.closest("button"); if (!b) return;
   if (b.hasAttribute("data-surprise")) {
@@ -835,12 +969,20 @@ function lookup(text) {
   })();
   memo.set(key, job); job.catch(() => memo.delete(key)); return job;
 }
+function paintGate() {
+  const bad = ["start", "target"].find(id => ["missing", "ambiguous"].includes(TOPIC[id].state) && TOPIC[id].text === $("#" + id).value.trim());
+  const go = $("#go"), gate = $("#gate");
+  if (bad && !starting) { go.disabled = true; gate.textContent = TOPIC[bad].state === "missing" ? `Fix “${TOPIC[bad].text}” to start` : `Pick a meaning for “${TOPIC[bad].text}” to start`; gate.hidden = false; }
+  else { if (!starting) go.disabled = false; gate.hidden = true; }
+}
 function paintTopic(id, force) {
   let T = TOPIC[id]; const box = $("#e-" + id), field = $("#f-" + id);
   if (!force && document.activeElement === $("#" + id) && (T.state === "missing" || T.state === "ambiguous")) T = { state: "typing" };  // don't nag mid-word
   field.classList.toggle("bad", T.state === "missing" || T.state === "ambiguous");
-  if (T.state === "ok" && T.dirty) { box.innerHTML = `<span class="ok">✓</span>${esc(T.desc || "Wikipedia article")}`; box.hidden = false; }
-  else if (T.state === "missing") {
+  paintGate();
+  if (T.state === "ok" && T.dirty) { box.textContent = T.desc || "Wikipedia article"; box.classList.add("desc"); box.hidden = false; return; }
+  box.classList.remove("desc");
+  if (T.state === "missing") {
     const top = T.sugg && T.sugg[0];
     box.innerHTML = `No Wikipedia article called “${esc(T.text)}”.` + (top ? ` Did you mean <a href="#" data-fill="${id}" data-v="${esc(top.title)}">${esc(top.title)}</a>?` : " Try another spelling.");
     box.hidden = false;
@@ -854,7 +996,15 @@ async function checkTopic(id, dirty) {
   const seq = (TOPIC[id].seq || 0) + 1; TOPIC[id] = { state: "checking", seq, dirty };
   try { const r = await lookup(v); if (TOPIC[id].seq !== seq || $("#" + id).value.trim() !== v) return TOPIC[id]; TOPIC[id] = { ...r, text: v, seq, dirty }; }
   catch { if (TOPIC[id].seq === seq) TOPIC[id] = { state: "unknown", seq }; }   // Wikipedia unreachable: the server still checks on submit
-  paintTopic(id); return TOPIC[id];
+  paintTopic(id);
+  if (TOPIC[id].state === "ok" && TOPIC.start.state === "ok") warmServer();
+  return TOPIC[id];
+}
+let warmed = "";
+function warmServer() {  // ask the race server to fetch these Wikipedia pages now, not at Start
+  const a = TOPIC.start.title || "", b = TOPIC.target.state === "ok" ? TOPIC.target.title : "";
+  const key = a + "|" + b; if (!a || key === warmed) return; warmed = key;
+  fetch(`${API}/api/warm?start=${encodeURIComponent(a)}&target=${encodeURIComponent(b)}`).catch(() => {});
 }
 function setupTopic(id, nextId) {
   const input = $("#" + id), label = $("#f-" + id), list = document.createElement("ul");
@@ -891,12 +1041,12 @@ function setupTopic(id, nextId) {
 setupTopic("start", "target"); setupTopic("target");
 
 // fast 3-2-1 (about a second), played while the race request is already on its way
-function countdown() {
+function countdown(pair = "") {
   const el = $("#cd");  // under reduced motion the numbers still show, just without the zoom
   let stopped = false, t = []; el.hidden = false;
   const done = new Promise(res => ["3", "2", "1", "Go"].forEach((n, i) => t.push(setTimeout(() => {
-    if (stopped) return; el.innerHTML = `<span class="${n === "Go" ? "go" : ""}">${n}</span>`; if (n === "Go") t.push(setTimeout(res, 230));
-  }, i * 260))));
+    if (stopped) return; el.innerHTML = `<span class="${n === "Go" ? "go" : ""}">${n}</span><p>${esc(pair)}</p>`; if (n === "Go") t.push(setTimeout(res, 260));
+  }, i * 250))));
   return { done, stop() { stopped = true; t.forEach(clearTimeout); el.hidden = true; el.innerHTML = ""; } };
 }
 let starting = false;
@@ -907,16 +1057,17 @@ async function startRace() {
   if (!start || !target) { $("#formMsg").textContent = "Type two topics first."; $("#formMsg").hidden = false; return; }
   const bad = ["start", "target"].filter(id => ["missing", "ambiguous"].includes(TOPIC[id].state) && TOPIC[id].text === $("#" + id).value.trim());
   if (bad.length) { bad.forEach(id => paintTopic(id, true)); return; }
-  starting = true; const go = $("#go"); go.disabled = true; go.textContent = "Starting…";
-  const cd = countdown();
+  starting = true; const go = $("#go"); go.disabled = true; go.textContent = "Checking the system…";
+  let cd = { done: Promise.resolve(), stop() {} };
   try {
     const r = await api("/api/race", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ start, target }) });
-    if (r.ok && r.d.race_id) { await cd.done; cd.stop(); history.pushState({}, "", `?watch=${r.d.race_id}`); return watch(r.d.race_id, { start, target }); }
+    if (r.ok && r.d.race_id) { cd = countdown(`${start} → ${target}`); await cd.done; cd.stop(); history.pushState({}, "", `?watch=${r.d.race_id}`); return watch(r.d.race_id, { start, target }); }
     cd.stop();
     const d = typeof r.d.detail === "object" && r.d.detail ? r.d.detail : { message: r.d.detail || "Something went wrong. Try again." };
     if (d.code === "bad_input") { show("home"); fieldError(d); }
     else if (d.code === "busy") showBusy(d);
     else if (d.code === "ip_limit") showLimit(d);
+    else if (["cerebras_busy", "cerebras_down", "engine_down"].includes(d.code)) showUnavailable(d);
     else if (d.code === "paused") { const best = latestRun(); if (best) openReplay(best, { auto: true }); else { $("#formMsg").textContent = d.message; $("#formMsg").hidden = false; } }
     else { $("#formMsg").textContent = d.message; $("#formMsg").hidden = false; }
   } catch (x) { cd.stop(); $("#formMsg").textContent = "Couldn’t reach the race server. Try again in a moment."; $("#formMsg").hidden = false; }
@@ -940,6 +1091,7 @@ function laneCol(id) {
     <div class="now" data-f="now"><span class="plabel" data-f="plabel"></span><a class="ptitle" data-f="ptitle" target="_blank" rel="noopener"></a>
       <p class="pstatus" data-f="pstatus"><span class="sdot breathe" style="background:${DOT[id]}"></span><span data-f="stxt"></span></p></div>
     <div class="endb" data-f="endb" hidden><p class="et" data-f="et"></p><p class="es" data-f="es"></p><a class="wlink" href="#" data-f="wstory" data-story hidden>Read the story <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <div class="thead mob-only"><span class="small">Trail · each step is a real link</span><button class="toggle" type="button" data-notes aria-pressed="false"><span class="sw" aria-hidden="true"><i></i></span>Thinking notes</button></div>
     <ol class="trail" data-f="trail"></ol></section>`;
 }
 const restCol = `<section class="rest desk-only" aria-label="NVIDIA GPU lane, resting today"><span><b>The GPU side is resting today</b><span>Its daily budget ran out, so live races run on Cerebras only. Replays still show both lanes.</span></span><a href="#" data-latest>Watch a replay</a></section>`;
@@ -956,6 +1108,7 @@ function paintSel() {
   $$("#lanes .lane").forEach(el => el.classList.toggle("sel", el.dataset.lane === R.sel));
   $$("#seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.sel === R.sel)));
 }
+document.addEventListener("click", e => { const u = e.target.closest("[data-unfold]"); if (!u || !R) return; R.open = R.open || {}; R.open[u.dataset.unfold] = true; R.tn[u.dataset.unfold] = -1; renderRace(); });
 $("#seg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b || !R) return; R.sel = b.dataset.sel; paintSel(); });
 function put(id, f, val, how = "html") {
   const k = id + "|" + f + "|" + how; if (R.cache[k] === val) return; R.cache[k] = val;
@@ -971,6 +1124,13 @@ function stepHTML(s, i, anim) {
 function paintTrail(id, L, S) {
   const el = $(`#lanes [data-lane="${id}"] [data-f="trail"]`); if (!el) return;
   const n = L.trail.length, prev = R.tn[id] ?? -1; if (prev === n) return;
+  R.open = R.open || {};
+  if (n > 5 && !R.open[id]) {  // long trail: fold the early steps, keep the last 4
+    el.innerHTML = `<li class="fold"><span></span><button type="button" data-unfold="${id}">Show ${n - 4} earlier step${n - 4 === 1 ? "" : "s"}</button><span></span></li>` +
+      L.trail.slice(-4).map((s2, k) => stepHTML(s2, n - 4 + k, prev !== n && k === 3)).join("");
+    [...el.querySelectorAll("li:not(.fold)")].forEach((li, k, a) => li.classList.toggle("cur", k === a.length - 1));
+    R.tn[id] = n; return;
+  }
   if (n === 0) el.innerHTML = `<li><span class="n">1</span><div class="st"><span class="tt" style="color:var(--pearl)">${esc(L.startPage || S.start)}</span><span class="rs">Start page · no clicks yet</span></div><span class="tm">0:00.0</span></li>`;
   else {
     if (prev <= 0 || prev > n) { el.innerHTML = ""; L.trail.forEach((s, i) => el.insertAdjacentHTML("beforeend", stepHTML(s, i, false))); }
@@ -1015,8 +1175,9 @@ function renderRace() {
     if (!running) {
       let cls = "endb", et = "", es = "";
       if (won) { cls += " won rh-win"; et = `Found it in ${clicks(L.hops)}`; es = S.first === id && S.storyWriting ? "Kimi is writing the story…" : ""; }
+      else if (L.result === "stopped" && S.aborted && L.end < 299) { et = "Stopped early"; es = "Cerebras couldn’t run this race, so there was nothing to race against. No point making you wait."; }
       else if (L.result === "stopped") { et = L.end >= 299 ? "Stopped at 5 minutes" : "Stopped"; es = `Still not there. It was still deciding where to go from ${L.page || S.start}.`; }
-      else { cls += " err"; et = `The ${NAME[id]} lane stopped on page ${L.pageNo}`; es = "The model service stopped answering." + (O && O.result === "done" ? ` The ${NAME[other]} result still counts.` : ""); }
+      else { cls += " err"; et = `The ${NAME[id]} lane stopped on page ${L.pageNo}`; es = (/overloaded|capacity|didn.t answer/i.test(L.error) ? "Cerebras’s shared endpoint is overloaded right now, so it stopped answering." : "The model service stopped answering.") + (O && O.result === "done" ? ` The ${NAME[other]} result still counts.` : ""); }
       put(id, "endb", cls, "class"); put(id, "et", et, "text"); put(id, "es", es, "text"); put(id, "es", !es, "hide");
       put(id, "wstory", !(won && S.first === id && S.story), "hide");
     }
@@ -1032,6 +1193,10 @@ function renderRace() {
   if (S.story) $("#rStorySub").textContent = `Kimi wrote how ${S.start} leads to ${S.target}`;
   const live = R.mode === "live" && !S.done;
   $("#v-race [data-odo-race]").innerHTML = `Waiting saved by Cerebras: <b>${fmtMS(STATS.seconds_saved + (live ? saved : 0))}</b> over ${STATS.races + (live && savedOn && g.result ? 1 : 0)} races`;
+  $("#rAbort").hidden = !S.aborted;
+  const ended = S.ids.every(x => S.lanes[x] && S.lanes[x].result) || S.done;
+  const lv = $("#rLive"); const want = ended ? "Finished" : "Live";
+  if (lv.dataset.t !== want) { lv.dataset.t = want; lv.innerHTML = ended ? "Finished" : `<i class="breathe"></i>Live`; }
   if (R.mode === "replay") paintBar();
 }
 function startRaceView(mode) {
@@ -1130,6 +1295,15 @@ function showLimit(d) {
     <div class="bars" aria-hidden="true">${"<span></span>".repeat(n)}</div>`;
   $("#sActs").innerHTML = `<a class="btn primary" href="#" data-latest>Play the latest replay</a><a class="btn quiet" href="./#recent" data-home>Browse past races</a>`;
 }
+function showUnavailable(d) {
+  show("state"); STATE_LIVE = null;
+  const engine = d.code === "engine_down";
+  $("#sBody").innerHTML = `<span class="small">${engine ? "Quick system check failed" : "Quick system check: Cerebras isn’t answering"}</span>
+    <h2>${engine ? "The race engine is restarting" : "Cerebras is at capacity right now"}</h2>
+    <p>${engine ? "It usually takes under a minute." : "The shared hackathon endpoint is turning requests away, so a live race would just sit there. We checked before starting, so this didn’t use up one of your races."}</p>`;
+  $("#sActs").innerHTML = `<button class="btn primary" type="button" data-retry>Try again</button><a class="btn quiet" href="#" data-latest>Play a replay instead</a>`;
+}
+document.addEventListener("click", e => { if (e.target.closest("[data-retry]")) { show("home"); startRace(); } });
 function renderStateLive() { if (!STATE_LIVE) return; const t = (performance.now() - STATE_LIVE.at) / 1000; $$("[data-sl]").forEach(el => el.textContent = fmt(t).full); }
 document.addEventListener("click", e => { const a = e.target.closest("[data-watch]"); if (!a) return; e.preventDefault(); history.pushState({}, "", `?watch=${a.dataset.watch}`); watch(a.dataset.watch); });
 
@@ -1192,6 +1366,12 @@ function paintAnswer() {
 
 // ---------- share image (1200×675, follows the ShareCard design) ----------
 const loadImg = src => new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+// names in images: at most 30 characters (cut at a word boundary), single words at most 22
+function capName(t, n = 30, word = 22) {
+  let out = String(t).split(/\s+/).map(w => w.length > word ? w.slice(0, word) + "…" : w).join(" ");
+  if (out.length <= n) return out;
+  const head = out.slice(0, n); return (head.includes(" ") ? head.slice(0, head.lastIndexOf(" ")) : head).replace(/[ ,;:-]+$/, "") + "…";
+}
 function splitWord(g, word, maxW) {  // a single word wider than the box gets broken into pieces
   const out = []; let cur = "";
   for (const ch of word) { if (cur && g.measureText(cur + ch).width > maxW) { out.push(cur); cur = ch; } else cur += ch; }
@@ -1224,7 +1404,7 @@ async function shareImage(S) {
   // left column
   drawMark(g, 60, 52, 22); g.fillStyle = "#F5F4F0"; g.font = `700 14px ${HUB}`; g.fillText("Rabbit Hole", 94, 68);
   const hz = "#A6A9A3", pe = "#F5F4F0";
-  const qTok = [{ t: "How is", c: hz }, { t: S.start, c: pe }, { t: "connected to", c: hz }, { t: S.target + "?", c: pe }];
+  const qTok = [{ t: "How is", c: hz }, { t: capName(S.start), c: pe }, { t: "connected to", c: hz }, { t: capName(S.target) + "?", c: pe }];
   let qSize = 50, qT;
   for (qSize of [50, 44, 38, 34, 30, 26]) { qT = wrapTokens(g, qTok, 500, `500 ${qSize}px ${HUB}`); if (qT.lines.length * qSize * 0.98 <= 250) break; }
   const qLH = Math.round(qSize * 0.98);
@@ -1295,7 +1475,8 @@ function showCard(q) {
       <div class="vlanes"><div><b aria-label="Cerebras">${img("cerebras", 52)}${wm("cbText", 42)}</b>${kimiRun(26)}</div><div><b aria-label="NVIDIA GPU">${img("gpu", 52)}${wm("nvText", 30)}<span style="font-size:36px;color:var(--haze)">GPU</span></b>${kimiRun(26)}</div></div></div>`;
   } else {
     const full = (q.get("chain") || "Pizza|Pizza theorem|Geometry|General relativity|Black hole").split("|").filter(Boolean);
-    const chain = full.length > 6 ? [...full.slice(0, 2), "…", ...full.slice(-3)] : full;  // long chains: keep the ends
+    const capped = full.map(c => capName(c));
+    const chain = capped.length > 6 ? [...capped.slice(0, 2), `… ${capped.length - 5} more`, ...capped.slice(-3)] : capped;  // long chains: keep the ends
     const longest = Math.max(...chain.map(c => c.length));
     const fs = longest > 26 ? 40 : longest > 18 ? 50 : 64;
     const shade = i => ["#55574F", "#6B6D66", "#A6A9A3", "#C8CAC4"][Math.min(3, Math.round(i * 3 / Math.max(1, chain.length - 2)))];
@@ -1330,6 +1511,7 @@ function tick(now) {
 hydrate();
 if (Q().get("film") === "1") document.body.classList.add("film");
 api("/api/health").then(r => { if (r.ok && r.d.replay_only) $("#pausedBanner").hidden = false; }).catch(() => {});
+api("/api/status").then(r => { if (r.ok && r.d.cerebras === "busy") { $("#formMsg").textContent = "Heads up: Cerebras has been very busy in the last few minutes. We check before every race, so you won’t wait for nothing."; $("#formMsg").hidden = false; } }).catch(() => {});
 loadStats(); loadRuns(); route(); requestAnimationFrame(loop);
 </script>
 </body>

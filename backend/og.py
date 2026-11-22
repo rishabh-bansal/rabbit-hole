@@ -76,102 +76,94 @@ def paste(img, im, x, y):
     img.alpha_composite(im, (round(x), round(y)))
 
 
+def cap(name: str, n: int = 30, word: int = 22) -> str:
+    """Names in images: at most 30 characters (cut at a word boundary), single words at most 22."""
+    words = [w if len(w) <= word else w[:word] + "…" for w in name.split()]
+    out = " ".join(words)
+    if len(out) <= n:
+        return out
+    cut = out[:n].rsplit(" ", 1)[0] if " " in out[:n] else out[:n]
+    return cut.rstrip(" ,;:-") + "…"
+
+
+def chain_text(path: list[str]) -> list[str]:
+    names = [cap(x) for x in path]
+    if len(names) > 6:
+        names = names[:2] + [f"… {len(names) - 5} more"] + names[-3:]
+    return names
+
+
+def tag(d, text, right, top):
+    f = font("ins", 20, 600)
+    w = d.textlength(text, font=f)
+    d.rounded_rectangle([right - w - 28, top, right, top + 38], radius=8, outline=(245, 244, 240, 110), width=2)
+    d.text((right - w - 14, top + 7), text, font=f, fill=PEARL)
+
+
 def render(summary: dict | None, kicker: str = "Latest race") -> bytes:
     img = Image.new("RGBA", (W, H), INK)
     d = ImageDraw.Draw(img)
-    # header
-    mark(d, 56, 48, 30)
-    d.text((98, 50), "Rabbit Hole", font=font("hub", 22, 600), fill=PEARL)
-    site = "airabbithole.pages.dev"
-    d.text((W - 56 - d.textlength(site, font=font("ins", 20, 500)), 52), site, font=font("ins", 20, 500), fill=FOG)
-
+    mark(d, 60, 50, 32)
+    d.text((104, 52), "Rabbit Hole", font=font("ins", 26, 600), fill=PEARL)
     lanes = (summary or {}).get("lanes", {})
     cb = lanes.get("cerebras")
-    if not summary or not cb:  # no finished race yet: a generic card
-        d.text((56, 170), "How are two things", font=font("hub", 78, 500), fill=PEARL)
-        d.text((56, 258), "connected?", font=font("hub", 78, 500), fill=PEARL)
-        d.text((56, 368), "An AI plays the Wikipedia game. Same model, two chips.", font=font("ins", 28, 400), fill=HAZE)
-        footer(img, d)
+    if not summary or not cb:  # no finished race yet
+        d.text((60, 250), "How are two things connected?", font=font("ins", 76, 600), fill=PEARL)
+        d.text((60, 352), "Watch an AI race itself through Wikipedia, link by link, on Cerebras and on NVIDIA GPUs.", font=font("ins", 25, 400), fill=FOG)
+        brand_stack(img, d)
         return png(img)
+    tag(d, kicker, W - 60, 48)
 
-    # left: kicker + question
-    d.text((56, 128), kicker, font=font("ins", 20, 500), fill=HAZE)
-    tokens = [("How is", HAZE), (summary["start"], PEARL), ("connected to", HAZE), (summary["target"] + "?", PEARL)]
-    box_h = 222  # between the kicker and the clocks
-    for size in (52, 46, 40, 36, 32, 28):  # shrink until the whole question fits
-        qf = font("hub", size, 500)
-        lines, sp = wrap_tokens(d, tokens, qf, 560)
-        lh = round(size * 1.08)
-        if len(lines) * lh <= box_h:
+    # the question: 68 / 56 / 46 px, at most 2 lines
+    tokens = [("How is", HAZE), (cap(summary["start"]), PEARL), ("connected to", HAZE), (cap(summary["target"]) + "?", PEARL)]
+    for size in (68, 56, 46, 40):
+        qf = font("ins", size, 600)
+        lines, sp = wrap_tokens(d, tokens, qf, W - 120)
+        if len(lines) <= 2:
             break
-    max_lines = box_h // lh
-    if len(lines) > max_lines:  # still too long at the smallest size: cut the last line with an ellipsis
-        lines = lines[:max_lines]
-        last = lines[-1]
-        while last and sum(w for _, _, w in last) + sp * len(last) + d.textlength("…", font=qf) > 560:
-            last.pop()
-        last.append(("…", HAZE, d.textlength("…", font=qf)))
-    y = 162
+    lines = lines[:2]
+    lh = round(size * 1.06)
+    y = 150 if len(lines) == 2 else 175
     for line in lines:
-        x = 56
+        x = 60
         for word, col, ww in line:
             d.text((x, y), word, font=qf, fill=col); x += ww + sp
         y += lh
-    # clocks
-    ty = 400
-    d.line([(56, ty), (616, ty)], fill=LINE, width=1)
-    d.line([(336, ty), (336, ty + 120)], fill=LINE, width=1)
-    paste(img, logo("cerebras-color", 26), 56, ty + 20); paste(img, logo("cerebras-text", 20), 88, ty + 23)
-    d.text((56, ty + 56), fmt(cb["seconds"]), font=font("hub", 56, 500), fill=EMBER)
-    paste(img, logo("nvidia-color", 26), 360, ty + 20); paste(img, logo("nvidia-text", 17), 392, ty + 25)
-    gpu, outcome = lanes.get("gpu"), (summary.get("outcome") or {}).get("gpu")
-    if gpu:
-        d.text((360, ty + 56), fmt(gpu["seconds"]), font=font("hub", 56, 500), fill=HAZE)
-    elif outcome == "lane_timeout":
-        d.text((360, ty + 56), "5:00", font=font("hub", 56, 500), fill=HAZE)
-        d.text((360 + d.textlength("5:00", font=font("hub", 56, 500)) + 10, ty + 86), "still thinking", font=font("ins", 20, 500), fill=HAZE)
-    else:
-        d.text((360, ty + 70), "did not finish", font=font("ins", 26, 500), fill=HAZE)
+    # the chain, at most 2 lines
+    cf = font("ins", 25, 400)
+    clines, csp = wrap_tokens(d, [(" → ".join(chain_text(cb["path"])), FOG)], cf, W - 120)
+    y += 10
+    for line in clines[:2]:
+        d.text((60, y), " ".join(w for w, _, _ in line), font=cf, fill=FOG); y += 34
 
-    # right: the chain
-    px, py, pw, ph = 660, 120, 484, 412
-    d.rounded_rectangle([px, py, px + pw, py + ph], radius=24, fill=NIGHT)
-    for (ax, ay, dx, dy) in ((px + pw + 12, py - 12, -1, 1), (px - 12, py + ph + 12, 1, -1)):
-        d.line([(ax, ay), (ax + 22 * dx, ay)], fill=EMBER, width=2); d.line([(ax, ay), (ax, ay + 22 * dy)], fill=EMBER, width=2)
-    path = cb["path"]
-    steps = list(enumerate(path))
-    if len(steps) > 7:
-        steps = steps[:3] + [(-1, "…")] + steps[-3:]
-    row = min(62, (ph - 56) / len(steps))
-    y = py + 28 + ((ph - 56) - row * len(steps)) / 2
-    tf, nf = font("hub", 28, 500), font("hub", 16, 700)
-    for k, (i, title) in enumerate(steps):
-        last = i == len(path) - 1
-        if i >= 0:
-            d.text((px + 32, y + row / 2 - 9), f"{i + 1:02d}", font=nf, fill=EMBER)
-        t = title
-        while d.textlength(t, font=tf) > pw - 110 and len(t) > 4:
-            t = t[:-2]
-        if t != title:
-            t = t.rstrip() + "…"
-        d.text((px + 76, y + row / 2 - 17), t, font=tf, fill=EMBER if last else PEARL)
-        if k < len(steps) - 1:
-            d.line([(px + 32, y + row), (px + pw - 32, y + row)], fill=LINE, width=1)
-        y += row
-    footer(img, d)
+    # bottom row: Cerebras time (hero), NVIDIA result, brand stack
+    by = 426
+    paste(img, logo("cerebras-color", 24), 60, by); d.text((92, by), "Cerebras", font=font("ins", 21, 600), fill=PEARL)
+    hero = fmt(cb["seconds"])
+    hf = font("hub", 124, 500)
+    d.text((54, by + 26), hero, font=hf, fill=EMBER)
+    gx = 60 + d.textlength(hero, font=hf) + 36
+    paste(img, logo("nvidia-color", 22), gx, by + 62); d.text((gx + 30, by + 61), "NVIDIA GPU", font=font("ins", 20, 600), fill=PEARL)
+    gpu, outcome = lanes.get("gpu"), (summary.get("outcome") or {}).get("gpu")
+    gtxt = fmt(gpu["seconds"]) if gpu else "5:00 still thinking" if outcome == "lane_timeout" else "did not finish" if outcome == "lane_error" else "resting today"
+    d.text((gx, by + 92), gtxt, font=font("ins", 34, 400), fill=HAZE)
+    brand_stack(img, d)
     return png(img)
 
 
-def footer(img, d):
-    y = 572
-    x = 56
-    paste(img, logo("kimi-color", 24), x, y - 2); x += 32
-    d.text((x, y), "Kimi K3.1 Pro", font=font("ins", 19, 500), fill=FOG); x += d.textlength("Kimi K3.1 Pro", font=font("ins", 19, 500)) + 24
-    paste(img, logo("cerebras-color", 24), x, y - 2); paste(img, logo("cerebras-text", 18), x + 30, y + 1); x += 30 + logo("cerebras-text", 18).width + 24
-    paste(img, logo("nvidia-color", 24), x, y - 2); paste(img, logo("nvidia-text", 15), x + 30, y + 3); x += 30 + logo("nvidia-text", 15).width + 24
-    paste(img, logo("openclaw-color", 24), x, y - 2); paste(img, logo("openclaw-text", 15), x + 30, y + 3)
-    tag = "#KimiOnCerebras"
-    d.text((W - 56 - d.textlength(tag, font=font("ins", 19, 600)), y), tag, font=font("ins", 19, 600), fill=HAZE)
+def brand_stack(img, d):
+    right = W - 60
+    x = right
+    for name in ("openclaw-color", "nvidia-color", "cerebras-color", "kimi-color"):
+        im = logo(name, 26)
+        x -= im.width
+        paste(img, im, x, 466)
+        x -= 12
+    site = "airabbithole.pages.dev"
+    f1, f2 = font("ins", 22, 600), font("ins", 20, 400)
+    d.text((right - d.textlength(site, font=f1), 504), site, font=f1, fill=PEARL)
+    tg = "#KimiOnCerebras"
+    d.text((right - d.textlength(tg, font=f2), 538), tg, font=f2, fill=HAZE)
 
 
 def png(img: Image.Image) -> bytes:
