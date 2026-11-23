@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import random
 import time
 import uuid
 from pathlib import Path
@@ -45,6 +46,14 @@ MODELS = {
     "qwen-3.8-27b": {"label": "Qwen 3.8 27B", "cerebras": "qwen-3.8-27b", "agent": "racer-qwen",
                      "story_agent": "storyteller-qwen", "extra": {}, "gpu": None},
 }
+# When NVIDIA's free tier doesn't serve the race's model, the GPU lane runs one of these instead (picked at
+# random per race). They're different models, so every screen labels them and /api/stats leaves them out.
+GPU_POOL = [
+    {"model": "nvidia/nemotron-3.5-lightning-30b-a3b", "label": "Nemotron 3.5 Lightning"},
+    {"model": "nvidia/nemotron-3-ultra-550b-a55b", "label": "Nemotron 3 Ultra"},
+    {"model": "minimaxai/minimax-m3.1-flash", "label": "MiniMax M3.1 Flash"},
+    {"model": "stepfun-ai/step-5-preview", "label": "Step 5 Preview"},
+]
 _avail: dict = {"at": 0.0, "ids": {k for k, m in MODELS.items() if not m.get("off")}}
 
 
@@ -70,9 +79,14 @@ async def _default_model() -> str | None:
     return next((k for k in MODELS if k in ids), None)
 
 
-def lanes(mk: str, with_gpu: bool) -> list[Lane]:
+def lanes(mk: str, with_gpu: bool, gpu_pick: dict | None = None) -> list[Lane]:
     m = MODELS[mk]
     out = []
+    if with_gpu and not m["gpu"] and gpu_pick:  # different model on NVIDIA, called directly on its free API
+        out.append(Lane("cerebras", f"{m['label']} · Cerebras", OPENCLAW, OC_TOKEN, "openclaw/" + m["agent"]) if OPENCLAW else
+                   Lane("cerebras", f"{m['label']} · Cerebras", "https://api.cerebras.ai/v1", os.getenv("CEREBRAS_API_KEY", ""), m["cerebras"], m["extra"]))
+        out.append(Lane("gpu", f"{gpu_pick['label']} · NVIDIA GPU", "https://integrate.api.nvidia.com/v1", os.getenv("NVIDIA_API_KEY", ""), gpu_pick["model"]))
+        return out
     if OPENCLAW:  # production: both lanes go through the OpenClaw gateway, one agent per provider and model
         out.append(Lane("cerebras", f"{m['label']} · Cerebras", OPENCLAW, OC_TOKEN, "openclaw/" + m["agent"]))
         if with_gpu and m["gpu"]:
@@ -106,6 +120,7 @@ def save_run(rid: str, body, history: list[dict]) -> None:
         "aborted": any(e.get("type") == "race_aborted" for e in history),
         "model": getattr(body, "model", None) or "kimi-k3.1-pro",
         "model_label": MODELS.get(getattr(body, "model", None) or "kimi-k3.1-pro", {}).get("label", "Kimi K3.1 Pro"),
+        "gpu_model_label": next((e.get("gpu_model_label") for e in history if e.get("type") == "race_started" and e.get("gpu_model_label")), None),
         "gpu_note": next((e.get("gpu_note") for e in history if e.get("type") == "race_started" and e.get("gpu_note")), None),
         "story": next((e["text"] for e in history if e.get("type") == "story"), ""),
     }
@@ -273,7 +288,7 @@ async def stats():
         try:
             lanes_ = sm["lanes"]
             cb = lanes_.get("cerebras")
-            if not cb:
+            if not cb or sm.get("gpu_note") in ("other_model", "no_host"):  # only same-model races count
                 continue
             gpu = (lanes_.get("gpu") or {}).get("seconds")
             if gpu is None and (sm.get("outcome") or {}).get("gpu") == "lane_timeout":
@@ -509,7 +524,8 @@ async def start_race(body: RaceIn, request: Request):
         raise HTTPException(429, {"code": "busy", "message": "Someone is racing right now.", "live": _live()})
     _quota_check(request)
     has_gpu_host = bool(MODELS[mk]["gpu"])
-    gpu_ok = _quota_commit(request, needs_gpu=has_gpu_host)
+    gpu_pick = None if has_gpu_host else random.choice(GPU_POOL)
+    gpu_ok = _quota_commit(request)
     _racing_model["k"] = mk
     rid = uuid.uuid4().hex[:10]
     history: list[dict] = []
@@ -536,7 +552,7 @@ async def start_race(body: RaceIn, request: Request):
             story_task["t"] = asyncio.create_task(make_story(e["path"]))
 
     async def run():
-        chosen = lanes(mk, with_gpu=gpu_ok)
+        chosen = lanes(mk, with_gpu=gpu_ok, gpu_pick=gpu_pick)
         tasks: dict[str, asyncio.Task] = {}
 
         async def capped(l):
@@ -551,7 +567,8 @@ async def start_race(body: RaceIn, request: Request):
 
         try:
             await emit({"type": "race_started", "start": body.start, "target": body.target, "gpu_paused": not gpu_ok,
-                        "gpu_note": None if has_gpu_host else "no_host", "model": mk, "model_label": MODELS[mk]["label"],
+                        "gpu_note": None if has_gpu_host else "other_model", "model": mk, "model_label": MODELS[mk]["label"],
+                        "gpu_model_label": MODELS[mk]["label"] if has_gpu_host else gpu_pick["label"],
                         "lanes": [{"id": l.id, "label": l.label} for l in chosen]})
             tasks = {l.id: asyncio.create_task(capped(l)) for l in chosen}
             if "cerebras" in tasks:

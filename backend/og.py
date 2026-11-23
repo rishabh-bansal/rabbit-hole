@@ -145,7 +145,8 @@ def render(summary: dict | None, kicker: str = "Latest race") -> bytes:
     gx = 60 + d.textlength(hero, font=hf) + 36
     gpu, outcome = lanes.get("gpu"), (summary.get("outcome") or {}).get("gpu")
     paste(img, logo("nvidia-color", 22), gx, by + 62); d.text((gx + 30, by + 61), "NVIDIA GPU", font=font("ins", 20, 600), fill=PEARL)
-    d.text((gx + 30 + d.textlength("NVIDIA GPU  ", font=font("ins", 20, 600)), by + 62), "free tier", font=font("ins", 18, 500), fill=HAZE)
+    nv_note = summary.get("gpu_model_label") if summary.get("gpu_note") == "other_model" else "free tier"
+    d.text((gx + 30 + d.textlength("NVIDIA GPU  ", font=font("ins", 20, 600)), by + 62), nv_note or "free tier", font=font("ins", 18, 500), fill=HAZE)
     if not gpu and summary.get("gpu_note") == "no_host":  # NVIDIA's free tier doesn't serve this model: same model or no lane
         d.text((gx, by + 92), "doesn’t serve " + (summary.get("model_label") or "this model"), font=font("ins", 28, 400), fill=HAZE)
     else:
