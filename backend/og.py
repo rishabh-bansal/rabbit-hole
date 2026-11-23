@@ -144,14 +144,11 @@ def render(summary: dict | None, kicker: str = "Latest race") -> bytes:
     d.text((54, by + 26), hero, font=hf, fill=EMBER)
     gx = 60 + d.textlength(hero, font=hf) + 36
     gpu, outcome = lanes.get("gpu"), (summary.get("outcome") or {}).get("gpu")
-    if not gpu and summary.get("gpu_note") == "no_host":  # no free GPU host serves this model: say what ran instead
-        mk = summary.get("model") or "kimi-k3.1-pro"
-        paste(img, logo(MODEL_LOGO.get(mk, "kimi-color"), 22), gx, by + 62)
-        d.text((gx + 30, by + 61), summary.get("model_label") or "Kimi K3.1 Pro", font=font("ins", 20, 600), fill=PEARL)
-        d.text((gx, by + 92), "Cerebras only", font=font("ins", 34, 400), fill=HAZE)
+    paste(img, logo("nvidia-color", 22), gx, by + 62); d.text((gx + 30, by + 61), "NVIDIA GPU", font=font("ins", 20, 600), fill=PEARL)
+    d.text((gx + 30 + d.textlength("NVIDIA GPU  ", font=font("ins", 20, 600)), by + 62), "free tier", font=font("ins", 18, 500), fill=HAZE)
+    if not gpu and summary.get("gpu_note") == "no_host":  # NVIDIA's free tier doesn't serve this model: same model or no lane
+        d.text((gx, by + 92), "doesn’t serve " + (summary.get("model_label") or "this model"), font=font("ins", 28, 400), fill=HAZE)
     else:
-        paste(img, logo("nvidia-color", 22), gx, by + 62); d.text((gx + 30, by + 61), "NVIDIA GPU", font=font("ins", 20, 600), fill=PEARL)
-        d.text((gx + 30 + d.textlength("NVIDIA GPU  ", font=font("ins", 20, 600)), by + 62), "free tier", font=font("ins", 18, 500), fill=HAZE)
         gtxt = fmt(gpu["seconds"]) if gpu else "5:00 still thinking" if outcome == "lane_timeout" else "did not finish" if outcome == "lane_error" else "resting today"
         d.text((gx, by + 92), gtxt, font=font("ins", 34, 400), fill=HAZE)
     brand_stack(img, d, summary.get("model") or "kimi-k3.1-pro")
@@ -165,8 +162,6 @@ def brand_stack(img, d, mk: str | None):
     right = W - 60
     x = right
     names = ["openclaw-color", "nvidia-color", "cerebras-color", MODEL_LOGO.get(mk or "kimi-k3.1-pro", "kimi-color")]
-    if mk and mk != "kimi-k3.1-pro":
-        names.remove("nvidia-color")
     for name in names:
         im = logo(name, 26)
         x -= im.width
