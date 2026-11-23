@@ -490,8 +490,13 @@ async def start_race(body: RaceIn, request: Request):
     except Exception:  # noqa: BLE001
         raise HTTPException(503, {"code": "wiki_down", "message": "Wikipedia isn’t answering right now. Try again in a moment."}) from None
     mk = body.model or await _default_model()
-    if not mk or mk not in MODELS or mk not in await _available():
-        raise HTTPException(422, {"code": "model_unavailable", "message": "That model isn’t available on Cerebras right now. Pick another one."})
+    if mk and mk not in MODELS:
+        raise HTTPException(422, {"code": "model_unavailable", "message": "That model isn’t on our list. Pick another one."})
+    if not mk or mk not in await _available():  # selectable on purpose: the visitor gets the "system down" page
+        m = MODELS.get(mk or "", {})
+        raise HTTPException(503, {"code": "cerebras_down", "model": m.get("label"),
+                                  "why": m.get("off") or "Cerebras isn’t serving this model right now.",
+                                  "message": f"{m.get('label', 'That model')} isn’t available on Cerebras right now."})
     body.model = mk
     # pre-flight: don't start a race the system can't run (and don't count it against the visitor)
     if not await _ping_gateway():

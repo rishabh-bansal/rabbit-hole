@@ -18,8 +18,8 @@ Kimi K3.1 Pro on Cerebras: 29.4 s.   Same model on GPUs: still thinking at 5 min
 ## What it does
 
 - **Pick a model.** The home page lists the models Cerebras serves (Kimi K3.1 Pro, GPT-OSS 120B,
-  Qwen 3.8 27B), read live from `/api/models`. A model Cerebras stops serving is greyed out, and comes
-  back on its own if it returns. GPT-OSS 120B is switched off for now: the free key allows it only
+  Qwen 3.8 27B), read live from `/api/models`. Every model stays selectable: one Cerebras is not serving shows a "system down" page with a
+  one-click switch to a working model. GPT-OSS 120B is switched off for now: the free key allows it only
   5 requests a minute, too few for a race.
 - **Two lanes, one model.** For Kimi K3.1 Pro both lanes run the same model. Only the inference hardware differs:
   Cerebras on one side, NVIDIA GPUs on the other. Clocks are real elapsed time.

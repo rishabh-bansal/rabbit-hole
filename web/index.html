@@ -232,7 +232,8 @@ input:focus { outline: none; }
   box-shadow: inset 0 0 0 1px rgba(245,244,240,.16); color: var(--fog); font-size: 14px; white-space: nowrap; cursor: pointer; }
 .mchip:hover { box-shadow: inset 0 0 0 1px rgba(245,244,240,.32); }
 .mchip[aria-checked="true"] { box-shadow: inset 0 0 0 1px var(--ember); color: var(--pearl); }
-.mchip:disabled { opacity: .4; cursor: not-allowed; box-shadow: inset 0 0 0 1px rgba(245,244,240,.1); }
+.mchip[data-down] { color: var(--haze); }
+.mchip[data-down] img { opacity: .5; }
 .mnote { width: 100%; margin: 0; font-size: 13px; color: var(--haze); }
 @media (min-width: 900px) { .models { justify-content: center; margin-top: 14px; } .mnote { text-align: center; } }
 .field.drop { animation: rh-drop .45s var(--ease) both; box-shadow: inset 0 0 0 1px var(--ember); }
@@ -646,11 +647,11 @@ body.notes .sw { background: var(--ember); } body.notes .sw i { left: 14px; back
       <div class="acol">
         <div class="ahead"><p class="k" id="aK"></p><h1 class="rise d1" id="aH"></h1></div>
         <dl class="times rise d2" id="aTimes"></dl>
-        <section class="story-m mob-only" aria-label="The story"><span class="small">The story, written by Kimi</span><p id="aStoryM"></p></section>
+        <section class="story-m mob-only" aria-label="The story"><span class="small" id="aStoryByM">The story, written by Kimi</span><p id="aStoryM"></p></section>
         <ol class="achain rise d3" id="aChain"></ol>
       </div>
       <div class="acol r desk-only">
-        <div class="storybox"><span class="c1" aria-hidden="true"></span><span class="c2" aria-hidden="true"></span><span class="lb">The story · by Kimi</span><div id="aStoryD"></div></div>
+        <div class="storybox"><span class="c1" aria-hidden="true"></span><span class="c2" aria-hidden="true"></span><span class="lb" id="aStoryByD">The story · by Kimi</span><div id="aStoryD"></div></div>
         <div class="abtns"><a class="btn primary" id="aX" target="_blank" rel="noopener">Post on X</a><button class="btn ghost" type="button" data-img>Share image</button><a class="btn ghost" href="#" id="aReplayD">Watch the replay</a></div>
         <div class="post"><span>The post</span><p id="aPost"></p></div>
         <p class="small" style="font-size:14px">Same model in both lanes, Kimi K3.1 Pro. Clocks show real elapsed time. GPU lane: NVIDIA API catalog, free tier (build.nvidia.com). Its time includes waiting in NVIDIA’s free queue. Article text from Wikipedia, CC BY-SA 4.0.</p>
@@ -1330,13 +1331,15 @@ function showLimit(d) {
 }
 function showUnavailable(d) {
   show("state"); STATE_LIVE = null;
-  const engine = d.code === "engine_down", m = esc(d.model || "The model"), others = (MODELS || []).filter(x => x.available && x.label !== d.model).length;
+  const engine = d.code === "engine_down", m = esc(d.model || "The model"), alt = (MODELS || []).find(x => x.available && x.label !== d.model);
   $("#sBody").innerHTML = `<span class="small">${engine ? "Quick system check failed" : `Quick system check: ${m} on Cerebras isn’t answering`}</span>
     <h2>${engine ? "The race engine is restarting" : d.code === "cerebras_busy" ? "Cerebras is at capacity right now" : `${m} isn’t answering right now`}</h2>
-    <p>${engine ? "It usually takes under a minute." : `A live race would just sit there. We checked before starting, so this didn’t use up one of your races.${others ? " You can pick another model on the home page." : ""}`}</p>`;
-  $("#sActs").innerHTML = `<button class="btn primary" type="button" data-retry>Try again</button><a class="btn quiet" href="#" data-latest>Play a replay instead</a>`;
+    <p>${engine ? "It usually takes under a minute." : `${d.why ? esc(d.why) + " " : ""}A live race would just sit there. We checked before starting, so this didn’t use up one of your races.`}</p>`;
+  $("#sActs").innerHTML = (alt && !engine ? `<button class="btn primary" type="button" data-switch="${esc(alt.id)}">Race with ${esc(alt.label)} instead</button><button class="btn quiet" type="button" data-retry>Try again</button>`
+    : `<button class="btn primary" type="button" data-retry>Try again</button>`) + `<a class="btn quiet" href="#" data-latest>Play a replay instead</a>`;
 }
 document.addEventListener("click", e => { if (e.target.closest("[data-retry]")) { show("home"); startRace(); } });
+document.addEventListener("click", e => { const b = e.target.closest("[data-switch]"); if (!b) return; MODEL = b.dataset.switch; try { localStorage.setItem("rh-model", MODEL); } catch (x) {} paintModels(); show("home"); startRace(); });
 function renderStateLive() { if (!STATE_LIVE) return; const t = (performance.now() - STATE_LIVE.at) / 1000; $$("[data-sl]").forEach(el => el.textContent = fmt(t).full); }
 document.addEventListener("click", e => { const a = e.target.closest("[data-watch]"); if (!a) return; e.preventDefault(); history.pushState({}, "", `?watch=${encodeURIComponent(a.dataset.watch)}`); LAST_SEARCH = location.search; watch(a.dataset.watch); });
 
@@ -1403,6 +1406,8 @@ function paintAnswer() {
     <div class="st"><span><a class="tt" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>${s.auto ? `<span class="dl">direct link</span>` : ""}</span><span class="rs">${esc(s.reason)}</span></div>
     <span class="tm">${s.start ? '<span class="mob-only">start</span><span class="desk-only">0:00.0</span>' : fmt(s.t).full}</span></li>`).join("");
   const story = S.story;
+  const by = mLabel(S).split(" ")[0] === "Kimi" ? "Kimi" : mLabel(S);
+  $("#aStoryByM").textContent = `The story, written by ${by}`; $("#aStoryByD").textContent = `The story · by ${by}`;
   if (story) { const [a, b] = splitStory(story); $("#aStoryD").innerHTML = `<p class="s1">${esc(a)}</p>${b ? `<p class="s2">${esc(b)}</p>` : ""}`; $("#aStoryM").textContent = story; }
   else { const w = S.storyWriting || A.live ? "Kimi is writing the story…" : "No story this time."; $("#aStoryD").innerHTML = `<p class="wr">${w}</p>`; $("#aStoryM").textContent = w; }
   const post = postText(S), href = "https://x.com/intent/post?text=" + encodeURIComponent(post);
@@ -1566,10 +1571,11 @@ try { MODEL = localStorage.getItem("rh-model"); } catch (x) {}
 function paintModels() {
   const box = $("#models"); if (!MODELS || !MODELS.length) { box.hidden = true; return; }
   const ok = MODELS.filter(m => m.available);
-  if (!ok.some(m => m.id === MODEL)) MODEL = (ok[0] || {}).id || null;
-  $("#mpick").innerHTML = MODELS.map(m => `<button type="button" class="mchip" role="radio" data-model="${esc(m.id)}" aria-checked="${m.id === MODEL}" ${m.available ? "" : `disabled title="${esc(m.note || "Not available on Cerebras right now")}"`}>${img(MODEL_LOGO[m.id] || "kimi", 15)}${esc(m.label)}</button>`).join("");
+  if (!MODELS.some(m => m.id === MODEL)) MODEL = (ok[0] || MODELS[0]).id;
+  $("#mpick").innerHTML = MODELS.map(m => `<button type="button" class="mchip" role="radio" data-model="${esc(m.id)}" aria-checked="${m.id === MODEL}"${m.available ? "" : ` data-down title="${esc(m.note || "Not available on Cerebras right now")}"`}>${img(MODEL_LOGO[m.id] || "kimi", 15)}${esc(m.label)}</button>`).join("");
   const cur = MODELS.find(m => m.id === MODEL);
-  $("#mnote").textContent = !ok.length ? "No model is available on Cerebras right now. Replays still work."
+  $("#mnote").textContent = cur && !cur.available ? `${cur.label} isn’t available on Cerebras right now. You can still try it.`
+    : !ok.length ? "No model is available on Cerebras right now. Replays still work."
     : cur && !cur.gpu ? `${cur.label} runs on Cerebras only: no free GPU host serves it, so there’s no same-model GPU lane.`
     : cur ? `${cur.label} races itself on Cerebras and on NVIDIA’s free GPU tier.` : "";
   box.hidden = false;
@@ -1578,7 +1584,7 @@ async function loadModels(force) {
   const r = await api("/api/models").catch(() => null);
   if (r && r.ok && Array.isArray(r.d.models)) { MODELS = r.d.models; if (!MODEL || force) MODEL = MODEL || r.d.default; paintModels(); }
 }
-$("#mpick").addEventListener("click", e => { const b = e.target.closest("[data-model]"); if (!b || b.disabled) return; MODEL = b.dataset.model; try { localStorage.setItem("rh-model", MODEL); } catch (x) {} paintModels(); });
+$("#mpick").addEventListener("click", e => { const b = e.target.closest("[data-model]"); if (!b) return; MODEL = b.dataset.model; try { localStorage.setItem("rh-model", MODEL); } catch (x) {} paintModels(); });
 
 // ---------- boot ----------
 hydrate();
