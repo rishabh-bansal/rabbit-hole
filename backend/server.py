@@ -49,10 +49,10 @@ MODELS = {
 # When NVIDIA's free tier doesn't serve the race's model, the GPU lane runs one of these instead (picked at
 # random per race). They're different models, so every screen labels them and /api/stats leaves them out.
 GPU_POOL = [
-    {"model": "nvidia/nemotron-3.5-lightning-30b-a3b", "label": "Nemotron 3.5 Lightning"},
-    {"model": "nvidia/nemotron-3-ultra-550b-a55b", "label": "Nemotron 3 Ultra"},
-    {"model": "minimaxai/minimax-m3.1-flash", "label": "MiniMax M3.1 Flash"},
-    {"model": "stepfun-ai/step-5-preview", "label": "Step 5 Preview"},
+    {"model": "nvidia/nemotron-3.5-lightning-30b-a3b", "label": "Nemotron 3.5 Lightning", "agent": "racer-nv-lightning"},
+    {"model": "nvidia/nemotron-3-ultra-550b-a55b", "label": "Nemotron 3 Ultra", "agent": "racer-nv-ultra"},
+    {"model": "minimaxai/minimax-m3.1-flash", "label": "MiniMax M3.1 Flash", "agent": "racer-nv-minimax"},
+    {"model": "stepfun-ai/step-5-preview", "label": "Step 5 Preview", "agent": "racer-nv-step"},
 ]
 _avail: dict = {"at": 0.0, "ids": {k for k, m in MODELS.items() if not m.get("off")}}
 
@@ -82,11 +82,12 @@ async def _default_model() -> str | None:
 def lanes(mk: str, with_gpu: bool, gpu_pick: dict | None = None) -> list[Lane]:
     m = MODELS[mk]
     out = []
-    if with_gpu and not m["gpu"] and gpu_pick:  # different model on NVIDIA, called directly on its free API
-        out.append(Lane("cerebras", f"{m['label']} · Cerebras", OPENCLAW, OC_TOKEN, "openclaw/" + m["agent"]) if OPENCLAW else
-                   Lane("cerebras", f"{m['label']} · Cerebras", "https://api.cerebras.ai/v1", os.getenv("CEREBRAS_API_KEY", ""), m["cerebras"], m["extra"]))
-        out.append(Lane("gpu", f"{gpu_pick['label']} · NVIDIA GPU", "https://integrate.api.nvidia.com/v1", os.getenv("NVIDIA_API_KEY", ""), gpu_pick["model"]))
-        return out
+    if with_gpu and not m["gpu"] and gpu_pick:  # a different model on NVIDIA; in production both lanes are OpenClaw agents
+        if OPENCLAW:
+            return [Lane("cerebras", f"{m['label']} · Cerebras", OPENCLAW, OC_TOKEN, "openclaw/" + m["agent"]),
+                    Lane("gpu", f"{gpu_pick['label']} · NVIDIA GPU", OPENCLAW, OC_TOKEN, "openclaw/" + gpu_pick["agent"])]
+        return [Lane("cerebras", f"{m['label']} · Cerebras", "https://api.cerebras.ai/v1", os.getenv("CEREBRAS_API_KEY", ""), m["cerebras"], m["extra"]),
+                Lane("gpu", f"{gpu_pick['label']} · NVIDIA GPU", "https://integrate.api.nvidia.com/v1", os.getenv("NVIDIA_API_KEY", ""), gpu_pick["model"])]
     if OPENCLAW:  # production: both lanes go through the OpenClaw gateway, one agent per provider and model
         out.append(Lane("cerebras", f"{m['label']} · Cerebras", OPENCLAW, OC_TOKEN, "openclaw/" + m["agent"]))
         if with_gpu and m["gpu"]:

@@ -95,6 +95,42 @@
           "name": "storyteller-qwen"
         },
         "model": "cerebras/qwen-3.8-27b"
+      },
+      "racer-nv-lightning": {
+        "name": "racer-nv-lightning",
+        "workspace": "/home/node/.openclaw/ws/racer-nv-lightning",
+        "agentDir": "/home/node/.openclaw/agents/racer-nv-lightning/agent",
+        "identity": {
+          "name": "racer-nv-lightning"
+        },
+        "model": "nvidia/nvidia/nemotron-3.5-lightning-30b-a3b"
+      },
+      "racer-nv-ultra": {
+        "name": "racer-nv-ultra",
+        "workspace": "/home/node/.openclaw/ws/racer-nv-ultra",
+        "agentDir": "/home/node/.openclaw/agents/racer-nv-ultra/agent",
+        "identity": {
+          "name": "racer-nv-ultra"
+        },
+        "model": "nvidia/nvidia/nemotron-3-ultra-550b-a55b"
+      },
+      "racer-nv-minimax": {
+        "name": "racer-nv-minimax",
+        "workspace": "/home/node/.openclaw/ws/racer-nv-minimax",
+        "agentDir": "/home/node/.openclaw/agents/racer-nv-minimax/agent",
+        "identity": {
+          "name": "racer-nv-minimax"
+        },
+        "model": "nvidia/minimaxai/minimax-m3.1-flash"
+      },
+      "racer-nv-step": {
+        "name": "racer-nv-step",
+        "workspace": "/home/node/.openclaw/ws/racer-nv-step",
+        "agentDir": "/home/node/.openclaw/agents/racer-nv-step/agent",
+        "identity": {
+          "name": "racer-nv-step"
+        },
+        "model": "nvidia/stepfun-ai/step-5-preview"
       }
     }
   },
@@ -201,6 +237,78 @@
                 "high",
                 "max"
               ]
+            }
+          },
+          {
+            "id": "nvidia/nemotron-3.5-lightning-30b-a3b",
+            "name": "Nemotron 3.5 Lightning (NVIDIA GPU)",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsTools": true,
+              "supportsStrictMode": false
+            }
+          },
+          {
+            "id": "nvidia/nemotron-3-ultra-550b-a55b",
+            "name": "Nemotron 3 Ultra (NVIDIA GPU)",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsTools": true,
+              "supportsStrictMode": false
+            }
+          },
+          {
+            "id": "minimaxai/minimax-m3.1-flash",
+            "name": "MiniMax M3.1 Flash (NVIDIA GPU)",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsTools": true,
+              "supportsStrictMode": false
+            }
+          },
+          {
+            "id": "stepfun-ai/step-5-preview",
+            "name": "Step 5 Preview (NVIDIA GPU)",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsTools": true,
+              "supportsStrictMode": false
             }
           }
         ],

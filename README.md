@@ -25,6 +25,7 @@ Kimi K3.1 Pro on Cerebras: 29.4 s.   Same model on GPUs: still thinking at 5 min
   GPT-OSS the NVIDIA lane runs a random NVIDIA-hosted model (Nemotron 3.5 Lightning, Nemotron 3 Ultra,
   MiniMax M3.1 Flash or Step 5 Preview: the ones that tool-call fast enough). Every screen names it
   as a different model, and these mixed races are left out of the "time saved by Cerebras" stat.
+  Each one is its own OpenClaw agent (`racer-nv-*`), so both lanes pay the same agent overhead.
 - **Two lanes, one model.** For Kimi K3.1 Pro both lanes run the same model. Only the inference hardware differs:
   Cerebras on one side, NVIDIA GPUs on the other. Clocks are real elapsed time.
 - **Where the GPU number comes from.** The GPU lane uses the **free tier of NVIDIA's API catalog**
