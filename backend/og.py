@@ -110,7 +110,7 @@ def render(summary: dict | None, kicker: str = "Latest race") -> bytes:
     if not summary or not cb:  # no finished race yet
         d.text((60, 250), "How are two things connected?", font=font("ins", 76, 600), fill=PEARL)
         d.text((60, 352), "Watch an AI race itself through Wikipedia, link by link, on Cerebras and on NVIDIA GPUs.", font=font("ins", 25, 400), fill=FOG)
-        brand_stack(img, d)
+        brand_stack(img, d, None)
         return png(img)
     tag(d, kicker, W - 60, 48)
 
@@ -143,19 +143,31 @@ def render(summary: dict | None, kicker: str = "Latest race") -> bytes:
     hf = font("hub", 124, 500)
     d.text((54, by + 26), hero, font=hf, fill=EMBER)
     gx = 60 + d.textlength(hero, font=hf) + 36
-    paste(img, logo("nvidia-color", 22), gx, by + 62); d.text((gx + 30, by + 61), "NVIDIA GPU", font=font("ins", 20, 600), fill=PEARL)
-    d.text((gx + 30 + d.textlength("NVIDIA GPU  ", font=font("ins", 20, 600)), by + 62), "free tier", font=font("ins", 18, 500), fill=HAZE)
     gpu, outcome = lanes.get("gpu"), (summary.get("outcome") or {}).get("gpu")
-    gtxt = fmt(gpu["seconds"]) if gpu else "5:00 still thinking" if outcome == "lane_timeout" else "did not finish" if outcome == "lane_error" else "resting today"
-    d.text((gx, by + 92), gtxt, font=font("ins", 34, 400), fill=HAZE)
-    brand_stack(img, d)
+    if not gpu and summary.get("gpu_note") == "no_host":  # no free GPU host serves this model: say what ran instead
+        mk = summary.get("model") or "kimi-k3.1-pro"
+        paste(img, logo(MODEL_LOGO.get(mk, "kimi-color"), 22), gx, by + 62)
+        d.text((gx + 30, by + 61), summary.get("model_label") or "Kimi K3.1 Pro", font=font("ins", 20, 600), fill=PEARL)
+        d.text((gx, by + 92), "Cerebras only", font=font("ins", 34, 400), fill=HAZE)
+    else:
+        paste(img, logo("nvidia-color", 22), gx, by + 62); d.text((gx + 30, by + 61), "NVIDIA GPU", font=font("ins", 20, 600), fill=PEARL)
+        d.text((gx + 30 + d.textlength("NVIDIA GPU  ", font=font("ins", 20, 600)), by + 62), "free tier", font=font("ins", 18, 500), fill=HAZE)
+        gtxt = fmt(gpu["seconds"]) if gpu else "5:00 still thinking" if outcome == "lane_timeout" else "did not finish" if outcome == "lane_error" else "resting today"
+        d.text((gx, by + 92), gtxt, font=font("ins", 34, 400), fill=HAZE)
+    brand_stack(img, d, summary.get("model") or "kimi-k3.1-pro")
     return png(img)
 
 
-def brand_stack(img, d):
+MODEL_LOGO = {"kimi-k3.1-pro": "kimi-color", "gpt-oss-120b": "openai", "qwen-3.8-27b": "qwen-color"}
+
+
+def brand_stack(img, d, mk: str | None):
     right = W - 60
     x = right
-    for name in ("openclaw-color", "nvidia-color", "cerebras-color", "kimi-color"):
+    names = ["openclaw-color", "nvidia-color", "cerebras-color", MODEL_LOGO.get(mk or "kimi-k3.1-pro", "kimi-color")]
+    if mk and mk != "kimi-k3.1-pro":
+        names.remove("nvidia-color")
+    for name in names:
         im = logo(name, 26)
         x -= im.width
         paste(img, im, x, 466)
@@ -163,7 +175,7 @@ def brand_stack(img, d):
     site = "airabbithole.pages.dev"
     f1, f2 = font("ins", 22, 600), font("ins", 20, 400)
     d.text((right - d.textlength(site, font=f1), 504), site, font=f1, fill=PEARL)
-    tg = "#KimiOnCerebras"
+    tg = "#KimiOnCerebras" if (mk or "kimi-k3.1-pro") == "kimi-k3.1-pro" else "Powered by Cerebras"
     d.text((right - d.textlength(tg, font=f2), 538), tg, font=f2, fill=HAZE)
 
 

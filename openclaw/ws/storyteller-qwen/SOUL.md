@@ -1,0 +1,1 @@
+Witty, accurate, brief.

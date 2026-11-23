@@ -33,17 +33,63 @@ LANE_TIMEOUT = float(os.getenv("RH_LANE_TIMEOUT", "300"))
 FAST_MODEL = os.getenv("RH_CEREBRAS_MODEL", "moonshotai-kimi-k3.1-pro-trial")
 
 
-def lanes() -> list[Lane]:
-    if OPENCLAW:  # production: both lanes go through the OpenClaw gateway, one agent per provider
-        return [
-            Lane("cerebras", "Kimi K3.1 Pro · Cerebras", OPENCLAW, OC_TOKEN, "openclaw/" + os.getenv("RH_CEREBRAS_AGENT", "racer-cerebras")),
-            Lane("gpu", "Kimi K3.1 Pro · NVIDIA GPU", OPENCLAW, OC_TOKEN, "openclaw/racer-nvidia"),
-        ]
-    effort = {} if "qwen" in FAST_MODEL else {"reasoning_effort": "low"}
-    return [
-        Lane("cerebras", "Kimi K3.1 Pro · Cerebras", "https://api.cerebras.ai/v1", os.getenv("CEREBRAS_API_KEY", ""), FAST_MODEL, effort),
-        Lane("gpu", "Kimi K3.1 Pro · NVIDIA GPU", "https://integrate.api.nvidia.com/v1", os.getenv("NVIDIA_API_KEY", ""), "moonshotai/kimi-k3.1-pro", {"reasoning_effort": "low"}),
-    ]
+# Models a race can use. Both lanes always run the SAME model; the GPU lane exists only when a free
+# GPU host serves that model (today only Kimi K3.1 Pro, on NVIDIA's API catalog free tier).
+MODELS = {
+    "kimi-k3.1-pro": {"label": "Kimi K3.1 Pro", "cerebras": FAST_MODEL, "agent": os.getenv("RH_CEREBRAS_AGENT", "racer-cerebras"),
+                      "story_agent": "storyteller", "extra": {"reasoning_effort": "low"},
+                      "gpu": {"model": "moonshotai/kimi-k3.1-pro", "agent": "racer-nvidia", "extra": {"reasoning_effort": "low"}}},
+    "gpt-oss-120b": {"label": "GPT-OSS 120B", "cerebras": "gpt-oss-120b", "agent": "racer-gptoss",
+                     "story_agent": "storyteller-gptoss", "extra": {"reasoning_effort": "low"}, "gpu": None,
+                     "off": "Off for now: our free Cerebras key allows only 5 requests a minute for this model, too few for a race."},
+    "qwen-3.8-27b": {"label": "Qwen 3.8 27B", "cerebras": "qwen-3.8-27b", "agent": "racer-qwen",
+                     "story_agent": "storyteller-qwen", "extra": {}, "gpu": None},
+}
+_avail: dict = {"at": 0.0, "ids": {k for k, m in MODELS.items() if not m.get("off")}}
+
+
+async def _available() -> set[str]:
+    """Which registry models Cerebras serves right now (cached 2 min; on errors keep the last answer)."""
+    if time.time() - _avail["at"] < 120:
+        return _avail["ids"]
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=8) as c:
+            r = await c.get("https://api.cerebras.ai/v1/models", headers={"Authorization": f"Bearer {os.getenv('CEREBRAS_API_KEY', '')}"})
+            served = {m["id"] for m in r.json().get("data", [])} if r.status_code == 200 else None
+        if served is not None:
+            _avail["ids"] = {k for k, m in MODELS.items() if m["cerebras"] in served and not m.get("off")}
+    except Exception:  # noqa: BLE001
+        pass
+    _avail["at"] = time.time()
+    return _avail["ids"]
+
+
+async def _default_model() -> str | None:
+    ids = await _available()
+    return next((k for k in MODELS if k in ids), None)
+
+
+def lanes(mk: str, with_gpu: bool) -> list[Lane]:
+    m = MODELS[mk]
+    out = []
+    if OPENCLAW:  # production: both lanes go through the OpenClaw gateway, one agent per provider and model
+        out.append(Lane("cerebras", f"{m['label']} · Cerebras", OPENCLAW, OC_TOKEN, "openclaw/" + m["agent"]))
+        if with_gpu and m["gpu"]:
+            out.append(Lane("gpu", f"{m['label']} · NVIDIA GPU", OPENCLAW, OC_TOKEN, "openclaw/" + m["gpu"]["agent"]))
+        return out
+    out.append(Lane("cerebras", f"{m['label']} · Cerebras", "https://api.cerebras.ai/v1", os.getenv("CEREBRAS_API_KEY", ""), m["cerebras"], m["extra"]))
+    if with_gpu and m["gpu"]:
+        out.append(Lane("gpu", f"{m['label']} · NVIDIA GPU", "https://integrate.api.nvidia.com/v1", os.getenv("NVIDIA_API_KEY", ""),
+                        m["gpu"]["model"], m["gpu"]["extra"]))
+    return out
+
+
+@app.get("/api/models")
+async def models():
+    ids = await _available()
+    return {"default": await _default_model(),
+            "models": [{"id": k, "label": m["label"], "available": k in ids, "gpu": bool(m["gpu"]), "note": m.get("off")} for k, m in MODELS.items()]}
 
 
 RUNS = ROOT / "runs"
@@ -58,6 +104,9 @@ def save_run(rid: str, body, history: list[dict]) -> None:
         "lanes": {k: {"seconds": v["seconds"], "hops": v["hops"], "path": [p["title"] for p in v["path"]]} for k, v in lanes_done.items()},
         "outcome": {e["lane"]: e["type"] for e in history if e.get("type") in ("lane_timeout", "lane_error", "lane_stopped")},
         "aborted": any(e.get("type") == "race_aborted" for e in history),
+        "model": getattr(body, "model", None) or "kimi-k3.1-pro",
+        "model_label": MODELS.get(getattr(body, "model", None) or "kimi-k3.1-pro", {}).get("label", "Kimi K3.1 Pro"),
+        "gpu_note": next((e.get("gpu_note") for e in history if e.get("type") == "race_started" and e.get("gpu_note")), None),
         "story": next((e["text"] for e in history if e.get("type") == "story"), ""),
     }
     tmp = RUNS / f".{rid}.tmp"
@@ -237,13 +286,13 @@ async def stats():
     return {"seconds_saved": round(saved, 1), "races": races_n}
 
 
-async def tell_story(start: str, target: str, path: list[dict]) -> str:
+async def tell_story(start: str, target: str, path: list[dict], mk: str = "kimi-k3.1-pro") -> str:
     """Kimi on Cerebras (through OpenClaw) turns the chain into a 3-sentence mini story."""
     from openai import AsyncOpenAI
     if OPENCLAW:
-        client, model = AsyncOpenAI(base_url=OPENCLAW, api_key=OC_TOKEN, timeout=40, max_retries=1), "openclaw/storyteller"
+        client, model = AsyncOpenAI(base_url=OPENCLAW, api_key=OC_TOKEN, timeout=40, max_retries=1), "openclaw/" + MODELS[mk]["story_agent"]
     else:
-        client, model = AsyncOpenAI(base_url="https://api.cerebras.ai/v1", api_key=os.getenv("CEREBRAS_API_KEY", ""), timeout=40, max_retries=1), FAST_MODEL
+        client, model = AsyncOpenAI(base_url="https://api.cerebras.ai/v1", api_key=os.getenv("CEREBRAS_API_KEY", ""), timeout=40, max_retries=1), MODELS[mk]["cerebras"]
     chain = " → ".join(p["title"] for p in path)
     notes = "\n".join(f"- {p['title']}: {p['reason']}" for p in path[1:])
     try:
@@ -262,6 +311,7 @@ async def tell_story(start: str, target: str, path: list[dict]) -> str:
 class RaceIn(BaseModel):
     start: str = Field(min_length=1, max_length=120)
     target: str = Field(min_length=1, max_length=120)
+    model: str | None = Field(default=None, max_length=40)
 
 
 # ---- protection for free credits (Cerebras trial, NVIDIA free credits, Wikipedia) ----
@@ -313,7 +363,7 @@ def _quota_check(request: Request) -> None:
                                   "message": f"Each visitor gets {PER_IP_PER_HOUR} live races an hour, so the free credits last."})
 
 
-def _quota_commit(request: Request) -> bool:
+def _quota_commit(request: Request, needs_gpu: bool = True) -> bool:
     """Count a race that is really starting. Returns whether the GPU lane may run today."""
     _ip_hits.setdefault(_client_ip(request), []).append(time.time())
     if len(_ip_hits) > 20000:
@@ -321,7 +371,7 @@ def _quota_commit(request: Request) -> bool:
         for k in [k for k, v in _ip_hits.items() if not v or v[-1] < cutoff]:
             _ip_hits.pop(k, None)
     _day["races"] += 1
-    gpu_ok = _day["gpu"] < GPU_DAILY
+    gpu_ok = needs_gpu and _day["gpu"] < GPU_DAILY
     if gpu_ok:
         _day["gpu"] += 1
     return gpu_ok
@@ -331,40 +381,43 @@ races: dict[str, dict] = {}
 current: str | None = None
 
 # ---- pre-flight: is the system responsive before we make a visitor wait? ----
-_health = {"cerebras_ok": 0.0, "cerebras_busy": 0.0}
-race_mod.on_fast_answer = lambda: _health.update(cerebras_ok=time.time())
+_health: dict[str, dict[str, float]] = {k: {"ok": 0.0, "busy": 0.0, "down": 0.0} for k in MODELS}
+_racing_model = {"k": "kimi-k3.1-pro"}
+race_mod.on_fast_answer = lambda: _health[_racing_model["k"]].update(ok=time.time())
 
 
-async def _ping_cerebras() -> str:
-    """'ok', 'busy' (queue full) or 'down'. A real answer in the last 45 s counts as ok."""
+async def _ping_cerebras(mk: str) -> str:
+    """'ok', 'busy' (queue full) or 'down' for one model. A real answer in the last 45 s counts as ok."""
     from openai import AsyncOpenAI, AuthenticationError, NotFoundError, PermissionDeniedError, RateLimitError
-    if time.time() - _health["cerebras_ok"] < 45:
+    h = _health[mk]
+    if time.time() - h["ok"] < 45:
         return "ok"
-    if time.time() - _health["cerebras_busy"] < 30:  # don't add to an overloaded queue on every click
+    if time.time() - h["busy"] < 30:  # don't add to an overloaded queue on every click
         return "busy"
-    if time.time() - _health.get("cerebras_down", 0.0) < 30:
+    if time.time() - h["down"] < 30:
         return "down"
     client = AsyncOpenAI(base_url="https://api.cerebras.ai/v1", api_key=os.getenv("CEREBRAS_API_KEY", ""), timeout=15, max_retries=0)
     try:
         for attempt in range(3):
             try:
-                await client.chat.completions.create(model=FAST_MODEL, max_tokens=8,
+                await client.chat.completions.create(model=MODELS[mk]["cerebras"], max_tokens=8,
                                                      messages=[{"role": "user", "content": "Reply with: ok"}])
-                _health["cerebras_ok"] = time.time()
+                h["ok"] = time.time()
                 return "ok"
             except RateLimitError:
                 await asyncio.sleep(1.5 + attempt)
             except (AuthenticationError, PermissionDeniedError):
-                _auto_pause_now()  # key access gone (e.g. the hackathon ended): replays only, re-checked in 30 min
-                _health["cerebras_down"] = time.time()
+                _auto_pause_now()  # key access gone: replays only, re-checked in 30 min
+                h["down"] = time.time()
                 return "down"
-            except NotFoundError:  # model id unknown to this path: say "down" but don't pause the whole site
-                _health["cerebras_down"] = time.time()
+            except NotFoundError:  # this model is gone (e.g. the hackathon trial ended): only this model is off
+                h["down"] = time.time()
+                _avail["ids"].discard(mk)
                 return "down"
             except Exception:  # noqa: BLE001
-                _health["cerebras_down"] = time.time()
+                h["down"] = time.time()
                 return "down"
-        _health["cerebras_busy"] = time.time()
+        h["busy"] = time.time()
         return "busy"
     finally:
         await client.close()
@@ -389,16 +442,17 @@ def _busy() -> bool:
 @app.get("/api/status")
 async def status():
     """Quick system check the page can show before a race (cached, cheap)."""
-    recent_busy = time.time() - _health["cerebras_busy"] < 90
-    return {"cerebras": "ok" if time.time() - _health["cerebras_ok"] < 120 else ("busy" if recent_busy else "unknown"),
-            "busy": _busy()}
+    mk = await _default_model()
+    h = _health.get(mk) if mk else None
+    state = "down" if not h else "ok" if time.time() - h["ok"] < 120 else ("busy" if time.time() - h["busy"] < 90 else "unknown")
+    return {"cerebras": state, "busy": _busy()}
 
 
 @app.get("/api/health")
 async def health():
     return {"ok": True, "mode": "openclaw" if OPENCLAW else "direct", "today": _day,
             "replay_only": _paused(),
-            "fast_model": os.getenv("RH_CEREBRAS_AGENT", "racer-cerebras") if OPENCLAW else FAST_MODEL,
+            "default_model": await _default_model(),
             "busy": _busy(), "live": _live()}
 
 
@@ -435,17 +489,23 @@ async def start_race(body: RaceIn, request: Request):
         raise
     except Exception:  # noqa: BLE001
         raise HTTPException(503, {"code": "wiki_down", "message": "Wikipedia isn’t answering right now. Try again in a moment."}) from None
+    mk = body.model or await _default_model()
+    if not mk or mk not in MODELS or mk not in await _available():
+        raise HTTPException(422, {"code": "model_unavailable", "message": "That model isn’t available on Cerebras right now. Pick another one."})
+    body.model = mk
     # pre-flight: don't start a race the system can't run (and don't count it against the visitor)
     if not await _ping_gateway():
         raise HTTPException(503, {"code": "engine_down", "message": "The race engine is restarting. Try again in a minute."})
-    cb = await _ping_cerebras()
+    cb = await _ping_cerebras(mk)
     if cb != "ok":
-        raise HTTPException(503, {"code": "cerebras_busy" if cb == "busy" else "cerebras_down",
-                                  "message": "Cerebras is at capacity right now. The shared hackathon endpoint is turning requests away."})
+        raise HTTPException(503, {"code": "cerebras_busy" if cb == "busy" else "cerebras_down", "model": MODELS[mk]["label"],
+                                  "message": f"{MODELS[mk]['label']} on Cerebras isn’t answering right now."})
     if _busy():  # someone started while we were checking
         raise HTTPException(429, {"code": "busy", "message": "Someone is racing right now.", "live": _live()})
     _quota_check(request)
-    gpu_ok = _quota_commit(request)
+    has_gpu_host = bool(MODELS[mk]["gpu"])
+    gpu_ok = _quota_commit(request, needs_gpu=has_gpu_host)
+    _racing_model["k"] = mk
     rid = uuid.uuid4().hex[:10]
     history: list[dict] = []
     done = asyncio.Event()
@@ -457,7 +517,7 @@ async def start_race(body: RaceIn, request: Request):
 
     async def make_story(path):
         await emit({"type": "story_started"})
-        story = await tell_story(body.start, body.target, path)
+        story = await tell_story(body.start, body.target, path, mk)
         if story:
             await emit({"type": "story", "text": story})
 
@@ -471,7 +531,7 @@ async def start_race(body: RaceIn, request: Request):
             story_task["t"] = asyncio.create_task(make_story(e["path"]))
 
     async def run():
-        chosen = [l for l in lanes() if gpu_ok or l.id != "gpu"]
+        chosen = lanes(mk, with_gpu=gpu_ok)
         tasks: dict[str, asyncio.Task] = {}
 
         async def capped(l):
@@ -486,6 +546,7 @@ async def start_race(body: RaceIn, request: Request):
 
         try:
             await emit({"type": "race_started", "start": body.start, "target": body.target, "gpu_paused": not gpu_ok,
+                        "gpu_note": None if has_gpu_host else "no_host", "model": mk, "model_label": MODELS[mk]["label"],
                         "lanes": [{"id": l.id, "label": l.label} for l in chosen]})
             tasks = {l.id: asyncio.create_task(capped(l)) for l in chosen}
             if "cerebras" in tasks:

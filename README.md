@@ -17,7 +17,11 @@ Kimi K3.1 Pro on Cerebras: 29.4 s.   Same model on GPUs: still thinking at 5 min
 
 ## What it does
 
-- **Two lanes, one model.** Both lanes run **Kimi K3.1 Pro**. Only the inference hardware differs:
+- **Pick a model.** The home page lists the models Cerebras serves (Kimi K3.1 Pro, GPT-OSS 120B,
+  Qwen 3.8 27B), read live from `/api/models`. A model Cerebras stops serving is greyed out, and comes
+  back on its own if it returns. GPT-OSS 120B is switched off for now: the free key allows it only
+  5 requests a minute, too few for a race.
+- **Two lanes, one model.** For Kimi K3.1 Pro both lanes run the same model. Only the inference hardware differs:
   Cerebras on one side, NVIDIA GPUs on the other. Clocks are real elapsed time.
 - **Where the GPU number comes from.** The GPU lane uses the **free tier of NVIDIA's API catalog**
   (build.nvidia.com), and the site labels it that way. On the free tier, a request often waits
@@ -61,7 +65,9 @@ Kimi K3.1 Pro on Cerebras: 29.4 s.   Same model on GPUs: still thinking at 5 min
  OpenClaw gateway (openclaw/) ─ two agents, caller-supplied go_to tool
     ├── racer-cerebras → Cerebras  (moonshotai-kimi-k3.1-pro-trial)
     ├── racer-nvidia   → NVIDIA API catalog (moonshotai/kimi-k3.1-pro)
-    └── storyteller    → Cerebras  (the 3-sentence story)
+    ├── racer-qwen / racer-gptoss → Cerebras (qwen-3.8-27b / gpt-oss-120b, Cerebras only:
+    │                  no free GPU host serves them, so there is no same-model GPU lane)
+    └── storyteller(-qwen, -gptoss) → Cerebras  (the 3-sentence story, same model as the race)
 ```
 
 Each hop is one OpenAI-compatible chat call with a single `go_to(title, reason, thinking)` tool and

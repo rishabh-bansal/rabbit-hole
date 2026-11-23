@@ -68,6 +68,33 @@
           "name": "storyteller"
         },
         "model": "cerebras/moonshotai-kimi-k3.1-pro-trial"
+      },
+      "racer-gptoss": {
+        "name": "racer-gptoss",
+        "workspace": "/home/node/.openclaw/ws/racer-gptoss",
+        "agentDir": "/home/node/.openclaw/agents/racer-gptoss/agent",
+        "identity": {
+          "name": "racer-gptoss"
+        },
+        "model": "cerebras/gpt-oss-120b"
+      },
+      "storyteller-gptoss": {
+        "name": "storyteller-gptoss",
+        "workspace": "/home/node/.openclaw/ws/storyteller-gptoss",
+        "agentDir": "/home/node/.openclaw/agents/storyteller-gptoss/agent",
+        "identity": {
+          "name": "storyteller-gptoss"
+        },
+        "model": "cerebras/gpt-oss-120b"
+      },
+      "storyteller-qwen": {
+        "name": "storyteller-qwen",
+        "workspace": "/home/node/.openclaw/ws/storyteller-qwen",
+        "agentDir": "/home/node/.openclaw/agents/storyteller-qwen/agent",
+        "identity": {
+          "name": "storyteller-qwen"
+        },
+        "model": "cerebras/qwen-3.8-27b"
       }
     }
   },
@@ -105,8 +132,8 @@
           },
           {
             "id": "qwen-3.8-27b",
-            "name": "Qwen 3.8 27B (Cerebras, testing)",
-            "reasoning": false,
+            "name": "Qwen 3.8 27B (Cerebras)",
+            "reasoning": true,
             "input": [
               "text"
             ],
@@ -119,6 +146,30 @@
             "compat": {
               "supportsTools": true,
               "supportsStrictMode": false
+            }
+          },
+          {
+            "id": "gpt-oss-120b",
+            "name": "GPT-OSS 120B (Cerebras)",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsTools": true,
+              "supportsStrictMode": false,
+              "supportsReasoningEffort": true,
+              "supportedReasoningEfforts": [
+                "low",
+                "medium",
+                "high"
+              ]
             }
           }
         ]
